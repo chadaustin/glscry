@@ -37,13 +37,16 @@ def defineArray(arraytype, size, repeat=[], offset=[], initial=[]):
     return array
 
 
-def buildGeometry(type, v=None, c=None, n=None, t=None, i=None):
-    geo = Geometry(type)
+def buildGeometry(primtype, v=None, c=None, n=None, t=None, i=None):
+    geo = Geometry(primtype)
+    if i: geo.indices   = i
     if v: geo.vertices  = v
     if c: geo.colors    = c
     if n: geo.normals   = n
-    if t: geo.texcoords = t
-    if i: geo.indices   = i
+    if t:
+        if type(t) is not list:
+            t = [t]
+        geo.texcoords[:] = t
     return geo
 
 
@@ -238,7 +241,7 @@ def runTest(test, runFor, resultName=None, printedName=None):
     GLError = RuntimeError
     try:
         print "\nRunning test '%s'" % printedName
-        
+
         if test.isSupported():
             resultSet = test.run(runFor)
 
@@ -352,7 +355,7 @@ def div(num, den):
         return 0
     else:
         return num / den
-        
+
 
 
 def _generateActualGraph(filename, graphLineList, measured,
