@@ -10,10 +10,10 @@ ll = (0, h, 0)
 quad = [ul, ur, lr, ll]
 
 genFrontToBack = Geometry(GL_QUADS)
-genFrontToBack.vertices = defineArray(quad, 4 * (0, 0, 1))
+genFrontToBack.vertices = defineArray(3, quad, 4 * (0, 0, 1))
 
 genBackToFront = Geometry(GL_QUADS)
-genBackToFront.vertices = defineArray(quad, 4 * (0, 0, -1))
+genBackToFront.vertices = defineArray(3, quad, 4 * (0, 0, -1))
 
 test1 = VertexArrayTest("FrontToBack", genFrontToBack)
 test1.setState(DepthState())

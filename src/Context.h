@@ -43,6 +43,17 @@ inline void throwGLEWError(const std::string& prefix, GLenum error) {
 }
 
 
+// Evil macros.
+
+#ifdef NEAR
+#undef NEAR
+#endif
+
+#ifdef FAR
+#undef FAR
+#endif
+
+
 const int    WIDTH  = 1024;
 const int    HEIGHT = 768;
 const double NEAR   = -1.0;
@@ -61,14 +72,8 @@ inline void setProjection() {
 }
 
 
-inline void quitSDL() {
-    SDL_Quit();
-}
-
-
 inline void initContext() {
     initializeSDL(SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO | SDL_INIT_TIMER);
-    atexit(quitSDL);
     
     // define our minimum requirements for the GL window
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     5);

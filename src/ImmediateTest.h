@@ -26,6 +26,36 @@ public:
 
     void iterate(ResultSet& results) {
 /*
+        GeometryPtr geometry = getGeometry();
+
+        _vertexCount = 0;
+
+        void (GLAPI * glVertexd) = 0;
+
+        if (ArrayPtr v = geometry->vertices) {
+            glEnableClientState(GL_VERTEX_ARRAY);
+
+            _vertexBuffer.resize(getVertexCount() * v->getSize() *
+                                 v->getTypeSize());
+            v->build(&_vertexBuffer[0], getVertexCount());
+           
+            glVertexPointer(v->getSize(), v->getTypeConstant(),
+                            0, &_vertexBuffer[0]);
+
+            _vertexCount = getVertexCount();
+        }
+
+
+        glBegin(geometry->getPrimitiveType());
+        for (size_t i = 0; i < _vertexCount; ++i) {
+            if (glVertexd) {
+                glVertexd(data);
+            }
+        }
+        glEnd();
+        
+        results[0] += _vertexCount;
+/*
         const std::vector<Triangle>& buffer = getTriangleBuffer();
 
         glBegin(GL_TRIANGLES);
@@ -35,8 +65,6 @@ public:
             glVertex(buffer[i].v3);
         }
         glEnd();
-
-        results[0] += buffer.size();
 */
     }
 };

@@ -78,8 +78,10 @@ namespace scry {
                 array[i] = repeat[repeat_i % repeat.size()];
 
                 // Add in the offset.
-                size_t offset_i = repeat_i % offset.size();
-                array[i] += offset[offset_i] * (repeat_i / offset.size());
+                if (!offset.empty()) {
+                    size_t offset_i = repeat_i % offset.size();
+                    array[i] += offset[offset_i] * (repeat_i / offset.size());
+                }
 
                 ++i;
                 ++repeat_i;

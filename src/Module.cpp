@@ -1,3 +1,8 @@
+#ifdef WIN32
+#include <windows.h>  // For IsDebuggerPresent, etc.
+#endif
+
+
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp> // for len()
 #include "Run.h"

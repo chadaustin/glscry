@@ -23,33 +23,9 @@ public:
         return "Vertex Array";
     }
 
-    void setup() {
-        GeometryPtr geometry = getGeometry();
-
-        _vertexCount = 0;
-
-        if (ArrayPtr v = geometry->vertices) {
-            glEnableClientState(GL_VERTEX_ARRAY);
-
-            _vertexBuffer.resize(getVertexCount() * v->getSize() *
-                                 v->getTypeSize());
-            v->build(&_vertexBuffer[0], getVertexCount());
-           
-            glVertexPointer(v->getSize(), v->getTypeConstant(),
-                            0, &_vertexBuffer[0]);
-
-            _vertexCount = getVertexCount();
-        }
-    }
-
-    void iterate(ResultSet& results) {
-        glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
-        results[0] += _vertexCount;
-    }
-
-    void teardown() {
-        glDisableClientState(GL_VERTEX_ARRAY);
-    }
+    void setup();
+    void iterate(ResultSet& results);
+    void teardown();
 
 private:
     Zeroed<size_t> _vertexCount;
