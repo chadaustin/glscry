@@ -45,8 +45,8 @@ namespace scry {
                        GL_UNSIGNED_INT, &_indices[0]);
             
         results[0] += getVertexCount();
-        results[0] += getBatchSize();
-        results[0] += 0;  /// @todo: calculate fill rate
+        results[1] += getBatchSize();
+        results[2] += 0;  /// @todo: calculate fill rate
     }
 
     void IndexedGeometryTest::teardown() {
