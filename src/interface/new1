@@ -1,0 +1,25 @@
+ from wxPython.wx import *
+
+   class MyFrame(wxFrame):
+       def __init__(self, parent, ID, title):
+           wxFrame.__init__(self, parent, ID, title, size=(300, 250))
+
+           panel1 = wxPanel(self,-1, size=(100,100), style=wxSUNKEN_BORDER)
+           panel2 = wxPanel(self,-1, size=(100,100), style=wxSUNKEN_BORDER)
+
+           panel1.SetBackgroundColour("BLUE")
+           panel2.SetBackgroundColour("RED")
+
+           box = wxBoxSizer(wxVERTICAL)
+           box.Add(panel1, 2, wxEXPAND)
+           box.Add(panel2, 1, wxEXPAND)
+
+           self.SetAutoLayout(true)
+           self.SetSizer(box)
+           self.Layout()
+
+
+   app = wxPySimpleApp()
+   frame = MyFrame(NULL, -1, "Sizer Test")
+   frame.Show()
+   app.MainLoop()
