@@ -11,6 +11,7 @@
 #include "ColorBufferState.h"
 #include "DepthState.h"
 #include "LightState.h"
+#include "MaterialState.h"
 
 #include "Geometry.h"
 
@@ -136,6 +137,7 @@ BOOST_PYTHON_MODULE(_glscry) {
     ColorBufferState::bind();
     DepthState::bind();
     LightState::bind();
+    MaterialState::bind();
 
     // Actions.
     Action::bind();

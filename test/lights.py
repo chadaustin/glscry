@@ -1,19 +1,46 @@
 from glscry import *
 
-geo = Geometry(GL_TRIANGLES)
-geo.vertices = defineArray(Array_f, 2, [(0, 0), (0, 1), (1, 1)])
-geo.normals  = defineArray(Array_f, 3, [(1, 0, 0), (0, 1, 0), (0, 0, 1)])
+geo = buildGeometry(GL_TRIANGLES,
+        v=defineArray(Array_f, 2, [(0, 0), (0, 1), (1, 1)]),
+        n=defineArray(Array_f, 3, [(1, 0, 0), (0, 1, 0), (0, 0, 1)]))
 
-tests = []
-
-for i in range(8):
+def buildDirectionTest(i):
     state = LightState()
     for j in range(i):
-        state.useLight(j, True)
-        state.setAmbient(j, Vec4f(0.5, 0.5, 0.5, 1.0))
+        light = state.lights[j]
+        light.enable  = True
+        light.position = Vec4f(0, 0, 1, 0)
 
     test = VertexArrayTest("%s lights" % i, geo)
     test.setState(state)
-    tests.append(test)
+    return test
 
-runTests("light.data", tests, 10, "VertexRate")
+def buildPositionTest(i):
+    state = LightState()
+    for j in range(i):
+        light = state.lights[j]
+        light.enable  = True
+        light.position = Vec4f(1, 2, 3, 1)
+
+    test = VertexArrayTest("%s lights" % i, geo)
+    test.setState(state)
+    return test
+
+def buildSpotTest(i):
+    state = LightState()
+    for j in range(i):
+        light = state.lights[j]
+        light.enable  = True
+        light.position = Vec4f(1, 2, 1, 1)
+        #light.spotExponent ?
+        light.spotCutoff = 45;
+
+    test = VertexArrayTest("%s lights" % i, geo)
+    test.setState(state)
+    return test
+        
+lightRange = range(len(LightState().lights))
+
+runTests("lights_dir.data",  [buildDirectionTest(i) for i in lightRange], 10, "VertexRate")
+runTests("lights_pos.data",  [buildPositionTest(i)  for i in lightRange], 10, "VertexRate")
+runTests("lights_spot.data", [buildSpotTest(i)      for i in lightRange], 10, "VertexRate")

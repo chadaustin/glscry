@@ -5,12 +5,17 @@ from random import randint
 v = defineArray(Array_f, 2)
 n = defineArray(Array_f, 3, [0, 0, 1])
 
-state = LightState()
-for j in range(8):
-    state.useLight(j, True)
-    state.setAmbient(j,  Vec4f(0.5, 0.5, 0.5, 1.0))
-    state.setDiffuse(j,  Vec4f(0.5, 0.5, 0.5, 1.0))
-    state.setSpecular(j, Vec4f(0.5, 0.5, 0.5, 1.0))
+lightstate = LightState()
+for l in lightstate.lights:
+    l.enable = True
+    l.ambient = Vec4f(0.5, 0.5, 0.5, 1.0)
+    l.diffuse = Vec4f(0.5, 0.5, 0.5, 1.0)
+    l.specular = Vec4f(0.5, 0.5, 0.5, 1.0)
+    
+matstate = MaterialState()
+matstate.front.shininess = 20
+matstate.front.specular = Vec4f(1, 1, 1, 1)
+matstate.back = matstate.front
 
 testList = []
 for i in [2 ** j for j in range(0, 12)]:
@@ -21,7 +26,8 @@ for i in [2 ** j for j in range(0, 12)]:
     
     geo = buildGeometry(GL_TRIANGLES, v=v, n=n, i=indices)
     test = DisplayListTest(str(i), geo)
-    test.setState(state)
+    test.setState(lightstate)
+    test.setState(matstate)
     testList.append(test)
 
 runTests("vertexcache.data", testList, 10, "VertexRate")

@@ -67,6 +67,7 @@ sources = Split("""
     ColorBufferState.cpp
     DepthState.cpp
     LightState.cpp
+    MaterialState.cpp
 
     Test.cpp
 

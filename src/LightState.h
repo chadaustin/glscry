@@ -3,7 +3,7 @@
 
 
 #include <vector>
-#include "glew.h"
+#include "OpenGL.h"
 #include "State.h"
 #include "Types.h"
 
@@ -17,63 +17,57 @@ namespace scry {
     public:
         static void bind();
 
-        LightState() {
-            GLint max_lights;
-            glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
-            _lights.resize(max_lights);
-        }
+        LightState();
 
-        void useLight(size_t index, bool use) {
-            SCRY_ASSERT(index < _lights.size());
-            _lights[index].use = use;
-        }
+        void apply();
+        void reset();
 
-        void setAmbient(size_t index, const Vec4f& ambient) {
-            SCRY_ASSERT(index < _lights.size());
-            _lights[index].ambient = ambient;
-        }
-
-        void setDiffuse(size_t index, const Vec4f& diffuse) {
-            SCRY_ASSERT(index < _lights.size());
-            _lights[index].diffuse = diffuse;
-        }
-
-        void setSpecular(size_t index, const Vec4f& specular) {
-            SCRY_ASSERT(index < _lights.size());
-            _lights[index].specular = specular;
-        }
-
-        void apply() {
-            glEnable(GL_LIGHTING);
-            for (size_t i = 0; i < _lights.size(); ++i) {
-                Light& l = _lights[i];
-                if (l.use) {
-                    glEnable(GL_LIGHT0 + i);
-                    glLightfv(GL_LIGHT0 + i, GL_AMBIENT,  l.ambient.getData());
-                    glLightfv(GL_LIGHT0 + i, GL_DIFFUSE,  l.diffuse.getData());
-                    glLightfv(GL_LIGHT0 + i, GL_SPECULAR, l.specular.getData());
-                    glLightfv(GL_LIGHT0 + i, GL_POSITION, l.position.getData());
-                }
-            }
-        }
-
-        void reset() {
-            for (size_t i = 0; i < _lights.size(); ++i) {
-                glDisable(GL_LIGHT0 + i);
-            }
-            glDisable(GL_LIGHTING);
-        }
-
-    private:
         struct Light {
-            Inited<bool, false> use;
+            // Defaults for lights 1..n.  light0 is initialized separately.
+            Light()
+            : enable(false)
+            , ambient(0, 0, 0, 1)
+            , diffuse(0, 0, 0, 0)
+            , specular(0, 0, 0, 0)
+            , position(0, 0, 1, 0)
+            , spotDirection(0, 0, -1)
+            , spotExponent(0)
+            , spotCutoff(180)
+            , constantAttenuation(1)
+            , linearAttenuation(0)
+            , quadraticAttenuation(0) {
+            }
+            
+            void apply(GLenum light);
+            
+            bool operator==(const Light& rhs) const {
+                return enable == rhs.enable &&
+                       ambient == rhs.ambient &&
+                       diffuse == rhs.diffuse &&
+                       specular == rhs.specular &&
+                       position == rhs.position &&
+                       spotDirection == rhs.spotDirection &&
+                       spotExponent == rhs.spotExponent &&
+                       spotCutoff == rhs.spotCutoff &&
+                       constantAttenuation == rhs.constantAttenuation &&
+                       linearAttenuation == rhs.linearAttenuation &&
+                       quadraticAttenuation == rhs.quadraticAttenuation;
+            }
+        
+            bool enable;
             Vec4f ambient;
             Vec4f diffuse;
             Vec4f specular;
             Vec4f position;
+            Vec3f spotDirection;
+            float spotExponent;
+            float spotCutoff;
+            float constantAttenuation;
+            float linearAttenuation;
+            float quadraticAttenuation;
         };
 
-        std::vector<Light> _lights;
+        std::vector<Light> lights;
     };
     SCRY_REF_PTR(LightState);
 
