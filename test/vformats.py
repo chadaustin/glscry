@@ -18,42 +18,38 @@ ll_tc = (0, 1)
 lr_tc = (1, 1)
 ur_tc = (1, 0)
 
-v = Arrayf(2)
-v.repeat[:] = flatten([ul, ll, lr, ur])
+v  = defineArray(2, [ul, ll, lr, ur])
+c  = defineArray(3, [r, g, b, w])
+n  = defineArray(3, [r, g, b, w])
+t = defineArray(2, [ul_tc, ll_tc, lr_tc, ur_tc])
 
-c = Arrayf(3)
-c.repeat[:] = flatten([r, g, b, w])
+def buildGeometry(type, v=None, c=None, n=None, t=None):
+    geo = Geometry(type)
+    if v: geo.vertices  = v
+    if c: geo.colors    = c
+    if n: geo.normals   = n
+    if t: geo.texcoords = t
+    return geo
 
-n = Arrayf(3)
-n.repeat[:] = flatten([r, g, b, w])
-
-tc = Arrayf(2)
-tc.repeat[:] = flatten([ul_tc, ll_tc, lr_tc, ur_tc])
-
-geo_v = Geometry(GL_TRIANGLES)
-geo_v.vertices = v
-
-geo_vc = Geometry(GL_TRIANGLES)
-geo_vc.vertices = v
-geo_vc.colors   = c
-
-geo_vt = Geometry(GL_TRIANGLES)
-geo_vt.vertices  = v
-geo_vt.texcoords = tc
-
-geo_vct = Geometry(GL_TRIANGLES)
-geo_vct.vertices  = v
-geo_vct.colors    = c
-geo_vct.texcoords = tc
+fmt = GL_TRIANGLES
+geo_v    = buildGeometry(fmt, v=v)
+geo_vc   = buildGeometry(fmt, v=v, c=c)
+geo_vn   = buildGeometry(fmt, v=v, n=n)
+geo_vt   = buildGeometry(fmt, v=v, t=t)
+geo_vcn  = buildGeometry(fmt, v=v, c=c, n=n)
+geo_vct  = buildGeometry(fmt, v=v, c=c, t=t)
+geo_vnt  = buildGeometry(fmt, v=v, n=n, t=t)
+geo_vcnt = buildGeometry(fmt, v=v, c=c, n=n, t=t)
 
 type = CompiledVertexArrayTest
-t1 = type("V", geo_v)
-t2 = type("VC", geo_vc)
-t3 = type("VN", geo_vn)
-t4 = type("VT", geo_vt)
-t5 = type("VCN", geo_vcn)
-t6 = type("VCT", geo_vct)
-t7 = type("VNT", geo_vnt)
-t8 = type("VCNT", geo_vcnt)
+tests = [
+    type("V", geo_v),
+    type("VC", geo_vc),
+    type("VN", geo_vn),
+    type("VT", geo_vt),
+    type("VCN", geo_vcn),
+    type("VCT", geo_vct),
+    type("VNT", geo_vnt),
+    type("VCNT", geo_vcnt)]
 
-runTests('fillrate.py', [t1, t2, t3, t4, t5, t6, t7, t8], 1, "TriangleRate")
+runTests('fillrate.py', tests, 1, "VertexRate")

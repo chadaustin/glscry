@@ -47,6 +47,7 @@ if env.subst('$CC') == 'gcc':
 sources = Split("""
     Module.cpp
     glew.c
+    GLUtility.cpp
     Range.cpp
     Timer.cpp
 

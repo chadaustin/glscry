@@ -5,83 +5,80 @@
 #include <stdexcept>
 #include <vector>
 #include <gmtl/gmtl.h>
+#include "glew.h"
 #include "Base.h"
 
 
 SCRY_BEGIN_NAMESPACE
 
 
+/**
+ * GLTypeConstant maps Type to the GLenum for that type: float ->
+ * GL_FLOAT, etc.
+ */
 template<typename Type>
 struct GLTypeConstant;
 
-template<>
-struct GLTypeConstant<float> {
-    enum { Result = GL_FLOAT };
-};
 
-template<>
-struct GLTypeConstant<double> {
-    enum { Result = GL_DOUBLE };
-};
-
-
+/**
+ * GLType is the opposite of GLTypeConstant.  It maps a GLenum to the
+ * associated type.  GL_FLOAT -> float, etc.
+ */
 template<GLenum TypeConstant>
 struct GLType;
 
-template<>
-struct GLType<GL_FLOAT> {
-    typedef float Result;
-};
 
-template<>
-struct GLType<GL_DOUBLE> {
-    typedef double Result;
-};
-
-
-template<size_t size, typename T>
-const void* glVertex(const void* data);
-
-#define SCRY_DEFINE_GL_VERTEX(wart, size, type)                        \
-    template<>                                                         \
-    inline const void* glVertex<size, type>(const void* data) {        \
-        const type* v = static_cast<const type*>(data);                \
-        glVertex##wart##v(v);                                          \
-        return v + size;                                               \
-    }
-
-SCRY_DEFINE_GL_VERTEX(2f, 2, float);
-SCRY_DEFINE_GL_VERTEX(3f, 3, float);
-SCRY_DEFINE_GL_VERTEX(4f, 4, float);
-
-SCRY_DEFINE_GL_VERTEX(2d, 2, double);
-SCRY_DEFINE_GL_VERTEX(3d, 3, double);
-SCRY_DEFINE_GL_VERTEX(4d, 4, double);
+#define SCRY_MAP_TYPE_CONSTANT(type, constant) \
+    template<>                                 \
+    struct GLTypeConstant<type> {              \
+        enum { Result = constant };            \
+    };                                         \
+                                               \
+    template<>                                 \
+    struct GLType<constant> {                  \
+        typedef type Result;                   \
+    };
 
 
-typedef const void* (*VertexPump)(const void* data);
+SCRY_MAP_TYPE_CONSTANT(GLubyte,  GL_UNSIGNED_BYTE);
+SCRY_MAP_TYPE_CONSTANT(GLbyte,   GL_BYTE);
+SCRY_MAP_TYPE_CONSTANT(GLushort, GL_UNSIGNED_SHORT);
+SCRY_MAP_TYPE_CONSTANT(GLshort,  GL_SHORT);
+SCRY_MAP_TYPE_CONSTANT(GLuint,   GL_UNSIGNED_INT);
+SCRY_MAP_TYPE_CONSTANT(GLint,    GL_INT);
+SCRY_MAP_TYPE_CONSTANT(GLfloat,  GL_FLOAT);
+SCRY_MAP_TYPE_CONSTANT(GLdouble, GL_DOUBLE);
 
-inline VertexPump getVertexPump(GLenum type, size_t size) {
+
+
+typedef const void* (*Pump)(const void* data);
+
+Pump getVertexPump(GLenum type, int size);
+Pump getColorPump(GLenum type, int size);
+
+
+
+#if 0
+inline Pump getColorPump(GLenum type, size_t size) {
+#define SCRY_GET_COLOR_PUMP_SIZE_CASE(size, type)       \
+    case size: return glColor<size, type>
+
+#define SCRY_GET_COLOR_PUMP_TYPE_CASE(type)                     \
+    case GLTypeConstant<type>::Result:                          \
+        switch (size) {                                         \
+            SCRY_GET_COLOR_PUMP_SIZE_CASE(2, type);             \
+            SCRY_GET_COLOR_PUMP_SIZE_CASE(3, type);             \
+            SCRY_GET_COLOR_PUMP_SIZE_CASE(4, type);             \
+            default: throw std::runtime_error("Illegal Size");  \
+        }
+
     switch (type) {
-        case GL_FLOAT:
-            switch (size) {
-                case 2:  return glVertex<2, float>;
-                case 3:  return glVertex<3, float>;
-                case 4:  return glVertex<4, float>;
-                default: throw std::runtime_error("Illegal Size");
-            }
-        case GL_DOUBLE:
-            switch (size) {
-                case 2:  return glVertex<2, double>;
-                case 3:  return glVertex<3, double>;
-                case 4:  return glVertex<4, double>;
-                default: throw std::runtime_error("Illegal Size");
-            }
-        default:
-            throw std::runtime_error("Unknown Type Constant");
+        SCRY_GET_COLOR_PUMP_TYPE_CASE(float);
+        SCRY_GET_COLOR_PUMP_TYPE_CASE(double);
+        default: throw std::runtime_error("Unknown Type Constant");
     }
 }
-
+#endif
 
 SCRY_END_NAMESPACE
 

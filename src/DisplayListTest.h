@@ -24,38 +24,23 @@ public:
     }
 
     void setup() {
-        _vertexCount = getVertexCount();
+        GeometryTest::setup();
 
-        GeometryPtr geometry = getGeometry();
-
-        std::vector<GLubyte> vertexBuffer;
-        VertexPump vertexPump = 0;
-
-        if (ArrayPtr v = geometry->vertices) {
-            vertexBuffer.resize(_vertexCount * v->getSize() *
-                                 v->getTypeSize());
-            v->build(&vertexBuffer[0], _vertexCount);
-
-            vertexPump = getVertexPump(v->getTypeConstant(), v->getSize());
-
-            _screenCoverage = calculateCoverage(
-                geometry->getPrimitiveType(),
-                v->getTypeConstant(),
-                v->getSize(),
-                _vertexCount,
-                &vertexBuffer[0]);
-        }
-
+        GeometryPtr geo = getGeometry();
 
         _list = glGenLists(1);
         glNewList(_list, GL_COMPILE);
 
-        const void* data = &vertexBuffer[0];
-        glBegin(geometry->getPrimitiveType());
-        for (size_t i = 0; i < _vertexCount; ++i) {
-            if (vertexPump) {
-                data = vertexPump(data);
-            }
+        Pump        v_pump = getVertexPump();
+        const void* v_data = getVertexBuffer();
+
+        Pump        c_pump = getColorPump();
+        const void* c_data = getColorBuffer();
+
+        glBegin(geo->getPrimitiveType());
+        for (size_t i = 0; i < getVertexCount(); ++i) {
+            if (v_pump) v_data = v_pump(v_data);
+            if (c_pump) c_data = c_pump(c_data);
         }
         glEnd();
 
@@ -64,9 +49,9 @@ public:
 
     void iterate(ResultSet& results) {
         glCallList(_list);
-        results[0] += _vertexCount;
+        results[0] += getVertexCount();
         results[1] += getBatchSize();
-        results[2] += _screenCoverage;
+        results[2] += getScreenCoverage();
     }
 
     void teardown() {
@@ -74,8 +59,6 @@ public:
     }
 
 private:
-    Zeroed<size_t> _vertexCount;
-    Zeroed<size_t> _screenCoverage;
     GLuint _list;
 };
 SCRY_REF_PTR(DisplayListTest);
