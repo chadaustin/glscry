@@ -35,4 +35,4 @@ test2 = ImmediateTest("BackToFront", genBackToFront)
 test2.addStateSet(stateSet)
 test2.addAction(clearAction)
 
-runTests("hierz.data", [test1, test2], 10, "VertexRate")
+runTests("hierz", [test1, test2], 10, "VertexRate")

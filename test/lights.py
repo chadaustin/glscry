@@ -66,6 +66,6 @@ def run(filename, testList, type):
                      xlabel='Number of %s Lights' % type)
 
 lightRange = range(len(LightState().lights) + 1)
-run("lights_dir.data",  map(buildDirectionTest, lightRange), 'Directional')
-run("lights_pos.data",  map(buildPositionTest,  lightRange), 'Positional')
-run("lights_spot.data", map(buildSpotTest,      lightRange), 'Spot')
+run("lights_dir",  map(buildDirectionTest, lightRange), 'Directional')
+run("lights_pos",  map(buildPositionTest,  lightRange), 'Positional')
+run("lights_spot", map(buildSpotTest,      lightRange), 'Spot')

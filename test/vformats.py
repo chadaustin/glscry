@@ -47,8 +47,8 @@ def run(file, test):
     print "Writing data to %s" % file
     runTests(file, tests, 10, "VertexRate")
 
-run('vformats_imm.data', ImmediateTest)
-run('vformats_dl.data',  DisplayListTest)
-run('vformats_va.data',  VertexArrayTest)
-run('vformats_cva.data', CompiledVertexArrayTest)
-run('vformats_vbo.data', VertexBufferObjectTest)
+run('vformats_imm', ImmediateTest)
+run('vformats_dl',  DisplayListTest)
+run('vformats_va',  VertexArrayTest)
+run('vformats_cva', CompiledVertexArrayTest)
+run('vformats_vbo', VertexBufferObjectTest)

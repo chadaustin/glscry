@@ -26,4 +26,4 @@ tests = [
     test("QUAD_STRIP",     defineGeometry(GL_QUAD_STRIP,     defineArray(Array_f, 2, [ul, ll, ur, lr]))),
     test("POLYGON",        defineGeometry(GL_POLYGON,        defineArray(Array_f, 2, [ll, ur], initial=[ul])))]
 
-runTests('primtype.data', tests, 10, "VertexRate")
+runTests('primtype', tests, 10, "VertexRate")

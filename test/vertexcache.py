@@ -28,8 +28,8 @@ def run(filename, testtype):
     results = runTests(testList, 5)
     generateBarGraph(filename, results, 'VertexRate', xlabel='Indices Used')
 
-run('vertexcache_imm.data', ImmediateTest)
-run('vertexcache_dl.data',  DisplayListTest)
-run('vertexcache_va.data',  VertexArrayTest)
-run('vertexcache_cva.data', CompiledVertexArrayTest)
-run('vertexcache_vbo.data', VertexBufferObjectTest)
+run('vertexcache_imm', ImmediateTest)
+run('vertexcache_dl',  DisplayListTest)
+run('vertexcache_va',  VertexArrayTest)
+run('vertexcache_cva', CompiledVertexArrayTest)
+run('vertexcache_vbo', VertexBufferObjectTest)

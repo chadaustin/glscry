@@ -195,10 +195,9 @@ def reduceResults(resultList, measured):
         
     return (rv, resultUnits)
 
-def generateBarGraph(datafile, resultList, measured, xlabel=None):
+def generateBarGraph(filename, resultList, measured, xlabel=None):
+    datafile = filename + '.data'
     print "\nWriting data file: %s" % datafile
-
-    resultUnits = None
 
     of = open(datafile, 'w')
     writeID(of)
@@ -207,16 +206,13 @@ def generateBarGraph(datafile, resultList, measured, xlabel=None):
     for r in results:
         print >> of, r
 
-    
-    script = datafile + '.sh'
+    script = filename + '.gnuplot'
     print "Generating graph script: %s" % script
     plot = open(script, 'w')
 
-    print >> plot, '#!/bin/sh'
-    print >> plot, 'cat <<EOF | gnuplot'
     print >> plot, 'set terminal png'
     print >> plot, 'set size 2,2'
-    print >> plot, 'set output "%s.png"' % datafile
+    print >> plot, 'set output "%s.png"' % filename
     print >> plot, 'set title "%s"' % getTitle()
     print >> plot, 'set xrange [-0.5:%s]' % (len(resultList) - 0.5)
     print >> plot, 'set yrange [0:*]'
@@ -232,7 +228,6 @@ def generateBarGraph(datafile, resultList, measured, xlabel=None):
     print >> plot, ')'
 
     print >> plot, 'plot "%s" using 0:1 with boxes' % datafile
-    print >> plot, 'EOF'
 
 
 def generateLineGraph(datafile, testList, resultUnits, indVar, theRange):

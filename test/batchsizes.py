@@ -8,5 +8,5 @@ testList = [
     CompiledVertexArrayTest('CVA', geo),
     VertexBufferObjectTest('VBO', geo)]
 
-runTestsRange("batchsizes.data", testList, 1, "VertexRate",
+runTestsRange("batchsizes", testList, 1, "VertexRate",
               "BatchSize", PowerRange(1, 18))

@@ -48,4 +48,4 @@ start = floor(log(1) / log(power))
 end   = ceil(log(1024) / log(power))
 range = uniquePowerRange(start, end, power)
 
-runTestsRange("statechange.data", testList, 1, "VertexRate", "BatchSize", range)
+runTestsRange("statechange", testList, 1, "VertexRate", "BatchSize", range)
