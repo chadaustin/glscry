@@ -38,4 +38,6 @@ if not tests:
     sys.exit(1)
 
 for t in tests:
+    print "Running test '%s'" % t
     os.system(sys.executable + ' ' + t)
+    print
