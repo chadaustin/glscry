@@ -13,53 +13,46 @@ namespace scry {
 
     void GeometryTest::setup() {
         _screenCoverage = 0;
-        _vertexPump = 0;
-        _colorPump = 0;
-        _normalPump = 0;
+        _vertices  = Buffer();
+        _colors    = Buffer();
+        _normals   = Buffer();
+        _texcoords = Buffer();
 
         GeometryPtr geometry = getGeometry();
 
         if (ArrayPtr v = geometry->vertices) {
-            _vertexBuffer.resize(getVertexCount() * v->getSize() *
-                                 v->getTypeSize());
-            v->build(&_vertexBuffer[0], getVertexCount());
-
-            _vertexPump = scry::getVertexPump(
-                v->getTypeConstant(), v->getSize());
-            if (!_vertexPump) {
-                std::cout << "Warning: vertices specified but no pump found." << std::endl;
-            }
+            defineBuffer(v, _vertices, "vertices");
 
             _screenCoverage = calculateCoverage(
                 geometry->getPrimitiveType(),
                 v->getTypeConstant(),
                 v->getSize(),
                 getVertexCount(),
-                &_vertexBuffer[0]);
+                &_vertices.data[0]);
         }
 
-        if (ArrayPtr c = geometry->colors) {
-            _colorBuffer.resize(getVertexCount() * c->getSize() *
-                                c->getTypeSize());
-            c->build(&_colorBuffer[0], getVertexCount());
+        defineBuffer(geometry->colors,    _colors,    "colors");
+        defineBuffer(geometry->normals,   _normals,   "normals");
+        defineBuffer(geometry->texcoords, _texcoords, "texcoords");
+    }
 
-            _colorPump = scry::getColorPump(
-                c->getTypeConstant(), c->getSize());
-            if (!_colorPump) {
-                std::cout << "Warning: colors specified but no pump found." << std::endl;
-            }
+
+    void GeometryTest::defineBuffer(ArrayPtr array, Buffer& buffer,
+                                    const char* name
+    ) {
+        if (!array) {
+            return;
         }
 
-        if (ArrayPtr n = geometry->normals) {
-            _normalBuffer.resize(getVertexCount() * n->getSize() *
-                                 n->getTypeSize());
-            n->build(&_normalBuffer[0], getVertexCount());
+        buffer.data.resize(getVertexCount() * array->getSize() *
+                           array->getTypeSize());
+        array->build(&buffer.data[0], getVertexCount());
 
-            _normalPump = scry::getColorPump(
-                n->getTypeConstant(), n->getSize());
-            if (!_normalPump) {
-                std::cout << "Warning: normals specified but no pump found." << std::endl;
-            }
+        buffer.pump = scry::getVertexPump(
+            array->getTypeConstant(), array->getSize());
+        if (!buffer.pump) {
+            std::cout << "Warning: " << name
+                      << " specified but no pump found." << std::endl;
         }
     }
 

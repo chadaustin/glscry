@@ -20,20 +20,17 @@ namespace scry {
         _list = glGenLists(1);
         glNewList(_list, GL_COMPILE);
 
-        Pump        v_pump = getVertexPump();
-        const void* v_data = getVertexBuffer();
-
-        Pump        c_pump = getColorPump();
-        const void* c_data = getColorBuffer();
-
-        Pump n_pump = getNormalPump();
-        const void* n_data = getNormalBuffer();
+        BufferIterator v(getVertices());
+        BufferIterator c(getColors());
+        BufferIterator n(getNormals());
+        BufferIterator t(getTexCoords());
 
         glBegin(geo->getPrimitiveType());
         for (size_t i = 0; i < getVertexCount(); ++i) {
-            if (v_pump) v_data = v_pump(v_data);
-            if (c_pump) c_data = c_pump(c_data);
-            if (n_pump) n_data = n_pump(n_data);
+            c.step();
+            n.step();
+            t.step();
+            v.step(); // vertices go last.
         }
         glEnd();
 

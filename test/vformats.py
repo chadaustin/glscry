@@ -52,4 +52,4 @@ tests = [
     type("VNT", geo_vnt),
     type("VCNT", geo_vcnt)]
 
-runTests('fillrate.py', tests, 1, "VertexRate")
+runTests('fillrate.py', tests, 10, "VertexRate")

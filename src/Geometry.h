@@ -101,6 +101,7 @@ namespace scry {
         ArrayPtr vertices;
         ArrayPtr colors;
         ArrayPtr normals;
+        ArrayPtr texcoords;
 
     private:
         GLenum _primitiveType;

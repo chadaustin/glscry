@@ -42,6 +42,26 @@ public:
     void setup();
 
 protected:
+    struct Buffer {
+        std::vector<GLubyte> data;
+        Zeroed<Pump> pump;
+    };
+
+    class BufferIterator {
+    public:
+        BufferIterator(const Buffer& buffer) {
+            _pump = buffer.pump;
+            _data = &buffer.data[0];
+        }
+
+        void step() {
+            if (_pump) _data = _pump(_data);
+        }
+    private:
+        Pump _pump;
+        const void* _data;
+    };
+
     GeometryPtr getGeometry() const {
         return _geometry;
     }
@@ -66,29 +86,23 @@ protected:
         return _screenCoverage;
     }
 
-    const void* getVertexBuffer() const { return &_vertexBuffer[0];  }
-    Pump getVertexPump()          const { return _vertexPump; }
-
-    const void* getColorBuffer() const { return &_colorBuffer[0]; }
-    Pump getColorPump()          const { return _colorPump; }
-
-    const void* getNormalBuffer() const { return &_normalBuffer[0]; }
-    Pump getNormalPump()          const { return _normalPump; }
+    const Buffer& getVertices()  const { return _vertices;  }
+    const Buffer& getColors()    const { return _colors;    }
+    const Buffer& getNormals()   const { return _normals;   }
+    const Buffer& getTexCoords() const { return _texcoords; }
 
 private:
+    void defineBuffer(ArrayPtr array, Buffer& buffer, const char* name);
+
     Inited<size_t, 4096> _batchSize;
     Zeroed<size_t> _screenCoverage;
 
     GeometryPtr _geometry;
 
-    std::vector<GLubyte> _vertexBuffer;
-    Zeroed<Pump> _vertexPump;
-
-    std::vector<GLubyte> _colorBuffer;
-    Zeroed<Pump> _colorPump;
-
-    std::vector<GLubyte> _normalBuffer;
-    Zeroed<Pump> _normalPump;
+    Buffer _vertices;
+    Buffer _colors;
+    Buffer _normals;
+    Buffer _texcoords;
 };
 SCRY_REF_PTR(GeometryTest);
 

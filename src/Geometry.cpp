@@ -11,20 +11,23 @@ namespace scry {
             .def(init<size_t>())
             .def_readwrite("initial", &Array::initial)
             .def_readwrite("repeat",  &Array::repeat)
-            .def_readwrite("offset",  &Array::offset);
+            .def_readwrite("offset",  &Array::offset)
+            ;
 
         class_<List>("List")
-            .def(vector_indexing_suite<List>());
+            .def(vector_indexing_suite<List>())
+            ;
     }
 
     void Geometry::bind() {
         class_<Geometry, GeometryPtr, boost::noncopyable>
             ("Geometry", no_init)
             .def(init<GLenum>())
-            .def_readwrite("vertices", &Geometry::vertices)
-            .def_readwrite("colors",   &Geometry::colors)
-            .def_readwrite("normals",  &Geometry::normals);
-
+            .def_readwrite("vertices",  &Geometry::vertices)
+            .def_readwrite("colors",    &Geometry::colors)
+            .def_readwrite("normals",   &Geometry::normals)
+            .def_readwrite("texcoords", &Geometry::texcoords)
+            ;
     }
 
     Geometry::Geometry(GLenum primitiveType) {
