@@ -1,6 +1,6 @@
 from glscry import *
 
 runTests("pixeltransfer.data",
-         [CopyPixelTest(), DrawPixelTest(), ReadPixelTest()],
+         [CopyPixelTest("Copy"), DrawPixelTest("Draw"), ReadPixelTest("Read")],
          1,
          "PixelRate")
