@@ -1,14 +1,14 @@
 from glscry import *
 
-def run(fn, begin, end, gen):
+def run(fn, begin, end, geo):
     testList = [
-        ImmediateTest(gen),
-        DisplayListTest(gen),
-        VertexArrayTest(gen),
-        CompiledVertexArrayTest(gen),
-        VertexBufferObjectTest(gen)]
+        ImmediateTest('Imm', geo),
+        DisplayListTest('DL', geo),
+        VertexArrayTest('VA', geo),
+        CompiledVertexArrayTest('CVA', geo),
+        VertexBufferObjectTest('VBO', geo)]
 
-    runTestsRange(fn, testList, 0.2, "TriangleRate",
+    runTestsRange(fn, testList, 0.2, "VertexRate",
                   "BatchSize", PowerRange(begin, end))
 
 run("zeroes.data",          1, 18, Zeroes())

@@ -9,12 +9,6 @@ lr = (w, h, 0)
 ll = (0, h, 0)
 quad = [ul, ur, lr, ll]
 
-def defineArray(repeat, offset):
-    array = Arrayf(3)
-    array.repeat[:] = flatten(repeat)
-    array.offset[:] = flatten(offset)
-    return array
-
 genFrontToBack = Geometry(GL_QUADS)
 genFrontToBack.vertices = defineArray(quad, 4 * (0, 0, 1))
 
