@@ -3,7 +3,7 @@ from random import randint
 
 v = defineArray(
     Array_f, 3,
-    repeat=[0, 0, 0, 0, 1, 0, 1, 1, 0],
+    repeat=[1, 1, 0, 1, 2, 0, 2, 2, 0],
     offset=[0, 0, 1, 0, 0, 1, 0, 0, 1])
 n = defineArray(Array_f, 3, [0, 0, 1])
 
