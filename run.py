@@ -5,7 +5,7 @@
 # Copyright (C) 2004-2005  Iowa State University
 # 
 # This software is licensed under the terms of the GNU Lesser Public
-# License, version 2.1, as published by the Free Software Foundation.  
+# License, version 2.1, as published by the Free Software Foundation.
 # See the file COPYRIGHT.txt for details.
 # 
 # Authors:
