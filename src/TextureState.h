@@ -70,7 +70,7 @@ namespace scry {
 
         TextureState* clone() const;
         const TextureState& getDefault() const;
-        void switchTo(const State& to) const;
+        void switchTo(const State& to, bool fullStateSwitch) const;
 
         void setTexture(TexturePtr texture) { _texture = texture; }
         TexturePtr getTexture() const       { return _texture; }

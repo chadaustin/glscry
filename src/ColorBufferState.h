@@ -17,7 +17,7 @@ namespace scry {
 
         ColorBufferState* clone() const;
         const ColorBufferState& getDefault() const;
-        void switchTo(const State& to) const;
+        void switchTo(const State& to, bool fullStateSwitch) const;
 
         ColorBufferState() {
             std::fill(_writeMask, _writeMask + 4, true);

@@ -21,14 +21,18 @@ depthState.depthTest = True
 colorBufferState = ColorBufferState()
 colorBufferState.setWriteMask(False, False, False, False)
 
+stateSet = StateSet()
+stateSet.setState(depthState)
+stateSet.setState(colorBufferState)
+
+clearAction = ClearAction(GL_DEPTH_BUFFER_BIT)
+
 test1 = ImmediateTest("FrontToBack", genFrontToBack)
-test1.setState(depthState)
-test1.setState(colorBufferState)
-test1.addAction(ClearAction())
+test1.addStateSet(stateSet)
+test1.addAction(clearAction)
 
 test2 = ImmediateTest("BackToFront", genBackToFront)
-test2.setState(depthState)
-test2.setState(colorBufferState)
-test2.addAction(ClearAction())
+test2.addStateSet(stateSet)
+test2.addAction(clearAction)
 
 runTests("hierz.data", [test1, test2], 10, "VertexRate")

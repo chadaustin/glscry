@@ -26,9 +26,11 @@ namespace scry {
         return *ptr;
     }
 
-    void DepthState::switchTo(const State& to) const {
+    void DepthState::switchTo(const State& to, bool fullStateSwitch) const {
         const DepthState& ds = checked_cast_ref<const DepthState&>(to);
-        if (_enableDepthTest != ds._enableDepthTest) {
+        if (fullStateSwitch ||
+            _enableDepthTest != ds._enableDepthTest
+        ) {
             glSetEnabled(GL_DEPTH_TEST, ds._enableDepthTest);
         }
     }

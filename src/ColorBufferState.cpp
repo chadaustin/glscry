@@ -8,7 +8,8 @@ using namespace boost::python;
 namespace scry {
 
     void ColorBufferState::bind() {
-        class_<ColorBufferState, ColorBufferStatePtr, bases<State>, boost::noncopyable>
+        class_<ColorBufferState, ColorBufferStatePtr, bases<State>,
+               boost::noncopyable>
             ("ColorBufferState", no_init)
             .def(init<>())
             .def("setWriteMask", &ColorBufferState::setWriteMask)
@@ -26,9 +27,13 @@ namespace scry {
         return *state;
     }
 
-    void ColorBufferState::switchTo(const State& to) const {
-        const ColorBufferState& cbs = checked_cast_ref<const ColorBufferState&>(to);
-        if (_writeMask[0] != cbs._writeMask[0] ||
+    void ColorBufferState::switchTo(const State& to,
+                                    bool fullStateSwitch
+    ) const {
+        const ColorBufferState& cbs = checked_cast_ref<
+            const ColorBufferState&>(to);
+        if (fullStateSwitch || 
+            _writeMask[0] != cbs._writeMask[0] ||
             _writeMask[1] != cbs._writeMask[1] ||
             _writeMask[2] != cbs._writeMask[2] ||
             _writeMask[3] != cbs._writeMask[3]

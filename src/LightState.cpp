@@ -12,7 +12,9 @@ namespace scry {
         scope s = class_<C, LightStatePtr, bases<State>, boost::noncopyable>
             ("LightState", no_init)
             .def(init<>())
-            .add_property("enableLighting", &C::getLightingEnabled, &C::setLightingEnabled)
+            .add_property("enableLighting",
+                          &C::getLightingEnabled,
+                          &C::setLightingEnabled)
             .def_readwrite("lights", &C::lights)
             ;
 
@@ -59,31 +61,36 @@ namespace scry {
         return *state;
     }
 
-    void LightState::switchTo(const State& to) const {
+    void LightState::switchTo(const State& to, bool fullStateSwitch) const {
         const LightState& ls = checked_cast_ref<const LightState&>(to);
 
         SCRY_ASSERT(lights.size() == ls.lights.size());
         
-        if (_enabled != ls._enabled) {
+        if (fullStateSwitch || _enabled != ls._enabled) {
             glSetEnabled(GL_LIGHTING, ls._enabled);
         }
         for (size_t i = 0; i < lights.size(); ++i) {
-            lights[i].switchTo(GL_LIGHT0 + i, ls.lights[i]);
+            lights[i].switchTo(GL_LIGHT0 + i, ls.lights[i], fullStateSwitch);
         }
     }
 
-    void LightState::Light::switchTo(GLenum light, const Light& to) const {
-        if (enable != to.enable)                             glSetEnabled(light, to.enable);
-        if (ambient != to.ambient)                           glLightfv(light, GL_AMBIENT,               to.ambient.getData());
-        if (diffuse != to.diffuse)                           glLightfv(light, GL_DIFFUSE,               to.diffuse.getData());
-        if (specular != to.specular)                         glLightfv(light, GL_SPECULAR,              to.specular.getData());
-        if (position != to.position)                         glLightfv(light, GL_POSITION,              to.position.getData());
-        if (spotDirection != to.spotDirection)               glLightfv(light, GL_SPOT_DIRECTION,        to.spotDirection.getData());
-        if (spotExponent != to.spotExponent)                 glLightf (light, GL_SPOT_EXPONENT,         to.spotExponent);
-        if (spotCutoff != to.spotCutoff)                     glLightf (light, GL_SPOT_CUTOFF,           to.spotCutoff);
-        if (constantAttenuation != to.constantAttenuation)   glLightf (light, GL_CONSTANT_ATTENUATION,  to.constantAttenuation);
-        if (linearAttenuation != to.linearAttenuation)       glLightf (light, GL_LINEAR_ATTENUATION,    to.linearAttenuation);
-        if (quadraticAttenuation != to.quadraticAttenuation) glLightf (light, GL_QUADRATIC_ATTENUATION, to.quadraticAttenuation);
+    void LightState::Light::switchTo(
+        GLenum light,
+        const Light& to,
+        bool fullStateSwitch
+    ) const {
+#define IF(x) if (fullStateSwitch || x != to.x)
+        IF(enable)               glSetEnabled(light, to.enable);
+        IF(ambient)              glLightfv(light, GL_AMBIENT,               to.ambient.getData());
+        IF(diffuse)              glLightfv(light, GL_DIFFUSE,               to.diffuse.getData());
+        IF(specular)             glLightfv(light, GL_SPECULAR,              to.specular.getData());
+        IF(position)             glLightfv(light, GL_POSITION,              to.position.getData());
+        IF(spotDirection)        glLightfv(light, GL_SPOT_DIRECTION,        to.spotDirection.getData());
+        IF(spotExponent)         glLightf (light, GL_SPOT_EXPONENT,         to.spotExponent);
+        IF(spotCutoff)           glLightf (light, GL_SPOT_CUTOFF,           to.spotCutoff);
+        IF(constantAttenuation)  glLightf (light, GL_CONSTANT_ATTENUATION,  to.constantAttenuation);
+        IF(linearAttenuation)    glLightf (light, GL_LINEAR_ATTENUATION,    to.linearAttenuation);
+        IF(quadraticAttenuation) glLightf (light, GL_QUADRATIC_ATTENUATION, to.quadraticAttenuation);
     }
 
 }

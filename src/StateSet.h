@@ -18,7 +18,7 @@ namespace scry {
             _states[typeid(*state)] = state;
         }
         
-        void switchTo(const StateSet& to) const;
+        void switchTo(const StateSet& to, bool fullStateSwitch) const;
 
     private:
         typedef std::map<TypeInfo, StatePtr> StateMap;
@@ -27,7 +27,7 @@ namespace scry {
     };
     SCRY_REF_PTR(StateSet);
 
-    void setCurrentStateSet(const StateSetPtr& next);
+    void setCurrentStateSet(const StateSetPtr& next, bool fullStateSwitch);
 
 }
 

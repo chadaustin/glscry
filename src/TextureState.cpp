@@ -105,9 +105,9 @@ namespace scry {
         return *state;
     }
 
-    void TextureState::switchTo(const State& state) const {
+    void TextureState::switchTo(const State& state, bool fullStateSwitch) const {
         const TextureState& ts = checked_cast_ref<const TextureState&>(state);
-        if (_texture != ts._texture) {
+        if (fullStateSwitch || _texture != ts._texture) {
             if (ts._texture) {
                 /// @todo With shaders, you don't need to glEnable the texture.
                 glEnable(GL_TEXTURE_2D);

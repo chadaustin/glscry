@@ -23,7 +23,7 @@ namespace scry {
 
         DepthState* clone() const;
         const DepthState& getDefault() const;
-        void switchTo(const State& to) const;
+        void switchTo(const State& to, bool fullStateSwitch) const;
 
         bool getDepthTest() const {
             return _enableDepthTest;

@@ -194,7 +194,7 @@ def generateLineGraph(datafile, testList, resultUnits, indVar, theRange):
     print >> plot, '#!/bin/sh'
     print >> plot, 'cat <<EOF | gnuplot'
     print >> plot, 'set terminal png'
-    print >> plot, 'set size 2,1'
+    print >> plot, 'set size 2,2'
     print >> plot, 'set output "%s.png"' % datafile
     print >> plot, 'set title "%s"' % getTitle()
     print >> plot, 'set yrange [0:*]'

@@ -78,7 +78,7 @@ namespace scry {
                 _actionList[i]->execute();
             }
             if (!_stateSetList.empty()) {
-                setCurrentStateSet(_stateSetList[currentStateSet]);
+                setCurrentStateSet(_stateSetList[currentStateSet], _fullStateSwitch);
                 currentStateSet = (currentStateSet + 1) % _stateSetList.size();
             }
             iterate(results);

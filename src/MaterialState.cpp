@@ -36,18 +36,27 @@ namespace scry {
         return *ptr;
     }
     
-    void MaterialState::switchTo(const State& to) const {
+    void MaterialState::switchTo(const State& to, bool fullStateSwitch) const {
         const MaterialState& ms = checked_cast_ref<const MaterialState&>(to);
-        front.switchTo(ms.front, GL_FRONT);
-        back .switchTo(ms.back,  GL_BACK);
+        front.switchTo(ms.front, GL_FRONT, fullStateSwitch);
+        back .switchTo(ms.back,  GL_BACK,  fullStateSwitch);
     }
 
-    void MaterialState::Material::switchTo(const Material& m, GLenum face) const {
-        if (ambient   != m.ambient)   glMaterialfv(face, GL_AMBIENT,   ambient.getData());
-        if (diffuse   != m.diffuse)   glMaterialfv(face, GL_DIFFUSE,   diffuse.getData());
-        if (specular  != m.specular)  glMaterialfv(face, GL_SPECULAR,  specular.getData());
-        if (emission  != m.emission)  glMaterialfv(face, GL_EMISSION,  emission.getData());
-        if (shininess != m.shininess) glMaterialf (face, GL_SHININESS, shininess);
+    void MaterialState::Material::switchTo(
+        const Material& m,
+        GLenum face,
+        bool fullStateSwitch
+    ) const {
+        if (fullStateSwitch || ambient   != m.ambient)
+            glMaterialfv(face, GL_AMBIENT,   ambient.getData());
+        if (fullStateSwitch || diffuse   != m.diffuse)
+            glMaterialfv(face, GL_DIFFUSE,   diffuse.getData());
+        if (fullStateSwitch || specular  != m.specular)
+            glMaterialfv(face, GL_SPECULAR,  specular.getData());
+        if (fullStateSwitch || emission  != m.emission)
+            glMaterialfv(face, GL_EMISSION,  emission.getData());
+        if (fullStateSwitch || shininess != m.shininess)
+            glMaterialf (face, GL_SHININESS, shininess);
     }
 
 }

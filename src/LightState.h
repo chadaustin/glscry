@@ -26,7 +26,7 @@ namespace scry {
 
         LightState* clone() const;
         const LightState& getDefault() const;
-        void switchTo(const State& to) const;
+        void switchTo(const State& to, bool fullStateSwitch) const;
         
         bool getLightingEnabled() const {
             return _enabled;
@@ -51,7 +51,8 @@ namespace scry {
             , quadraticAttenuation(0) {
             }
 
-            void switchTo(GLenum light, const Light& to) const;
+            void switchTo(GLenum light, const Light& to,
+                          bool fullStateSwitch) const;
 
             bool operator==(const Light& rhs) const {
                 return enable == rhs.enable &&

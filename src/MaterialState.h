@@ -26,7 +26,7 @@ namespace scry {
 
         MaterialState* clone() const;
         const MaterialState& getDefault() const;
-        void switchTo(const State& to) const;
+        void switchTo(const State& to, bool fullStateSwitch) const;
 
         struct Material {
             Material()
@@ -37,7 +37,8 @@ namespace scry {
             , shininess(0) {
             }
 
-            void switchTo(const Material& m, GLenum face) const;
+            void switchTo(const Material& m, GLenum face,
+                          bool fullStateSwitch) const;
             
             Vec4f ambient;
             Vec4f diffuse;
