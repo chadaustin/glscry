@@ -167,7 +167,8 @@ class wxFrame1(wxFrame):
         f.write(self.control.GetValue())
         f.close()
     def OnMenu1Id_saveasMenu(self, event):
-        dlg = wxFileDialog(self, "Choose a file", self.dirname, self.filename,"*.*", wxSAVE)
+        self.dirname=os.getcwd()
+        dlg = wxFileDialog(self, "Choose a file", self.dirname, " ","*.*", wxSAVE)
         if dlg.ShowModal() == wxID_OK:
             self.filename=dlg.GetFilename()
             self.dirname=dlg.GetDirectory()
