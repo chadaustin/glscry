@@ -75,7 +75,7 @@ Export('TargetDirectory')
 
 Default(TargetDirectory)
 
-for dir in ['src', 'third-party']:
+for dir in ['scripts', 'src', 'third-party']:
     SConscript(dirs=[dir], build_dir=BuildDirectory.Dir(dir), duplicate=0)
 
 
