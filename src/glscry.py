@@ -291,7 +291,10 @@ def runTestRange(test, runFor, variedProperty, range, coerce=identity):
     resultSetList = []
     for v in range:
         v = coerce(v)
-        setattr(test, variedProperty, v)
+        if callable(variedProperty):
+            variedProperty(test, v)
+        else:
+            setattr(test, variedProperty, v)
         resultSet = runTest(test, runFor, str(v),
                             '%s (%s = %s)' % (test.name, variedProperty, v))
         resultSetList.append(resultSet)

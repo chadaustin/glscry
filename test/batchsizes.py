@@ -9,7 +9,10 @@ testList = [
     CompiledVertexArrayTest('Compiled Vertex Arrays', geo),
     VertexBufferObjectTest('Vertex Buffer Objects', geo)]
 
-results = runTestsRange(testList, 1, 'batchSize', PowerRange(1, 18))
+def setBatchSize(test, size):
+    test.geometry.batches[0].batchSize = size
+
+results = runTestsRange(testList, 1, setBatchSize, PowerRange(1, 18))
 generateGraph('batchsizes_vertexrate', results, 'VertexRate',
               xlabel='Batch Size', graphType=GraphType.LINE)
 generateGraph('batchsizes_batchrate', results, 'BatchRate',

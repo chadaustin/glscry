@@ -22,6 +22,8 @@ namespace scry {
     void Geometry::bind() {
         class_<PrimitiveBatch>("PrimitiveBatch", no_init)
             .def(init<GLenum, size_t>())
+            .def_readwrite("primitiveType", &PrimitiveBatch::primitiveType)
+            .def_readwrite("batchSize",     &PrimitiveBatch::batchSize)
             ;
 
         class_<PrimitiveBatchList>("PrimitiveBatchList")
