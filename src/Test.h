@@ -111,7 +111,6 @@ namespace scry {
 
         virtual bool isSupported() const { return true; }
         virtual ResultDescList getResultDescs() = 0;
-        virtual void setProperty(const std::string& name, size_t value) { }
 
         virtual void setup()    { }
         virtual void iterate(ResultSet& results) = 0;

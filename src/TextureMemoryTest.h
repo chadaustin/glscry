@@ -29,13 +29,11 @@ namespace scry {
             return "TextureMemoryTest";
         }
 
-        void setProperty(const std::string& name, size_t value) {
-            if (name == "TextureCount") {
-                _textureCount = value;
-                SCRY_ASSERT(_textureCount > 0);
-            } else {
-                SCRY_ASSERT(false && "Invalid Property Name");
-            }
+        size_t getTextureCount() const {
+            return _textureCount;
+        }
+        void setTextureCount(size_t textureCount) {
+            _textureCount = textureCount;
         }
 
         void setup();

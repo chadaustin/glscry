@@ -5,9 +5,13 @@ using namespace boost::python;
 namespace scry {
 
     void TextureMemoryTest::bind() {
-        class_<TextureMemoryTest, TextureMemoryTestPtr, bases<Test>,
+        typedef TextureMemoryTest C;
+        class_<C, TextureMemoryTestPtr, bases<Test>,
                boost::noncopyable>("TextureMemoryTest", no_init)
-            .def(init<const char*>());
+            .def(init<const char*>())
+            .add_property("textureCount",
+                          &C::getTextureCount, &C::setTextureCount)
+            ;
 
         implicitly_convertible<TextureMemoryTestPtr, TestPtr>();
     }

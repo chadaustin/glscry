@@ -8,8 +8,11 @@ using namespace boost::python;
 namespace scry {
 
     void GeometryTest::bind() {
-        class_<GeometryTest, GeometryTestPtr, bases<Test>, boost::noncopyable>
-            ("GeometryTest", no_init);
+        typedef GeometryTest C;
+        class_<C, GeometryTestPtr, bases<Test>, boost::noncopyable>
+            ("GeometryTest", no_init)
+            .add_property("batchSize", &C::getBatchSize, &C::setBatchSize)
+            ;
 
         implicitly_convertible<GeometryTestPtr, TestPtr>();
     }

@@ -30,14 +30,6 @@ namespace scry {
         void   setBatchSize(size_t size) { _batchSize = size; }
         size_t getBatchSize() const      { return _batchSize; }
 
-        void setProperty(const std::string& name, size_t value) {
-            if (name == "BatchSize") {
-                setBatchSize(value);
-            } else {
-                SCRY_ASSERT(false && "Invalid Property Name");
-            }
-        }
-
         void setup();
 
     protected:

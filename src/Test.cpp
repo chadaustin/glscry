@@ -57,7 +57,6 @@ namespace scry {
             .def("run",            &C::run)
             .def("isSupported",    &C::isSupported)
             .def("getResultDescs", &C::getResultDescs)
-            .def("setProperty",    &C::setProperty)
             ;
     }
 
