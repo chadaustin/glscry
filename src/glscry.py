@@ -239,7 +239,7 @@ def runTest(test, runFor, resultName=None, printedName=None):
         print e
 
     # Return zeroes if the test isn't supported or throws an exception.
-    resultSet = ResultSet()
+    resultSet = ResultValues()
     resultSet[:] = [0] * len(test.getResultDescs())
     return makeResultSet(resultSet)
 
