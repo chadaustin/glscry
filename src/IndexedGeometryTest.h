@@ -15,40 +15,15 @@ namespace scry {
     public:
         static void bind();
 
-        static const size_t triangleCount = 2048;
-
         IndexedGeometryTest(const char* name, GeometryPtr geo)
         : GeometryTest(name, geo) {
         }
 
-        void setup() {
-#if 0
-            const std::vector<Triangle>& buffer = getTriangleBuffer();
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(buffer);
-
-            // Initialize the indices.
-            _indices.resize(triangleCount * 3);
-            for (size_t i = 0; i < triangleCount; ++i) {
-                _indices[i] = rand() % (buffer.size() * 3);
-            }
-#endif
-        }
-
-        void iterate(ResultSet& results) {
-            glDrawElements(GL_TRIANGLES, _indices.size(),
-                           GL_UNSIGNED_INT, &_indices[0]);
-            
-            results[0] += triangleCount;
-        }
-
-        void teardown() {
-            glDisableClientState(GL_VERTEX_ARRAY);
-        }
+        void setup();
+        void iterate(ResultSet& results);
+        void teardown();
 
     private:
-        Inited<int, 256> _arraySize;
-
         std::vector<GLuint> _indices;
     };
     SCRY_REF_PTR(IndexedGeometryTest);

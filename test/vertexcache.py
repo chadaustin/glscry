@@ -1,5 +1,5 @@
 from glscry import *
 
-list = [ IndexedGeometryTest(Zeroes()) ]
-runTestsRange("vcache.data", list, 1, "TriangleRate",
+list = [ IndexedGeometryTest("Test", Zeroes()) ]
+runTestsRange("vcache.data", list, 10, "VertexRate",
               "BatchSize", PowerRange(1, 16))
