@@ -58,7 +58,8 @@ env.Append(CPPDEFINES=['GLEW_STATIC'])
 env.Append(CPPPATH=['src/gmtl-python'])
 
 if env.subst('$CC') == 'gcc':
-    env.Append(CCFLAGS=['-Wall', '-O2'])
+    env.Append(CCFLAGS=['-Wall', '-O2'],
+               CXXFLAGS=['-Wno-non-virtual-dtor'])
 
 Export('env')
 

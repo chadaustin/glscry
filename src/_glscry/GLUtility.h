@@ -118,6 +118,11 @@ namespace scry {
     // Multitexturing makes things complicated...
 
     struct PumpFactory {
+    protected:
+        /// No polymorphic destruction.
+        ~PumpFactory() { }
+
+    public:
         virtual Pump getPump(GLenum type, int size) const = 0;
     };
 
