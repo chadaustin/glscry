@@ -19,7 +19,9 @@ namespace scry {
         : GeometryTest(name, geo) {
         }
 
+        void setup();
         void iterate(ResultSet& results);
+        void teardown();
     };
     SCRY_REF_PTR(ImmediateTest);
 

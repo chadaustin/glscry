@@ -26,7 +26,7 @@ namespace scry {
         BufferIterator t(getTexCoords());
 
         glBegin(geo->getPrimitiveType());
-        for (size_t i = 0; i < getVertexCount(); ++i) {
+        for (size_t i = 0; i < getVertexCountPerBatch(); ++i) {
             c.step();
             n.step();
             t.step();
@@ -39,7 +39,7 @@ namespace scry {
 
     void DisplayListTest::iterate(ResultSet& results) {
         glCallList(_list);
-        results[0] += getVertexCount();
+        results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();
         results[2] += getScreenCoverage();
     }

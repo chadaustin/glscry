@@ -18,75 +18,42 @@ namespace scry {
 
         GeometryPtr geometry = getGeometry();
         if (ArrayPtr v = geometry->vertices) {
-            GLuint buffer;
-            glGenBuffersARB(1, &buffer);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, buffer);
-            glBufferDataARB(
-                GL_ARRAY_BUFFER_ARB,
-                getVertices().data.size(),
-                getVertices().data_ptr(),
-                GL_STATIC_DRAW_ARB /* This should be settable. */);
+            _buffers.push_back(createVertexBuffer(getVertices()));
 
             glEnableClientState(GL_VERTEX_ARRAY);
             glVertexPointer(v->getSize(), v->getTypeConstant(), 0, 0);
-
-            _buffers.push_back(buffer);
         }
 
         if (ArrayPtr c = geometry->colors) {
-            GLuint buffer;
-            glGenBuffersARB(1, &buffer);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, buffer);
-            glBufferDataARB(
-                GL_ARRAY_BUFFER_ARB,
-                getColors().data.size(),
-                getColors().data_ptr(),
-                GL_STATIC_DRAW_ARB /* This should be settable. */);
+            _buffers.push_back(createVertexBuffer(getColors()));
 
             glEnableClientState(GL_COLOR_ARRAY);
             glColorPointer(c->getSize(), c->getTypeConstant(), 0, 0);
-
-            _buffers.push_back(buffer);
         }
 
         if (ArrayPtr n = geometry->normals) {
-            GLuint buffer;
-            glGenBuffersARB(1, &buffer);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, buffer);
-            glBufferDataARB(
-                GL_ARRAY_BUFFER_ARB,
-                getNormals().data.size(),
-                getNormals().data_ptr(),
-                GL_STATIC_DRAW_ARB /* This should be settable. */);
+            _buffers.push_back(createVertexBuffer(getNormals()));
 
             glEnableClientState(GL_NORMAL_ARRAY);
             assert(n->getSize() == 3);
             glNormalPointer(n->getTypeConstant(), 0, 0);
-
-            _buffers.push_back(buffer);
         }
 
         if (ArrayPtr t = geometry->texcoords) {
-            GLuint buffer;
-            glGenBuffersARB(1, &buffer);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, buffer);
-            glBufferDataARB(
-                GL_ARRAY_BUFFER_ARB,
-                getTexCoords().data.size(),
-                getTexCoords().data_ptr(),
-                GL_STATIC_DRAW_ARB /* This should be settable. */);
+            _buffers.push_back(createVertexBuffer(getTexCoords()));
 
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glTexCoordPointer(t->getSize(), t->getTypeConstant(), 0, 0);
-
-            _buffers.push_back(buffer);
         }
     }
 
     void VertexBufferObjectTest::iterate(ResultSet& results) {
         GeometryPtr geo = getGeometry();
-        glDrawArrays(geo->getPrimitiveType(), 0, getVertexCount());
-        results[0] += getVertexCount();
+
+        // In indexing support, use glDrawRangeElements or glDrawElements.
+
+        glDrawArrays(geo->getPrimitiveType(), 0, getVertexCountPerBatch());
+        results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();
         results[2] += getScreenCoverage();
     }
@@ -102,4 +69,17 @@ namespace scry {
             glDeleteBuffersARB(1, &_buffers[i]);
         }
     }
+
+    GLuint VertexBufferObjectTest::createVertexBuffer(const Buffer& buffer) {
+        GLuint handle;
+        glGenBuffersARB(1, &handle);
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
+        glBufferDataARB(
+            GL_ARRAY_BUFFER_ARB,
+            buffer.data.size(),
+            buffer.data_ptr(),
+            GL_STATIC_DRAW_ARB /* This should be settable. */);
+        return handle;
+    }
+
 }

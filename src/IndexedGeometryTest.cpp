@@ -27,7 +27,7 @@ namespace scry {
                         0, getVertices().data_ptr());
 
         // Initialize the indices.
-        _indices.resize(getVertexCount());
+        _indices.resize(getVertexCountPerBatch());
         for (size_t i = 0; i < _indices.size(); ++i) {
             _indices[i] = i;
         }
@@ -41,10 +41,10 @@ namespace scry {
 
     void IndexedGeometryTest::iterate(ResultSet& results) {
         GeometryPtr geo = getGeometry();
-        glDrawElements(geo->getPrimitiveType(), getVertexCount(),
+        glDrawElements(geo->getPrimitiveType(), getVertexCountPerBatch(),
                        GL_UNSIGNED_INT, &_indices[0]);
             
-        results[0] += getVertexCount();
+        results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();
         results[2] += 0;  /// @todo: calculate fill rate
     }

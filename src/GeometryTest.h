@@ -57,7 +57,9 @@ namespace scry {
             }
 
             void step() {
-                if (_pump) _data = _pump(_data);
+                if (_pump) {
+                    _data = _pump(_data);
+                }
             }
         private:
             Pump _pump;
@@ -68,19 +70,13 @@ namespace scry {
             return _geometry;
         }
 
-        size_t getVertexCount() const {
-            switch (_geometry->getPrimitiveType()) {
-                case GL_POINTS:         return getBatchSize() * 1; 
-                case GL_LINES:          return getBatchSize() * 2;
-                case GL_LINE_STRIP:     return getBatchSize() + 1;
-                case GL_LINE_LOOP:      return getBatchSize();
-                case GL_TRIANGLES:      return getBatchSize() * 3;
-                case GL_TRIANGLE_STRIP: return getBatchSize() + 2;
-                case GL_TRIANGLE_FAN:   return getBatchSize() + 2;
-                case GL_QUADS:          return getBatchSize() * 4;
-                case GL_QUAD_STRIP:     return getBatchSize() * 2 + 2;
-                case GL_POLYGON:        return getBatchSize();
-                default:                return 0;
+        size_t getVertexCountPerBatch() const;
+
+        size_t getVertexArraySize() {
+            if (getGeometry()->indices) {
+                return _vertexArraySize;
+            } else {
+                return getVertexCountPerBatch();
             }
         }
 
@@ -92,12 +88,18 @@ namespace scry {
         const Buffer& getColors()    const { return _colors;    }
         const Buffer& getNormals()   const { return _normals;   }
         const Buffer& getTexCoords() const { return _texcoords; }
+        const Buffer& getIndices()   const { return _indices;   }
 
     private:
-        void defineBuffer(ArrayPtr array, Buffer& buffer, const char* name, PumpGetter getter);
+        static void defineBuffer(
+            Buffer& buffer, ArrayPtr array, size_t vertexCount,
+            const char* name, PumpGetter getter);
 
         Inited<size_t, 4096> _batchSize;
         Zeroed<size_t> _screenCoverage;
+
+        /// Size of vertex arrays when using indexed geometry.
+        Zeroed<size_t> _vertexArraySize;
 
         GeometryPtr _geometry;
 
@@ -105,6 +107,7 @@ namespace scry {
         Buffer _colors;
         Buffer _normals;
         Buffer _texcoords;
+        Buffer _indices;
     };
     SCRY_REF_PTR(GeometryTest);
 

@@ -9,19 +9,28 @@ def flatten(list):
             r.append(a)
     return r
 
-def defineArray(size, repeat, offset=[], initial=[]):
-    array = Arrayf(size)
+def defineArray(arraytype, size, repeat, offset=[], initial=[]):
+    array = arraytype(size)
     array.repeat[:]  = flatten(repeat)
     array.offset[:]  = flatten(offset)
     array.initial[:] = flatten(initial)
     return array
 
-def Zeroes():
-    geo = Geometry(GL_TRIANGLES)
-    geo.vertices = defineArray(2, [(0, 0), (0, 0), (0, 0)])
+def buildGeometry(type, v=None, c=None, n=None, t=None, i=None):
+    geo = Geometry(type)
+    if v: geo.vertices  = v
+    if c: geo.colors    = c
+    if n: geo.normals   = n
+    if t: geo.texcoords = t
+    if i: geo.indices   = i
     return geo
 
+def Zeroes():
+    return buildGeometry(
+        GL_TRIANGLES,
+        v=defineArray(2, [(0, 0), (0, 0), (0, 0)]))
+
 def SmallTriangles():
-    geo = Geometry(GL_TRIANGLES)
-    geo.vertices = defineArray(2, [(0, 0), (0, 1), (1, 1)])
-    return geo
+    return buildGeometry(
+        GL_TRIANGLES,
+        v=defineArray(2, [(0, 0), (0, 1), (1, 1)]))

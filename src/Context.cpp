@@ -48,8 +48,8 @@ namespace scry {
 
     const int    WIDTH  = 1024;
     const int    HEIGHT = 768;
-    const double NEAR   = -1.0;
-    const double FAR    = 1.0;
+    const double NEAR   = -10000.0;
+    const double FAR    = 10000.0;
 
 
     void setProjection() {

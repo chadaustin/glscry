@@ -49,7 +49,6 @@ namespace scry {
     SCRY_MAP_TYPE_CONSTANT(GLdouble, GL_DOUBLE);
 
 
-
     typedef const void* (*Pump)(const void* data);
     typedef Pump (*PumpGetter)(GLenum type, int size);
 
@@ -57,6 +56,7 @@ namespace scry {
     Pump getColorPump(GLenum type, int size);
     Pump getNormalPump(GLenum type, int size);
     Pump getTexCoordPump(GLenum type, int size);
+    Pump getIndexPump(GLenum type, int size);
 
 }
 

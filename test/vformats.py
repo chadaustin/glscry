@@ -23,14 +23,6 @@ c = defineArray(3, [r, g, b, w])
 n = defineArray(3, [r, g, b, w])
 t = defineArray(2, [ul_tc, ll_tc, lr_tc, ur_tc])
 
-def buildGeometry(type, v=None, c=None, n=None, t=None):
-    geo = Geometry(type)
-    if v: geo.vertices  = v
-    if c: geo.colors    = c
-    if n: geo.normals   = n
-    if t: geo.texcoords = t
-    return geo
-
 fmt = GL_TRIANGLES
 geo_v    = buildGeometry(fmt, v=v)
 geo_vc   = buildGeometry(fmt, v=v, c=c)

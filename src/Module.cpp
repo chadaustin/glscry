@@ -105,7 +105,7 @@ BOOST_PYTHON_MODULE(_glscry) {
 
     // Geometry generators.
 
-    Array::bind();
+    bindArrayTypes();
     Geometry::bind();
 
     // Tests.

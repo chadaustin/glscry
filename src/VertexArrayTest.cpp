@@ -19,34 +19,29 @@ namespace scry {
 
         if (ArrayPtr v = geometry->vertices) {
             glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(v->getSize(), v->getTypeConstant(),
-                            0, getVertices().data_ptr());
+            glVertexPointer(v, getVertices().data_ptr());
         }
 
         if (ArrayPtr c = geometry->colors) {
             glEnableClientState(GL_COLOR_ARRAY);
-            glColorPointer(c->getSize(), c->getTypeConstant(),
-                           0, getColors().data_ptr());
+            glColorPointer(c, getColors().data_ptr());
         }
 
         if (ArrayPtr n = geometry->normals) {
             glEnableClientState(GL_NORMAL_ARRAY);
-            assert(n->getSize() == 3);
-            glNormalPointer(n->getTypeConstant(),
-                            0, getNormals().data_ptr());
+            glNormalPointer(n, getNormals().data_ptr());
         }
 
         if (ArrayPtr t = geometry->texcoords) {
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            glTexCoordPointer(t->getSize(), t->getTypeConstant(),
-                              0, getTexCoords().data_ptr());
+            glTexCoordPointer(t, getTexCoords().data_ptr());
         }
     }
 
     void VertexArrayTest::iterate(ResultSet& results) {
         GeometryPtr geometry = getGeometry();
-        glDrawArrays(geometry->getPrimitiveType(), 0, getVertexCount());
-        results[0] += getVertexCount();
+        glDrawArrays(geometry->getPrimitiveType(), 0, getVertexCountPerBatch());
+        results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();
         results[2] += getScreenCoverage();
     }

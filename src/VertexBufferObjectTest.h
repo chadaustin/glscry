@@ -28,6 +28,8 @@ namespace scry {
         void teardown();
 
     private:
+        GLuint createVertexBuffer(const Buffer& buffer);
+
         std::vector<GLuint> _buffers;
     };
     SCRY_REF_PTR(VertexBufferObjectTest);

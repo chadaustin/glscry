@@ -58,6 +58,7 @@ sources = Split("""
     Run.cpp
     Timer.cpp
 
+    Array.cpp
     Geometry.cpp
 
     State.cpp
