@@ -2,16 +2,19 @@
 
 from wxPython.wx import *
 import os
-
+import Gnuplot, Gnuplot.PlotItems, Gnuplot.funcutils
 
 def create(parent):
     return wxFrame1(parent)
 
-[wxID_WXFRAME1, wxID_WXFRAME1BROWSE_BUTTON, wxID_WXFRAME1GRAPH_BUTTON, 
- wxID_WXFRAME1NOTEBOOK1, wxID_WXFRAME1PANEL1, wxID_WXFRAME1PANEL2, 
- wxID_WXFRAME1STATICBITMAP1, wxID_WXFRAME1TEXTCTRL1, wxID_WXFRAME1TREECTRL1, 
- wxID_WXFRAME1WINDOW1, 
-] = map(lambda _init_ctrls: wxNewId(), range(10))
+[wxID_WXFRAME1, wxID_WXFRAME1BROWSE_BUTTON, wxID_WXFRAME1BATCHSIZES, 
+ wxID_WXFRAME1GRAPH_BUTTON, wxID_WXFRAME1NOTEBOOK1, wxID_WXFRAME1PANEL1, 
+ wxID_WXFRAME1PANEL2, wxID_WXFRAME1STATICBITMAP1, wxID_WXFRAME1TEXTCTRL1, 
+ wxID_WXFRAME1TREECTRL1, wxID_WXFRAME1WINDOW1,wxID_WXFRAME1EXAMPLE,
+ wxID_WXFRAME1HIERZ, wxID_WXFRAME1LIGHTS, wxID_WXFRAME1PIXELTRANSFER,
+ wxID_WXFRAME1TEXMEM, wxID_WXMINIFRAME1SCROLLEDWINDOW1, wxID_WXMINIFRAME1,
+ wxID_WXFULLBITMAP 
+] = map(lambda _init_ctrls: wxNewId(), range(19))
 
 [wxID_WXFRAME1MENU1ID_EXIT, wxID_WXFRAME1MENU1ID_NEW, 
  wxID_WXFRAME1MENU1ID_OPEN, wxID_WXFRAME1MENU1ID_SAVE, 
@@ -82,9 +85,8 @@ class wxFrame1(wxFrame):
         # generated method, don't edit
 
         parent.AddPage(imageId=-1, page=self.panel1, select=True,
-              text=u'Pages0')
-        parent.AddPage(imageId=-1, page=self.panel2, select=False,
-              text='Pages1')
+              text=u'Analyze')
+        parent.AddPage(imageId=-1, page=self.panel2, select=False, text='GLScry')
 
     def _init_utils(self):
         # generated method, don't edit
@@ -116,20 +118,20 @@ class wxFrame1(wxFrame):
         self.notebook1 = wxNotebook(id=wxID_WXFRAME1NOTEBOOK1, name='notebook1',
               parent=self, pos=wxPoint(0, 0), size=wxSize(248, 692), style=0)
 
-        self.window1 = wxWindow(id=wxID_WXFRAME1WINDOW1, name='window1',
+        self.window1 = wxScrolledWindow(id=wxID_WXFRAME1WINDOW1, name='window1',
               parent=self, pos=wxPoint(248, 0), size=wxSize(776, 692), style=0)
 
-        self.panel1 = wxPanel(id=wxID_WXFRAME1PANEL1, name='panel1',
+        self.panel1 = wxPanel(id=wxID_WXFRAME1PANEL1, name='Analyze',
               parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(240, 666),
               style=wxTAB_TRAVERSAL)
 
-        self.panel2 = wxPanel(id=wxID_WXFRAME1PANEL2, name='panel2',
+        self.panel2 = wxPanel(id=wxID_WXFRAME1PANEL2, name='GLScry',
               parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(240, 666),
               style=wxTAB_TRAVERSAL)
 
         self.textCtrl1 = wxTextCtrl(id=wxID_WXFRAME1TEXTCTRL1, name='textCtrl1',
               parent=self.panel1, pos=wxPoint(8, 16), size=wxSize(144, 21),
-              style=0, value=u'C:\\')
+              style=0, value=u'Please select a directory')
 
         self.browse_button = wxButton(id=wxID_WXFRAME1BROWSE_BUTTON,
               label=u'Browse', name=u'browse_button', parent=self.panel1,
@@ -139,21 +141,46 @@ class wxFrame1(wxFrame):
 
         self.treeCtrl1 = wxTreeCtrl(id=wxID_WXFRAME1TREECTRL1, name='treeCtrl1',
               parent=self.panel1, pos=wxPoint(8, 56), size=wxSize(216, 536),
-              style=wxTR_HAS_BUTTONS)
+              style=wxTR_HAS_BUTTONS | wxTR_MULTIPLE)
 
         self.graph_button = wxButton(id=wxID_WXFRAME1GRAPH_BUTTON,
               label=u'Graph', name=u'graph_button', parent=self.panel1,
               pos=wxPoint(160, 608), size=wxSize(75, 31), style=0)
-        EVT_BUTTON(self.graph_button, wxID_WXFRAME1GRAPH_BUTTON, self.loadGraph)
-        
-        self.image = 'blank.png'
-        self.staticBitmap1 = wxStaticBitmap(bitmap=wxBitmap(self.image, 
+        EVT_BUTTON(self.graph_button, wxID_WXFRAME1GRAPH_BUTTON,
+              self.OnGraphButton)
+
+        self.staticBitmap1 = wxStaticBitmap(bitmap=wxBitmap('blank.png',
               wxBITMAP_TYPE_PNG), id=wxID_WXFRAME1STATICBITMAP1,
               name='staticBitmap1', parent=self.window1, pos=wxPoint(0, 0),
               size=wxSize(775, 692), style=0)
         self.staticBitmap1.SetAutoLayout(True)
         self.staticBitmap1.Center(wxBOTH)
+        EVT_LEFT_DCLICK(self.staticBitmap1, self.OnBitmapDblClick)
 
+        self.batchsizes = wxCheckBox(id=wxID_WXFRAME1BATCHSIZES,
+              label='Batch Sizes', name='batchsizes', parent=self.panel2,
+              pos=wxPoint(64, 88), size=wxSize(83, 23), style=0)
+
+        self.example = wxCheckBox(id=wxID_WXFRAME1EXAMPLE,
+              label='Example', name='example', parent=self.panel2,
+              pos=wxPoint(64, 108), size=wxSize(83, 23), style=0)
+        
+        self.hierz = wxCheckBox(id=wxID_WXFRAME1HIERZ,
+              label='Hierz', name='hierz', parent=self.panel2,
+              pos=wxPoint(64, 128), size=wxSize(83, 23), style=0)
+        
+        self.lights = wxCheckBox(id=wxID_WXFRAME1LIGHTS,
+              label='Lights', name='lights', parent=self.panel2,
+              pos=wxPoint(64, 148), size=wxSize(83, 23), style=0)
+        
+        self.pixeltransfer = wxCheckBox(id=wxID_WXFRAME1PIXELTRANSFER,
+              label='Pixel Transfer', name='pixeltransfer', parent=self.panel2,
+              pos=wxPoint(64, 168), size=wxSize(83, 23), style=0)       
+              
+        self.texmem = wxCheckBox(id=wxID_WXFRAME1TEXMEM,
+              label='Texmem', name='texmem', parent=self.panel2,
+              pos=wxPoint(64, 188), size=wxSize(83, 23), style=0)           
+        
         self._init_coll_notebook1_Pages(self.notebook1)
 
     def __init__(self, parent,filename='work_in_progress'):
@@ -167,43 +194,93 @@ class wxFrame1(wxFrame):
         event.Skip()
     
     def OnMenu4Items0Menu(self, event):
+        #-#------About Dialog Box------#-#
         d= wxMessageDialog( self, "work_in_progress \n"
                             "V. 2.16.05"," About work_in_progress", wxOK | wxICON_INFORMATION)  # Create a message dialog box
         d.ShowModal() # Shows it
         d.Destroy() # finally destroy it when finished.    
 
     def OnMenu1Id_saveMenu(self, event):
+        #-#------Save------#-#
         f=open(os.path.join(self.dirname,self.filename),"w")
         f.write(self.control.GetValue())
         f.close()
     def OnMenu1Id_saveasMenu(self, event):
+        #-#------Save As------#-#
         self.dirname=os.getcwd()
         dlg = wxFileDialog(self, "Choose a file", self.dirname, " ","*.*", wxSAVE)
         if dlg.ShowModal() == wxID_OK:
             self.filename=dlg.GetFilename()
             self.dirname=dlg.GetDirectory()
-            self.OnSave(e)
+            self.OnSave()
         dlg.Destroy()    
     def OnMenu1Id_exitMenu(self, event):
+        #-#------Exit------#-#
         self.Close(true)
     
-    def loadGraph(self, event):
+    def OnGraphButton(self, event):
+        #-#------open a new gnuplot session-----#-#
+        g = Gnuplot.Gnuplot(debug=1)
+        #-#------get datafile------#-#
+        selected = self.treeCtrl1.GetSelections()
+        size = len(selected)
+        count = 0;
+        while count < size:
+            path = self.treeCtrl1.GetPyData(selected[count])
+            count = count + 1
+            self.SetGraphLabel(path, g)
+                       
+    def SaveAndDisplay(self, event):
+        #-#------Graph Button Event------#-#
         selected = self.treeCtrl1.GetSelection()
-        #obj = eval(open(self.treeCtrl1.GetSelections()).read())
-        #d= wxMessageDialog( self, selected , wxOK | wxICON_INFORMATION)
-        #d.ShowModal()
-        #d.Destroy()    
+        path = self.treeCtrl1.GetPyData(selected)
         
+        img = wxBitmap(path, wxBITMAP_TYPE_PNG)
+        #-#------Resize Image for Window------#-#
+        resizedimg = img
+        toobig = false
+        height = img.GetHeight()
+        width = img.GetWidth()
+        if width > 774:
+            resizedimg.SetWidth(774)
+            toobig = true
+        if height > 691:
+            resizedimg.SetHeight(691)
+            toobig = true
+        if toobig == true:
+            self.staticBitmap1.SetBitmap(resizedimg)
+        else:
+            self.staticBitmap1.SetBitmap(img)
+    def OnBitmapDblClick(self, event):
+    #-#------On Double Click of StaticBitmap1, Open a new scrolled window
+    #to view image at full size------#-#    
+         selected = self.treeCtrl1.GetSelection()
+         nm = self.treeCtrl1.GetItemText(selected)
+         path = self.treeCtrl1.GetPyData(selected)
+         img = wxBitmap(path, wxBITMAP_TYPE_PNG)
+         height = img.GetHeight()
+         width = img.GetWidth()
+                 
+         self.wxExpFrame1 = wxFrame(self, id=wxID_WXMINIFRAME1, name='',
+              pos=wxPoint(175, 144), size=wxSize(768, 530),
+              style=wxDEFAULT_FRAME_STYLE, title=nm)
+         self.scrolledWindow1 = wxScrolledWindow(id=wxID_WXMINIFRAME1SCROLLEDWINDOW1,
+              name='scrolledWindow1', parent=self.wxExpFrame1, pos=wxPoint(0, 0),
+              size=wxSize(width, height), style=wxHSCROLL | wxVSCROLL)
+         self.scrolledWindow1.SetScrollbars(30, 30, width, height, 0, 0, noRefresh = FALSE)              
+         
+         self.fullBitmap1 = wxStaticBitmap(bitmap=wxBitmap(path,
+              wxBITMAP_TYPE_PNG), id=wxID_WXFULLBITMAP,
+              name='fullbitmap1', parent=self.scrolledWindow1, pos=wxPoint(0, 0),
+              size=wxSize(width, height), style=0)
+         self.wxExpFrame1.Show()
+                
         
-  
-      #
-      #build tree according to root directory
-      #
-       
+    #-#------Tree Functions------#-#
+                  
     def BuildFolder(self, event):
-
+        #-#------Build a tree according to root directory------#-#
         dlg = wxDirDialog(self)
-
         try:
             if dlg.ShowModal() == wxID_OK:
                 dir = dlg.GetPath()
@@ -213,6 +290,7 @@ class wxFrame1(wxFrame):
                 self.treeCtrl1.DeleteAllItems()
                 self.StartBuildFromDir(dir)
                 self.treeCtrl1.Expand(self.root)
+                
         finally:
             dlg.Destroy()
 
@@ -229,14 +307,35 @@ class wxFrame1(wxFrame):
             if os.path.isfile(pathinquestion):
                 extension = os.path.splitext(pathinquestion)
                 extension = extension[1]
-                if extension == ".png":
+                if extension == ".gnuplot":
                     child = self.treeCtrl1.AppendItem(parent, listing)
                     childdata = self.treeCtrl1.GetItemData(child)
                     childdata.path = pathinquestion
+                    self.treeCtrl1.SetPyData(child, pathinquestion)            
+                    
                     
             elif os.path.isdir(pathinquestion):
                 newparent = self.treeCtrl1.AppendItem(parent, listing)
                 newdir = os.path.join(dir, listing)
                 self.BuildChildrenFromDir(newparent, newdir)
-
-   
+                  
+    def SetGraphLabel(self, path, graph):
+        # load info from .gnuplot file
+        file = open(path)
+        line = file.readline()
+        for line in file:
+            returnchar = file.readline()
+            graph(line)
+        # plot .data file assosciated with the .gnuplot file
+        extension = os.path.splitext(path)
+        extension = extension[1]
+        path = path.replace(extension, '.data')
+        # replace the filename.data with full path
+        name = path.split('\\')
+        size = len(name)
+        filename = name[size-1]
+        line = line.replace(filename, path)
+        line = line.replace("\\","\\\\", -1)
+        graph(line)
+        raw_input('Please press return to continue...\n')    
+                       
