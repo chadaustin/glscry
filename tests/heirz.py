@@ -1,7 +1,7 @@
 from glscry import *
 
-genFrontToBack = Zeroes()
-genBackToFront = Zeroes()
+genFrontToBack = Geometry()
+genBackToFront = Geometry()
 
 frontToBack = VertexArrayTest(genFrontToBack)
 backToFront = VertexArrayTest(genBackToFront)

@@ -5,6 +5,8 @@
 #include "DepthState.h"
 #include "LightState.h"
 
+#include "Geometry.h"
+
 #include "ImmediateTest.h"
 #include "IndexedGeometryTest.h"
 #include "DisplayListTest.h"
@@ -83,6 +85,7 @@ BOOST_PYTHON_MODULE(_glscry) {
 
     // Geometry generators.
 
+    Geometry::bind();
     GeometryGenerator::bind();
     Zeroes::bind();
     SmallTriangles::bind();
