@@ -96,8 +96,12 @@ namespace scry {
             ;
     }
 
-    const State& TextureState::getDefault() const {
-        StatePtr state = new TextureState;
+    TextureState* TextureState::clone() const {
+        return new TextureState(*this);
+    }
+
+    const TextureState& TextureState::getDefault() const {
+        static TextureStatePtr state = new TextureState;
         return *state;
     }
 

@@ -88,6 +88,26 @@ class PowerRange:
                     return value
         return Iterable()
 
+def make_unique(list):
+    if not list:
+        return list
+
+    rv = []
+
+    list.sort()
+    last = list[0]
+    rv.append(last)
+    for b in list[1:]:
+        if b != last:
+            last = b
+            rv.append(last)
+
+    return rv
+
+def uniquePowerRange(low, high, power):
+    list = [int(power ** k) for k in range(int(low), int(high + 1))]
+    return make_unique(list)
+
 def runTests(filename, testList, runFor, measure):
     print "\nGenerating data for %s" % filename
 
@@ -166,7 +186,7 @@ def generateBarGraph(datafile, testList, resultUnits):
     print >> plot, 'EOF'
 
 
-def generateLineGraph(datafile, testList, resultUnits, indVar, range):
+def generateLineGraph(datafile, testList, resultUnits, indVar, theRange):
     script = datafile + ".sh"
     print '\nGenerating gnuplot script: ' + script
     plot = open(script, 'w')
@@ -181,11 +201,14 @@ def generateLineGraph(datafile, testList, resultUnits, indVar, range):
     print >> plot, 'set xlabel "%s"' % indVar
     print >> plot, 'set ylabel "%s"' % resultUnits
     print >> plot, 'set xtics (',
-    for i in range(len(testList)):
-        t = testList[i]
-        print >> plot, '"%s" %s' % (t.getName(), i),
-        if i + 1 < len(testList):
+    first = True
+    j = 0
+    for i in theRange:
+        if not first:
             print >> plot, ', ',
+        first = False
+        print >> plot, '"%s" %s' % (i, j),
+        j = j + 1
     print >> plot, ')'
 
     print >> plot, 'plot \\'

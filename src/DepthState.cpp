@@ -17,8 +17,12 @@ namespace scry {
         implicitly_convertible<CPtr, StatePtr>();
     }
 
-    const State& DepthState::getDefault() const {
-        static StatePtr ptr = new DepthState;
+    DepthState* DepthState::clone() const {
+        return new DepthState(*this);
+    }
+
+    const DepthState& DepthState::getDefault() const {
+        static DepthStatePtr ptr = new DepthState;
         return *ptr;
     }
 

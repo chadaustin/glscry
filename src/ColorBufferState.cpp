@@ -17,8 +17,12 @@ namespace scry {
         implicitly_convertible<ColorBufferStatePtr, StatePtr>();
     }
 
-    const State& ColorBufferState::getDefault() const {
-        StatePtr state = new ColorBufferState;
+    ColorBufferState* ColorBufferState::clone() const {
+        return new ColorBufferState(*this);
+    }
+
+    const ColorBufferState& ColorBufferState::getDefault() const {
+        static ColorBufferStatePtr state = new ColorBufferState;
         return *state;
     }
 

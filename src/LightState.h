@@ -19,7 +19,13 @@ namespace scry {
 
         LightState();
 
-        const State& getDefault() const;
+        LightState(const LightState& rhs) {
+            lights = rhs.lights;
+            _enabled = rhs._enabled;
+        }
+
+        LightState* clone() const;
+        const LightState& getDefault() const;
         void switchTo(const State& to) const;
         
         bool getLightingEnabled() const {

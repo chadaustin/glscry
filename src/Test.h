@@ -76,14 +76,6 @@ namespace scry {
             return _name.c_str();
         }
 
-        StateSet& getStateSet() {
-            return _stateSet;
-        }
-
-        void setState(State* state) {
-            getStateSet().setState(state);
-        }
-
         void setTransform(
             const Vec4f& row1,
             const Vec4f& row2,
@@ -100,9 +92,20 @@ namespace scry {
         const Matrix44f& getTransform() const {
             return _transform;
         }
-            
 
-        void addAction(ActionPtr action) {
+        bool getFullStateSwitch() const {
+            return _fullStateSwitch;
+        }
+
+        void setFullStateSwitch(bool fullStateSwitch) {
+            _fullStateSwitch = fullStateSwitch;
+        }
+
+        void addStateSet(const StateSetPtr& stateSet) {
+            _stateSetList.push_back(stateSet);
+        }            
+
+        void addAction(const ActionPtr& action) {
             _actionList.push_back(action);
         }
 
@@ -122,8 +125,10 @@ namespace scry {
     private:
         std::string _name;
         Matrix44f _transform;
-        StateSet _stateSet;
-        std::vector<ActionPtr> _actionList;
+
+        Inited<bool, false>      _fullStateSwitch;
+        std::vector<StateSetPtr> _stateSetList;
+        std::vector<ActionPtr>   _actionList;
     };
     SCRY_REF_PTR(Test);
 

@@ -7,7 +7,8 @@ namespace scry {
 
     void MaterialState::bind() {
         typedef MaterialState C;
-        scope s = class_<MaterialState, MaterialStatePtr, bases<State>, boost::noncopyable>
+        scope s = class_<MaterialState, MaterialStatePtr, bases<State>,
+                         boost::noncopyable>
             ("MaterialState", no_init)
             .def(init<>())
             .def_readwrite("front", &C::front)
@@ -25,9 +26,13 @@ namespace scry {
 
         implicitly_convertible<MaterialStatePtr, StatePtr>();
     }
+
+    MaterialState* MaterialState::clone() const {
+        return new MaterialState(*this);
+    }
     
-    const State& MaterialState::getDefault() const {
-        static StatePtr ptr = new MaterialState;
+    const MaterialState& MaterialState::getDefault() const {
+        static MaterialStatePtr ptr = new MaterialState;
         return *ptr;
     }
     

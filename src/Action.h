@@ -2,6 +2,7 @@
 #define SCRY_ACTION_H
 
 
+#include "OpenGL.h"
 #include "RefCounted.h"
 
 
@@ -26,9 +27,46 @@ namespace scry {
     public:
         static void bind();
 
-        void execute();
+        ClearAction(GLbitfield buffers) {
+            _buffers = buffers;
+        }
+
+        void execute() {
+            glClear(_buffers);
+        }
+
+    private:
+        GLbitfield _buffers;
     };
     SCRY_REF_PTR(ClearAction);
+
+
+    class FlushAction : public Action {
+    protected:
+        ~FlushAction() { }
+
+    public:
+        static void bind();
+
+        void execute() {
+            glFlush();
+        }
+    };
+    SCRY_REF_PTR(FlushAction);
+
+
+    class FinishAction : public Action {
+    protected:
+        ~FinishAction() { }
+
+    public:
+        static void bind();
+
+        void execute() {
+            glFinish();
+        }
+    };
+    SCRY_REF_PTR(FinishAction);
 
 }
 

@@ -2,6 +2,7 @@
 #define SCRY_COLOR_BUFFER_STATE_H
 
 
+#include <algorithm>
 #include "State.h"
 
 
@@ -14,14 +15,16 @@ namespace scry {
     public:
         static void bind();
 
-        const State& getDefault() const;
+        ColorBufferState* clone() const;
+        const ColorBufferState& getDefault() const;
         void switchTo(const State& to) const;
 
         ColorBufferState() {
-            _writeMask[0] = true;
-            _writeMask[1] = true;
-            _writeMask[2] = true;
-            _writeMask[3] = true;
+            std::fill(_writeMask, _writeMask + 4, true);
+        }
+
+        ColorBufferState(const ColorBufferState& rhs) {
+            std::copy(rhs._writeMask, rhs._writeMask + 4, _writeMask);
         }
 
         void setWriteMask(bool r, bool g, bool b, bool a) {
@@ -31,7 +34,7 @@ namespace scry {
             _writeMask[3] = a;
         }
 
-    protected:
+    private:
         bool _writeMask[4];
     };
     SCRY_REF_PTR(ColorBufferState);

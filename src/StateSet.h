@@ -10,8 +10,10 @@
 
 namespace scry {
 
-    class StateSet {
+    class StateSet : public RefCounted {
     public:
+        static void bind();
+
         void setState(State* state) {
             _states[typeid(*state)] = state;
         }
@@ -23,8 +25,9 @@ namespace scry {
         typedef StateMap::const_iterator StateMapCIter;
         StateMap _states;
     };
+    SCRY_REF_PTR(StateSet);
 
-    void setCurrentStateSet(const StateSet& next);
+    void setCurrentStateSet(const StateSetPtr& next);
 
 }
 

@@ -13,7 +13,6 @@ namespace scry {
         Test* _test;
     public:
         RunSentry(Test* test): _test(test) {
-            setCurrentStateSet(_test->getStateSet());
             glPushMatrix();
             glLoadMatrixf(_test->getTransform().getData());
             _test->setup();
@@ -21,11 +20,12 @@ namespace scry {
         ~RunSentry() {
             try {
                 _test->teardown();
-                glPopMatrix();
             }
             catch (const std::exception& /*e*/) {
                 // nothing
             }
+
+            glPopMatrix();
         }
     };
 
@@ -48,8 +48,9 @@ namespace scry {
         typedef Test C;
         class_<C, TestPtr, noncopyable>("Test", no_init)
             .def("getName",        &C::getName)
-            .def("setState",       &C::setState)
             .def("setTransform",   &C::setTransform)
+            .add_property("fullStateSwitch", &C::getFullStateSwitch, &C::setFullStateSwitch)
+            .def("addStateSet",    &C::addStateSet)
             .def("addAction",      &C::addAction)
             .def("run",            &C::run)
             .def("isSupported",    &C::isSupported)
@@ -66,7 +67,9 @@ namespace scry {
         ResultDescList descs = getResultDescs();
         ResultSet results(descs.size());
 
-        // Don't bother timing setup and teardown.
+        size_t currentStateSet = 0;
+
+        // Don't time setup and teardown.
         glFinish();
 
         Timer timer;
@@ -74,14 +77,18 @@ namespace scry {
             for (size_t i = 0; i < _actionList.size(); ++i) {
                 _actionList[i]->execute();
             }
+            if (!_stateSetList.empty()) {
+                setCurrentStateSet(_stateSetList[currentStateSet]);
+                currentStateSet = (currentStateSet + 1) % _stateSetList.size();
+            }
             iterate(results);
-            pumpMessages();
         }
         glFinish();
 
         // timer.elapsed() is evaluated before RunSentry is destroyed.
         normalize(results, timer.elapsed());
 
+        pumpMessages();
         return results;
     }
 

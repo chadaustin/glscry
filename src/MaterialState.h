@@ -14,9 +14,18 @@ namespace scry {
         ~MaterialState() { }
 
     public:
+        MaterialState() {
+        }
+
+        MaterialState(const MaterialState& rhs) {
+            front = rhs.front;
+            back  = rhs.back;
+        }
+
         static void bind();
 
-        const State& getDefault() const;
+        MaterialState* clone() const;
+        const MaterialState& getDefault() const;
         void switchTo(const State& to) const;
 
         struct Material {

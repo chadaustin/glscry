@@ -59,9 +59,17 @@ namespace scry {
         ~TextureState() { }
 
     public:
+        TextureState() {
+        }
+
+        TextureState(const TextureState& rhs) {
+            _texture = rhs._texture;
+        }
+
         static void bind();
 
-        const State& getDefault() const;
+        TextureState* clone() const;
+        const TextureState& getDefault() const;
         void switchTo(const State& to) const;
 
         void setTexture(TexturePtr texture) { _texture = texture; }

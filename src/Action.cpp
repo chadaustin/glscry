@@ -11,12 +11,25 @@ namespace scry {
     void ClearAction::bind() {
         class_<ClearAction, ClearActionPtr, bases<Action>, boost::noncopyable>
             ("ClearAction", no_init)
-            .def(init<>())
+            .def(init<GLbitfield>())
             ;
         implicitly_convertible<ClearActionPtr, ActionPtr>();
     }
 
-    void ClearAction::execute() {
-        glClear(GL_DEPTH_BUFFER_BIT);
+    void FlushAction::bind() {
+        class_<FlushAction, FlushActionPtr, bases<Action>, boost::noncopyable>
+            ("FlushAction", no_init)
+            .def(init<>())
+            ;
+        implicitly_convertible<FlushActionPtr, ActionPtr>();
     }
+
+    void FinishAction::bind() {
+        class_<FinishAction, FinishActionPtr, bases<Action>, boost::noncopyable>
+            ("FinishAction", no_init)
+            .def(init<>())
+            ;
+        implicitly_convertible<FinishActionPtr, ActionPtr>();
+    }
+
 }

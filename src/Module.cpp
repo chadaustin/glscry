@@ -45,6 +45,7 @@ BOOST_PYTHON_MODULE(_glscry) {
     bindContext();
 
     // States.
+    StateSet::bind();
     State::bind();
     ColorBufferState::bind();
     DepthState::bind();
@@ -55,6 +56,8 @@ BOOST_PYTHON_MODULE(_glscry) {
     // Actions.
     Action::bind();
     ClearAction::bind();
+    FlushAction::bind();
+    FinishAction::bind();
 
     // Geometry generators.
 

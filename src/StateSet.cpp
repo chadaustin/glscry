@@ -1,4 +1,5 @@
 #include "StateSet.h"
+using namespace boost::python;
 
 
 namespace scry {
@@ -23,6 +24,13 @@ namespace scry {
             return t;
         }
 
+    }
+
+    void StateSet::bind() {
+        class_<StateSet, StateSetPtr, boost::noncopyable>("StateSet", no_init)
+            .def(init<>())
+            .def("setState", &StateSet::setState)
+            ;
     }
 
     void StateSet::switchTo(const StateSet& to) const {
@@ -53,9 +61,13 @@ namespace scry {
         }
     }
 
-    void setCurrentStateSet(const StateSet& next) {
-        static StateSet current;
-        current.switchTo(next);
+    void setCurrentStateSet(const StateSetPtr& next) {
+        static StateSetPtr def = new StateSet;
+        static StateSetPtr current;
+
+        StateSetPtr from = (current ? current : def);
+        StateSetPtr to   = (next    ? next    : def);
+        from->switchTo(*to);
         current = next;
     }
 

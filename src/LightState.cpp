@@ -50,8 +50,12 @@ namespace scry {
         light0.specular = Vec4f(1, 1, 1, 1);
     }
 
-    const State& LightState::getDefault() const {
-        static StatePtr state = new LightState;
+    LightState* LightState::clone() const {
+        return new LightState(*this);
+    }
+
+    const LightState& LightState::getDefault() const {
+        static LightStatePtr state = new LightState;
         return *state;
     }
 

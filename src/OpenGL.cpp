@@ -80,6 +80,11 @@ namespace scry {
         DEF(GL_VERSION);
         DEF(GL_EXTENSIONS);
 
+        DEF(GL_COLOR_BUFFER_BIT);
+        DEF(GL_DEPTH_BUFFER_BIT);
+        DEF(GL_ACCUM_BUFFER_BIT);
+        DEF(GL_STENCIL_BUFFER_BIT);
+
         def("glGetString", glGetString);
     }
 

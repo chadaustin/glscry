@@ -12,9 +12,17 @@ namespace scry {
         ~DepthState() { }
 
     public:
+        DepthState() {
+        }
+
+        DepthState(const DepthState& rhs) {
+            _enableDepthTest = rhs._enableDepthTest;
+        }
+
         static void bind();
 
-        const State& getDefault() const;
+        DepthState* clone() const;
+        const DepthState& getDefault() const;
         void switchTo(const State& to) const;
 
         bool getDepthTest() const {
