@@ -63,6 +63,13 @@ def buildBlendSS(enable, src, dst):
     state.dstFactor = dst
     return StateSet(state)
 
+def buildLineSS(enableStipple, stippleFactor, stipplePattern):
+    state = LineState()
+    state.enableStipple = enableStipple
+    state.stippleFactor = stippleFactor
+    state.stipplePattern = stipplePattern
+    return StateSet(state)
+
 runStateChange('blend',
                buildBlendSS(True, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
                buildBlendSS(False, GL_ONE, GL_ZERO))
@@ -72,3 +79,6 @@ runStateChange('texture',
 runStateChange('depth',
                buildDepthSS(GL_LESS, GL_FALSE),
                buildDepthSS(GL_GREATER, GL_FALSE))
+runStateChange('linestipple',
+               buildLineSS(False, 1, 0xFFFF),
+               buildLineSS(True,  1, 0x5555))
