@@ -28,9 +28,9 @@ def buildGeometry(type, v=None, c=None, n=None, t=None, i=None):
 def Zeroes():
     return buildGeometry(
         GL_TRIANGLES,
-        v=defineArray(2, [(0, 0), (0, 0), (0, 0)]))
+        v=defineArray(Array_f, 2))
 
 def SmallTriangles():
     return buildGeometry(
         GL_TRIANGLES,
-        v=defineArray(2, [(0, 0), (0, 1), (1, 1)]))
+        v=defineArray(Array_f, 2, [(0, 0), (0, 1), (1, 1)]))
