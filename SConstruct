@@ -69,13 +69,13 @@ Export('BuildData')
 
 # SConscripts
 
-TargetDirectory = Dir('stage')
+TargetDirectory = Dir('lib')
 BuildDirectory = Dir(os.path.join('build', env['PLATFORM']))
 Export('TargetDirectory')
 
 Default(TargetDirectory)
 
-for dir in ['scripts', 'src', 'third-party']:
+for dir in ['src', 'third-party']:
     SConscript(dirs=[dir], build_dir=BuildDirectory.Dir(dir), duplicate=0)
 
 

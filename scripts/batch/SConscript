@@ -1,2 +1,0 @@
-Import('*')
-env.Install(TargetDirectory.Dir('bin'), 'RunAllTests.bat')

@@ -1,2 +1,2 @@
 Import('*')
-env.Install(TargetDirectory.Dir('lib'), 'SDL/lib/SDL.dll')
+env.Install(TargetDirectory, 'SDL/lib/SDL.dll')

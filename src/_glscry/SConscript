@@ -108,6 +108,6 @@ module = env.SharedLibrary(modulename, sources)
 BuildData['NativeModule'] = module
 
 # Don't install all of the generated files, just the native module.
-env.Install(TargetDirectory.Dir('lib'), modulename)
+env.Install(TargetDirectory, modulename)
 
 SConscript(dirs=['gmtl-python'])

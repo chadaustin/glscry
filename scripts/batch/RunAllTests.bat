@@ -1,1 +1,1 @@
-python.exe ../../run.py -a
+run.exe -a
