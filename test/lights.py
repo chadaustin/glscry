@@ -18,4 +18,4 @@ for i in range(8):
     test.setState(state)
     tests.append(test)
 
-runTests("light.data", tests, 1, "TriangleRate")
+runTests("light.data", tests, 1, "VertexRate")

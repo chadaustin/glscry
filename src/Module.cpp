@@ -76,13 +76,14 @@ void exportGMTL();
 
 
 BOOST_PYTHON_MODULE(_glscry) {
+    initContext();
+
     exportGMTL();
 
     bindOpenGL();
 
-    def("run",            ::run);
-    def("runTests_",      ::runTests);
-    def("runTestsRange_", ::runTestsRange);
+    def("runTests",      ::runTests);
+    def("runTestsRange", ::runTestsRange);
 
     // General classes.
     Range::bind();

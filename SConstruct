@@ -33,9 +33,9 @@ if env['PLATFORM'] in ['cygwin', 'win32']:
     env.Append(CPPDEFINES=['WIN32', '_WIN32'])
 
 # If using GCC, deal with ld O(n^2) algorithm.
-#if env['CXX'][:3] == 'g++' and WhereIs('objcopy'):
-#    env['CXXCOM']   = [env['CXXCOM'],   'objcopy --set-section-flags .debug_str=contents,debug $TARGET']
-#    env['SHCXXCOM'] = [env['SHCXXCOM'], 'objcopy --set-section-flags .debug_str=contents,debug $TARGET']
+if env['CXX'][:3] == 'g++' and env.WhereIs('objcopy'):
+    env['CXXCOM']   = [env['CXXCOM'],   'objcopy --set-section-flags .debug_str=contents $TARGET']
+    env['SHCXXCOM'] = [env['SHCXXCOM'], 'objcopy --set-section-flags .debug_str=contents $TARGET']
 
 env.Append(CPPDEFINES=['GLEW_STATIC'])
 env.Append(CPPPATH=['src/gmtl-python'])
