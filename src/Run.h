@@ -24,7 +24,7 @@ void output(std::ostream& os, TestPtr test, const ResultSet& results,
             const std::string& depVar) {
     std::vector<ResultDesc> descs;
     test->getResultDescs(descs);
-    assert(descs.size() == results.size());
+    SCRY_ASSERT(descs.size() == results.size());
 
     int resultIndex = -1;
     for (size_t i = 0; i < descs.size(); ++i) {

@@ -31,7 +31,7 @@ public:
     static void bind();
 
     LinearRange(size_t begin, size_t end, size_t step = 1) {
-        assert(step > 0);
+        SCRY_ASSERT(step > 0);
 
         _begin = begin;
         _end   = end;

@@ -21,7 +21,7 @@ env = Environment(
 env.Append(CPPPATH=['#/third-party/all'])
 if env.subst('$CXX') == 'cl':
     env.Append(
-        CXXFLAGS=['/GX', '/GR', '/MD', '/Zi'],
+        CXXFLAGS=['/GX', '/GR', '/MD', '/Z7'],
         LINKFLAGS=['/DEBUG'],
         CPPPATH=['#/third-party/vc7/include'],
         LIBPATH=['#/third-party/vc7/lib'])
@@ -53,6 +53,7 @@ sources = Split("""
     Test.cpp
 
     TextureUploadTest.cpp
+    TextureMemoryTest.cpp
 
     PixelTransferTest.cpp
     CopyPixelTest.cpp

@@ -24,12 +24,12 @@ public:
     }
 
     void useLight(size_t index, bool use) {
-        assert(index < _lights.size());
+        SCRY_ASSERT(index < _lights.size());
         _lights[index].use = use;
     }
 
     void setAmbient(size_t index, const Vec4f& ambient) {
-        assert(index < _lights.size());
+        SCRY_ASSERT(index < _lights.size());
         _lights[index].ambient = ambient;
     }
 

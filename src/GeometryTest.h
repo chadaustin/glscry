@@ -21,7 +21,7 @@ public:
     static void bind();
 
     GeometryTest(GeometryGeneratorPtr gen) {
-        assert(gen);
+        SCRY_ASSERT(gen);
         _generator = gen;
     }
 
@@ -32,7 +32,7 @@ public:
         if (name == "BatchSize") {
             setBatchSize(value);
         } else {
-            assert(false && "Invalid Property Name");
+            SCRY_ASSERT(false && "Invalid Property Name");
         }
     }
 

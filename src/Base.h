@@ -77,6 +77,12 @@ void delete_function(T* t) {
 }
 
 
+#define SCRY_ASSERT(expr)                                       \
+    if (!(expr)) {                                              \
+        throw std::runtime_error("Assertion: " #expr);          \
+    }
+
+
 SCRY_END_NAMESPACE
 
 

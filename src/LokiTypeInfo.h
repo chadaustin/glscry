@@ -19,7 +19,6 @@
 #define SCRY_TYPE_INFO_H
 
 #include <typeinfo>
-#include <assert.h>
 #include "Base.h"
 
 SCRY_BEGIN_NAMESPACE
@@ -31,29 +30,29 @@ public:
     TypeInfo() {
         class Nil {};
         pInfo_ = &typeid(Nil);
-        assert(pInfo_ && "pInfo_ not valid");
+        SCRY_ASSERT(pInfo_ && "pInfo_ not valid");
     }
         
     /// non-explicit
     TypeInfo(const std::type_info& ti) {
         pInfo_ = &ti;
-        assert(pInfo_ && "pInfo_ not valid");
+        SCRY_ASSERT(pInfo_ && "pInfo_ not valid");
     }
 
     /// Access for the wrapped std::type_info
     const std::type_info& Get() const {
-        assert(pInfo_ && "pInfo_ not valid");
+        SCRY_ASSERT(pInfo_ && "pInfo_ not valid");
         return *pInfo_;
     }
         
     /// Compatibility functions
     bool before(const TypeInfo& rhs) const {
-        assert(pInfo_ && "pInfo_ not valid");
+        SCRY_ASSERT(pInfo_ && "pInfo_ not valid");
         return pInfo_->before(*rhs.pInfo_) != 0;
     }
         
     const char* name() const {
-        assert(pInfo_ && "pInfo_ not valid");
+        SCRY_ASSERT(pInfo_ && "pInfo_ not valid");
         return pInfo_->name();
     }
 

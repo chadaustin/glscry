@@ -17,6 +17,7 @@
 #include "ReadPixelTest.h"
 
 #include "TextureUploadTest.h"
+#include "TextureMemoryTest.h"
 
 using namespace boost::python;
 using namespace scry;
@@ -91,6 +92,7 @@ BOOST_PYTHON_MODULE(_glscry) {
     Test::bind();
 
     TextureUploadTest::bind();
+    TextureMemoryTest::bind();
 
     PixelTransferTest::bind();
     CopyPixelTest::bind();

@@ -70,7 +70,7 @@ private:
             case GL_UNSIGNED_INT:   return sizeof(GLuint);
             case GL_INT:            return sizeof(GLint);
             case GL_FLOAT:          return sizeof(GLfloat);
-            default: assert(false && "Invalid type"); return 0;
+            default: SCRY_ASSERT(false && "Invalid type"); return 0;
         }
     }
 

@@ -11,13 +11,13 @@
 #include "Timer.h"
 
 
-#define SCRY_BEGIN_RESULT_DESCS()                                   \
+#define SCRY_BEGIN_RESULT_DESCS()                                       \
     static void getClassResultDescs(std::vector<ResultDesc>& descs) {
 
-#define SCRY_RESULT_DESC(name, units)               \
+#define SCRY_RESULT_DESC(name, units)                   \
     descs.push_back(ResultDesc((name), (units)));
 
-#define SCRY_END_RESULT_DESCS()                             \
+#define SCRY_END_RESULT_DESCS()                                 \
     }                                                           \
     void getResultDescs(std::vector<ResultDesc>& descs) {       \
         getClassResultDescs(descs);                             \
@@ -51,12 +51,12 @@ public:
     }
 
     T& operator[](size_t i) {
-        assert(i < size());
+        SCRY_ASSERT(i < size());
         return _results[i];
     }
 
     const T& operator[](size_t i) const {
-        assert(i < size());
+        SCRY_ASSERT(i < size());
         return _results[i];
     }
 

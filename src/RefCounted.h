@@ -36,7 +36,7 @@ namespace scry {
          * empty, protected destructor as well.
          */
         virtual ~RefCounted() {
-            assert(_count == 0);
+            SCRY_ASSERT(_count == 0);
         }
 
     public:
@@ -44,7 +44,7 @@ namespace scry {
          * Add a reference to the internal reference count.
          */
         void ref() {
-            assert(_count >= 0);
+            SCRY_ASSERT(_count >= 0);
             ++_count;
         }
 
@@ -53,7 +53,7 @@ namespace scry {
          * reaches 0, the object is destroyed.
          */
         void unref() {
-            assert(_count > 0);
+            SCRY_ASSERT(_count > 0);
             if (--_count == 0) {
                 delete this;
             }
