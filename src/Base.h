@@ -1,18 +1,18 @@
-#ifndef TRIAGARA_BASE_H
-#define TRIAGARA_BASE_H
+#ifndef SCRY_BASE_H
+#define SCRY_BASE_H
 
 
 #include <gmtl/gmtl.h>
 
 
-#define TRIAGARA_BEGIN_NAMESPACE namespace triagara {
-#define TRIAGARA_END_NAMESPACE   }
+#define SCRY_BEGIN_NAMESPACE namespace scry {
+#define SCRY_END_NAMESPACE   }
 
 
 // Perhaps the stuff below should go into a Utility.h.
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 using gmtl::Vec4f;
@@ -77,7 +77,7 @@ void delete_function(T* t) {
 }
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

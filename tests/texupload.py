@@ -1,4 +1,4 @@
-from triagara import *
+from glscry import *
 
 test1 = TextureUploadTest()
 

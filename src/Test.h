@@ -1,5 +1,5 @@
-#ifndef TRIAGARA_TEST_H
-#define TRIAGARA_TEST_H
+#ifndef SCRY_TEST_H
+#define SCRY_TEST_H
 
 
 #include <string>
@@ -10,20 +10,20 @@
 #include "Timer.h"
 
 
-#define TRIAGARA_BEGIN_RESULT_DESCS()                                   \
+#define SCRY_BEGIN_RESULT_DESCS()                                   \
     static void getClassResultDescs(std::vector<ResultDesc>& descs) {
 
-#define TRIAGARA_RESULT_DESC(name, units)               \
+#define SCRY_RESULT_DESC(name, units)               \
     descs.push_back(ResultDesc((name), (units)));
 
-#define TRIAGARA_END_RESULT_DESCS()                             \
+#define SCRY_END_RESULT_DESCS()                             \
     }                                                           \
     void getResultDescs(std::vector<ResultDesc>& descs) {       \
         getClassResultDescs(descs);                             \
     }
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 struct ResultDesc {
@@ -110,7 +110,7 @@ private:
     StateSet _stateSet;
 };
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

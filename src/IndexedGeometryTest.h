@@ -1,11 +1,11 @@
-#ifndef TRIAGARA_INDEXED_GEOMETRY_TEST_H
-#define TRIAGARA_INDEXED_GEOMETRY_TEST_H
+#ifndef SCRY_INDEXED_GEOMETRY_TEST_H
+#define SCRY_INDEXED_GEOMETRY_TEST_H
 
 
 #include "GeometryTest.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 class IndexedGeometryTest : public GeometryTest {
 public:
@@ -53,7 +53,7 @@ private:
     std::vector<GLuint> _indices;
 };
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

@@ -1,11 +1,11 @@
-#ifndef TRIAGARA_RANGE_H
-#define TRIAGARA_RANGE_H
+#ifndef SCRY_RANGE_H
+#define SCRY_RANGE_H
 
 
 #include "Base.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 class Range {
@@ -75,7 +75,7 @@ private:
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

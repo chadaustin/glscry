@@ -1,12 +1,12 @@
-#ifndef TRIAGARA_LIGHT_STATE_H
-#define TRIAGARA_LIGHT_STATE_H
+#ifndef SCRY_LIGHT_STATE_H
+#define SCRY_LIGHT_STATE_H
 
 
 #include <vector>
 #include "Base.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 class LightState : public State {
@@ -60,7 +60,7 @@ private:
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

@@ -1,12 +1,12 @@
-#ifndef TRIAGARA_IMMEDIATE_TEST_H
-#define TRIAGARA_IMMEDIATE_TEST_H
+#ifndef SCRY_IMMEDIATE_TEST_H
+#define SCRY_IMMEDIATE_TEST_H
 
 
 #include "GeometryTest.h"
 #include "GLUtility.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 class ImmediateTest : public GeometryTest {
@@ -36,7 +36,7 @@ public:
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

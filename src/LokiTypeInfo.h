@@ -15,14 +15,14 @@
 
 // Last update: May 19, 2002
 
-#ifndef TRIAGARA_TYPE_INFO_H
-#define TRIAGARA_TYPE_INFO_H
+#ifndef SCRY_TYPE_INFO_H
+#define SCRY_TYPE_INFO_H
 
 #include <typeinfo>
 #include <assert.h>
 #include "Base.h"
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 /// Purpose: offer a first-class, comparable wrapper over std::type_info
 class TypeInfo {
@@ -82,7 +82,7 @@ inline bool operator<=(const TypeInfo& lhs, const TypeInfo& rhs)
 inline bool operator>=(const TypeInfo& lhs, const TypeInfo& rhs)
 { return !(lhs < rhs); }
     
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

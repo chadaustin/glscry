@@ -1,11 +1,11 @@
-#ifndef TRIAGARA_STATE_H
-#define TRIAGARA_STATE_H
+#ifndef SCRY_STATE_H
+#define SCRY_STATE_H
 
 
 #include "Base.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 class State {
@@ -17,7 +17,7 @@ public:
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

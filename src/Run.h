@@ -1,5 +1,5 @@
-#ifndef TRIAGARA_RUN_H
-#define TRIAGARA_RUN_H
+#ifndef SCRY_RUN_H
+#define SCRY_RUN_H
 
 
 #include <fstream>
@@ -11,7 +11,7 @@
 #include "Test.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 const int    WIDTH  = 1024;
@@ -142,7 +142,7 @@ void setProjection() {
 
 void run(boost::python::object test) {
     initializeSDL(SDL_INIT_NOPARACHUTE | SDL_INIT_VIDEO | SDL_INIT_TIMER);
-    TRIAGARA_ON_BLOCK_EXIT(SDL_Quit);
+    SCRY_ON_BLOCK_EXIT(SDL_Quit);
     
     // define our minimum requirements for the GL window
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     5);
@@ -159,7 +159,7 @@ void run(boost::python::object test) {
 
     // If we set this before opening the window, the window has
     // this caption.
-    SDL_WM_SetCaption("Triagara", 0);
+    SDL_WM_SetCaption("GLScry", 0);
 
     /**
      * @note SDL does silly things when the created window is larger
@@ -190,7 +190,7 @@ void run(boost::python::object test) {
 }
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

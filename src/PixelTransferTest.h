@@ -1,21 +1,21 @@
-#ifndef TRIAGARA_PIXEL_TRANSFER_TEST
-#define TRIAGARA_PIXEL_TRANSFER_TEST
+#ifndef SCRY_PIXEL_TRANSFER_TEST
+#define SCRY_PIXEL_TRANSFER_TEST
 
 
 #include "Base.h"
 #include "Test.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 class PixelTransferTest : public Test {
 public:
-    TRIAGARA_BEGIN_RESULT_DESCS()
-        TRIAGARA_RESULT_DESC("PixelRate", "pixels/sec")
-    TRIAGARA_END_RESULT_DESCS()
+    SCRY_BEGIN_RESULT_DESCS()
+        SCRY_RESULT_DESC("PixelRate", "pixels/sec")
+    SCRY_END_RESULT_DESCS()
 };
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

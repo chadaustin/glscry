@@ -3,7 +3,7 @@
 using namespace boost::python;
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 void TextureUploadTest::bind() {
@@ -14,4 +14,4 @@ void TextureUploadTest::bind() {
 }
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE

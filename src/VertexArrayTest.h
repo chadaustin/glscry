@@ -1,11 +1,11 @@
-#ifndef TRIAGARA_VERTEX_ARRAY_TEST
-#define TRIAGARA_VERTEX_ARRAY_TEST
+#ifndef SCRY_VERTEX_ARRAY_TEST
+#define SCRY_VERTEX_ARRAY_TEST
 
 
 #include "GeometryTest.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 class VertexArrayTest : public GeometryTest {
 public:
@@ -35,7 +35,7 @@ public:
     }
 };
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

@@ -1,12 +1,12 @@
-#ifndef TRIAGARA_TEXTURE_UPLOAD_TEST_H
-#define TRIAGARA_TEXTURE_UPLOAD_TEST_H
+#ifndef SCRY_TEXTURE_UPLOAD_TEST_H
+#define SCRY_TEXTURE_UPLOAD_TEST_H
 
 
 #include "Base.h"
 #include "Test.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 class TextureUploadTest : public Test {
 public:
@@ -29,10 +29,10 @@ public:
         return true;
     }
 
-    TRIAGARA_BEGIN_RESULT_DESCS()
-      TRIAGARA_RESULT_DESC("PixelRate", "pixels/sec")
-      TRIAGARA_RESULT_DESC("ByteRate",  "bytes/sec")
-    TRIAGARA_END_RESULT_DESCS()
+    SCRY_BEGIN_RESULT_DESCS()
+      SCRY_RESULT_DESC("PixelRate", "pixels/sec")
+      SCRY_RESULT_DESC("ByteRate",  "bytes/sec")
+    SCRY_END_RESULT_DESCS()
 
     void setup() {
         glGenTextures(1, &_texture);
@@ -81,7 +81,7 @@ private:
     std::vector<unsigned char> _buffer;
 };
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

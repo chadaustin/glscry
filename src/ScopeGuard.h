@@ -1,11 +1,11 @@
-#ifndef TRIAGARA_SCOPE_GUARD_H
-#define TRIAGARA_SCOPE_GUARD_H
+#ifndef SCRY_SCOPE_GUARD_H
+#define SCRY_SCOPE_GUARD_H
 
 
 #include "Base.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 template <class T>
@@ -278,17 +278,17 @@ inline ObjScopeGuardImpl2<Obj, MemFun, P1, P2> MakeObjGuard(Obj& obj, MemFun mem
 	return ObjScopeGuardImpl2<Obj, MemFun, P1, P2>::MakeObjGuard(obj, memFun, p1, p2);
 }
 
-#define TRIAGARA_CONCATENATE_DIRECT(s1, s2) s1##s2
-#define TRIAGARA_CONCATENATE(s1, s2) TRIAGARA_CONCATENATE_DIRECT(s1, s2)
-#define TRIAGARA_ANONYMOUS_VARIABLE(str) TRIAGARA_CONCATENATE(str, __LINE__)
+#define SCRY_CONCATENATE_DIRECT(s1, s2) s1##s2
+#define SCRY_CONCATENATE(s1, s2) SCRY_CONCATENATE_DIRECT(s1, s2)
+#define SCRY_ANONYMOUS_VARIABLE(str) SCRY_CONCATENATE(str, __LINE__)
 
-#define TRIAGARA_ON_BLOCK_EXIT \
-    ScopeGuard TRIAGARA_ANONYMOUS_VARIABLE(scopeGuard) = MakeGuard
-#define TRIAGARA_ON_BLOCK_EXIT_OBJ \
-    ScopeGuard TRIAGARA_ANONYMOUS_VARIABLE(scopeGuard) = MakeObjGuard
+#define SCRY_ON_BLOCK_EXIT \
+    ScopeGuard SCRY_ANONYMOUS_VARIABLE(scopeGuard) = MakeGuard
+#define SCRY_ON_BLOCK_EXIT_OBJ \
+    ScopeGuard SCRY_ANONYMOUS_VARIABLE(scopeGuard) = MakeObjGuard
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

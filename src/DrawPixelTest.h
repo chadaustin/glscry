@@ -1,12 +1,12 @@
-#ifndef TRIAGARA_DRAW_PIXEL_TEST_H
-#define TRIAGARA_DRAW_PIXEL_TEST_H
+#ifndef SCRY_DRAW_PIXEL_TEST_H
+#define SCRY_DRAW_PIXEL_TEST_H
 
 
 #include "Base.h"
 #include "PixelTransferTest.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 class DrawPixelTest : public PixelTransferTest {
@@ -23,7 +23,7 @@ public:
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

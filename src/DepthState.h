@@ -1,11 +1,11 @@
-#ifndef TRIAGARA_DEPTH_STATE_H
-#define TRIAGARA_DEPTH_STATE_H
+#ifndef SCRY_DEPTH_STATE_H
+#define SCRY_DEPTH_STATE_H
 
 
 #include "State.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 class DepthState : public State {
@@ -19,7 +19,7 @@ class DepthState : public State {
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

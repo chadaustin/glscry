@@ -1,5 +1,5 @@
-#ifndef TRIAGARA_STATE_SET_H
-#define TRIAGARA_STATE_SET_H
+#ifndef SCRY_STATE_SET_H
+#define SCRY_STATE_SET_H
 
 
 #include <algorithm>
@@ -9,7 +9,7 @@
 #include "State.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 class StateSet {
@@ -37,7 +37,7 @@ private:
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

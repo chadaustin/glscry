@@ -1,11 +1,11 @@
-#ifndef TRIAGARA_DISPLAY_LIST_TEST_H
-#define TRIAGARA_DISPLAY_LIST_TEST_H
+#ifndef SCRY_DISPLAY_LIST_TEST_H
+#define SCRY_DISPLAY_LIST_TEST_H
 
 
 #include "GeometryTest.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 class DisplayListTest : public GeometryTest {
     GLuint _list;
@@ -48,7 +48,7 @@ public:
 };
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

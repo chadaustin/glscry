@@ -29,7 +29,7 @@
 #include "TextureUploadTest.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 void testBatchSizes(const std::string& filename, const GeometryGenerator& gen,
@@ -131,12 +131,12 @@ void testHeirarchialZBuffer() {
 }
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 int main(int /*argc*/, char** /*argv*/) {
     try {
-        //triagara::run();
+        //scry::run();
         return EXIT_SUCCESS;
     }
     catch (const std::exception& e) {

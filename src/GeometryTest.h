@@ -1,5 +1,5 @@
-#ifndef TRIAGARA_GEOMETRY_TEST_H
-#define TRIAGARA_GEOMETRY_TEST_H
+#ifndef SCRY_GEOMETRY_TEST_H
+#define SCRY_GEOMETRY_TEST_H
 
 
 #include "Base.h"
@@ -7,13 +7,13 @@
 #include "Test.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 class GeometryTest : public Test {
 public:
-    TRIAGARA_BEGIN_RESULT_DESCS()
-        TRIAGARA_RESULT_DESC("TriangleRate", "tri/s")
-    TRIAGARA_END_RESULT_DESCS()
+    SCRY_BEGIN_RESULT_DESCS()
+        SCRY_RESULT_DESC("TriangleRate", "tri/s")
+    SCRY_END_RESULT_DESCS()
 
     GeometryTest(const GeometryGenerator* gen) {
         assert(gen);
@@ -46,7 +46,7 @@ private:
     std::vector<Triangle> _triangleBuffer;
 };
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

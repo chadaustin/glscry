@@ -1,12 +1,12 @@
-#ifndef TRIAGARA_CONTEXT_H
-#define TRIAGARA_CONTEXT_H
+#ifndef SCRY_CONTEXT_H
+#define SCRY_CONTEXT_H
 
 
 #include <SDL.h>
 #include "Base.h"
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 inline void pumpMessages() {
     SDL_Event event;
@@ -20,7 +20,7 @@ inline void pumpMessages() {
     }
 }
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
 
 
 #endif

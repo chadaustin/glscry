@@ -4,7 +4,7 @@ using namespace boost;
 using namespace boost::python;
 
 
-TRIAGARA_BEGIN_NAMESPACE
+SCRY_BEGIN_NAMESPACE
 
 
 // Handles calling teardown() on exit in an exception-safe way.
@@ -57,4 +57,4 @@ ResultSet Test::run(float runFor) {
 }
 
 
-TRIAGARA_END_NAMESPACE
+SCRY_END_NAMESPACE
