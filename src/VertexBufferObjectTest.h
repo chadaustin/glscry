@@ -13,6 +13,12 @@ namespace scry {
         ~VertexBufferObjectTest() { }
 
     public:
+        enum StorageMode {
+            SEPARATE_BUFFERS,
+            ONE_BUFFER,
+            ONE_BUFFER_INTERLEAVED,
+        };
+
         static void bind();
 
         VertexBufferObjectTest(const char* name, GeometryPtr geo)
@@ -21,6 +27,10 @@ namespace scry {
 
         void setBufferType(GLenum type) {
             _bufferType = type;
+        }
+
+        void setStorageMode(StorageMode storageMode) {
+            _storageMode = storageMode;
         }
 
         bool supported() const {
@@ -34,8 +44,10 @@ namespace scry {
     private:
         GLuint createVBO(const Buffer& buffer,
                          GLenum target = GL_ARRAY_BUFFER_ARB);
+        static GLsizei getStride(ArrayPtr array);
 
         Inited<GLenum, GL_STATIC_DRAW_ARB> _bufferType;
+        Inited<StorageMode, SEPARATE_BUFFERS> _storageMode;
         std::vector<GLuint> _buffers;
     };
     SCRY_REF_PTR(VertexBufferObjectTest);

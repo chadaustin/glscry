@@ -47,6 +47,7 @@ namespace scry {
 
             std::vector<GLubyte> data;
             Zeroed<Pump> pump;
+            Zeroed<GLsizei> stride;
         };
 
         class BufferIterator {
