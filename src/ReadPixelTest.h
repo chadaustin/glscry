@@ -19,13 +19,21 @@ namespace scry {
         : PixelTransferTest(name) {
         }
 
-        void iterate(ResultSet& results) {
-            static const int width = 256;
-            static const int height = 256;
-            static char buffer[width * height * 4];
-            glReadPixels(0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-            results[0] += width * height;
+        void setup() {
+            _buffer.resize(getWidth() * getHeight() *
+                           getElementCount() * getTypeSize());
         }
+
+        void iterate(ResultSet& results) {
+            glReadPixels(0, 0, getWidth(), getHeight(),
+                         getFormat(), getType(), &_buffer[0]);
+            results[0] += getWidth() * getHeight();
+            results[1] += getWidth() * getHeight() *
+                          getElementCount() * getTypeSize();
+        }
+
+    private:
+        std::vector<GLubyte> _buffer;
     };
     SCRY_REF_PTR(ReadPixelTest);
 

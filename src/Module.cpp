@@ -65,6 +65,26 @@ void bindOpenGL() {
     DEF(GL_DYNAMIC_DRAW_ARB);
     DEF(GL_DYNAMIC_READ_ARB);
     DEF(GL_DYNAMIC_COPY_ARB);
+
+    // glCopyPixels types.
+    DEF(GL_COLOR);
+    DEF(GL_DEPTH);
+    DEF(GL_STENCIL);
+
+    // Pixel transfer formats.
+    DEF(GL_COLOR_INDEX);
+    DEF(GL_STENCIL_INDEX);
+    DEF(GL_DEPTH_COMPONENT);
+    DEF(GL_RED);
+    DEF(GL_GREEN);
+    DEF(GL_BLUE);
+    DEF(GL_ALPHA);
+    DEF(GL_RGB);
+    DEF(GL_BGR);
+    DEF(GL_RGBA);
+    DEF(GL_BGRA);
+    DEF(GL_LUMINANCE);
+    DEF(GL_LUMINANCE_ALPHA);
 }
 
 

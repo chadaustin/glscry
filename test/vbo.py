@@ -3,15 +3,15 @@ from glscry import *
 geo = buildGeometry(GL_TRIANGLES, defineArray(Array_f, 3))
 
 testList = []
-for a in ['GL_STREAM_DRAW_ARB',
-          'GL_STREAM_READ_ARB',
-          'GL_STREAM_COPY_ARB',
-          'GL_STATIC_DRAW_ARB',
-          'GL_STATIC_READ_ARB',
-          'GL_STATIC_COPY_ARB',
-          'GL_DYNAMIC_DRAW_ARB',
-          'GL_DYNAMIC_READ_ARB',
-          'GL_DYNAMIC_COPY_ARB']:
+for a in ['STREAM_DRAW',
+          'STREAM_READ',
+          'STREAM_COPY',
+          'STATIC_DRAW',
+          'STATIC_READ',
+          'STATIC_COPY',
+          'DYNAMIC_DRAW',
+          'DYNAMIC_READ',
+          'DYNAMIC_COPY']:
 
     test = VertexBufferObjectTest(a, geo)
     test.setBufferType(globals()[a])

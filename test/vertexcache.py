@@ -13,4 +13,4 @@ for i in [2 ** j for j in range(0, 12)]:
     geo = buildGeometry(GL_TRIANGLES, v=v, i=indices)
     testList.append(VertexArrayTest(str(i), geo))
 
-runTests("vcache.data", testList, 10, "VertexRate")
+runTests("vertexcache.data", testList, 10, "VertexRate")

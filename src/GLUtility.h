@@ -6,6 +6,7 @@
 #include <vector>
 #include <gmtl/gmtl.h>
 #include "OpenGL.h"
+#include "Utility.h"
 
 
 namespace scry {
@@ -47,6 +48,21 @@ namespace scry {
     SCRY_MAP_TYPE_CONSTANT(GLint,    GL_INT);
     SCRY_MAP_TYPE_CONSTANT(GLfloat,  GL_FLOAT);
     SCRY_MAP_TYPE_CONSTANT(GLdouble, GL_DOUBLE);
+
+
+    inline size_t getTypeSize(GLenum typeConstant) {
+        switch (typeConstant) {
+            //case GL_BITMAP: ??
+            case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
+            case GL_BYTE:           return sizeof(GLbyte);
+            case GL_UNSIGNED_SHORT: return sizeof(GLushort);
+            case GL_SHORT:          return sizeof(GLshort);
+            case GL_UNSIGNED_INT:   return sizeof(GLuint);
+            case GL_INT:            return sizeof(GLint);
+            case GL_FLOAT:          return sizeof(GLfloat);
+            default: SCRY_ASSERT(false && "Invalid type"); return 0;
+        }
+    }
 
 
     typedef const void* (*Pump)(const void* data);

@@ -2,7 +2,7 @@
 #define SCRY_TEXTURE_UPLOAD_TEST_H
 
 
-#include "OpenGL.h"
+#include "GLUtility.h"
 #include "Test.h"
 
 
@@ -65,17 +65,7 @@ namespace scry {
 
     private:
         int getTypeSize() const {
-            switch (_type.get()) {
-                case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
-                case GL_BYTE:           return sizeof(GLbyte);
-//            case GL_BITMAP: ??
-                case GL_UNSIGNED_SHORT: return sizeof(GLushort);
-                case GL_SHORT:          return sizeof(GLshort);
-                case GL_UNSIGNED_INT:   return sizeof(GLuint);
-                case GL_INT:            return sizeof(GLint);
-                case GL_FLOAT:          return sizeof(GLfloat);
-                default: SCRY_ASSERT(false && "Invalid type"); return 0;
-            }
+            return scry::getTypeSize(_type);
         }
 
         Inited<int, 256>              _width;

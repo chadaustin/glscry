@@ -19,12 +19,16 @@ namespace scry {
         : PixelTransferTest(name) {
         }
 
+        void setCopyType(GLenum copyType) { _copyType = copyType; }
+        GLenum getCopyType() const        { return _copyType; }
+
         void iterate(ResultSet& results) {
-            static const int width = 256;
-            static const int height = 256;
-            glCopyPixels(0, 0, width, height, GL_COLOR);
-            results[0] += width * height;
+            glCopyPixels(0, 0, getWidth(), getHeight(), getCopyType());
+            results[0] += getWidth() * getHeight();
         }
+
+    private:
+        Inited<GLenum, GL_COLOR> _copyType;
     };
     SCRY_REF_PTR(CopyPixelTest);
 

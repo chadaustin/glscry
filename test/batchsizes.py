@@ -8,7 +8,7 @@ def run(fn, begin, end, geo):
         CompiledVertexArrayTest('CVA', geo),
         VertexBufferObjectTest('VBO', geo)]
 
-    runTestsRange(fn, testList, 0.2, "VertexRate",
+    runTestsRange(fn, testList, 1, "VertexRate",
                   "BatchSize", PowerRange(begin, end))
 
 run("zeroes.data",          1, 18, Zeroes())

@@ -43,8 +43,8 @@ namespace scry {
         void teardown();
 
     private:
-        Inited<size_t, 256> _width;
-        Inited<size_t, 256> _height;
+        Inited<size_t, 512> _width;
+        Inited<size_t, 512> _height;
         Inited<size_t, 1> _textureCount;
         std::vector<GLuint> _textures;
 
