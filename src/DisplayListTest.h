@@ -24,38 +24,48 @@ public:
     }
 
     void setup() {
-/*
-        const std::vector<Triangle>& buffer = getTriangleBuffer();
+        _vertexCount = getVertexCount();
+
+        GeometryPtr geometry = getGeometry();
+
+        std::vector<GLubyte> vertexBuffer;
+        VertexPump vertexPump = 0;
+
+        if (ArrayPtr v = geometry->vertices) {
+            vertexBuffer.resize(_vertexCount * v->getSize() *
+                                 v->getTypeSize());
+            v->build(&vertexBuffer[0], _vertexCount);
+
+            vertexPump = getVertexPump(v->getTypeConstant(), v->getSize());
+        }
+
 
         _list = glGenLists(1);
         glNewList(_list, GL_COMPILE);
-        glBegin(GL_TRIANGLES);
-        for (size_t i = 0; i < buffer.size(); ++i) {
-            glVertex(buffer[i].v1);
-            glVertex(buffer[i].v2);
-            glVertex(buffer[i].v3);
+
+        const void* data = &vertexBuffer[0];
+        glBegin(geometry->getPrimitiveType());
+        for (size_t i = 0; i < _vertexCount; ++i) {
+            if (vertexPump) {
+                data = vertexPump(data);
+            }
         }
         glEnd();
+
         glEndList();
-*/
     }
 
     void iterate(ResultSet& results) {
-/*
-        const std::vector<Triangle>& buffer = getTriangleBuffer();
-
         glCallList(_list);
-        results[0] += buffer.size();
-*/
+        results[0] += _vertexCount;
     }
 
     void teardown() {
-#if 0
         glDeleteLists(_list, 1);
-#endif
     }
 
 private:
+    size_t _vertexCount;
     GLuint _list;
 };
 SCRY_REF_PTR(DisplayListTest);

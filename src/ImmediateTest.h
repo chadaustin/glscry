@@ -24,54 +24,43 @@ public:
         return "Immediate";
     }
 
-    void iterate(ResultSet& results) {
-/*
+    void setup() {
+        _vertexCount = getVertexCount();
+
         GeometryPtr geometry = getGeometry();
 
-        _vertexCount = 0;
-
-        void (GLAPI * glVertexd) = 0;
-
         if (ArrayPtr v = geometry->vertices) {
-            glEnableClientState(GL_VERTEX_ARRAY);
-
-            _vertexBuffer.resize(getVertexCount() * v->getSize() *
+            _vertexBuffer.resize(_vertexCount * v->getSize() *
                                  v->getTypeSize());
-            v->build(&_vertexBuffer[0], getVertexCount());
-           
-            glVertexPointer(v->getSize(), v->getTypeConstant(),
-                            0, &_vertexBuffer[0]);
+            v->build(&_vertexBuffer[0], _vertexCount);
 
-            _vertexCount = getVertexCount();
+            _vertexPump = getVertexPump(v->getTypeConstant(), v->getSize());
         }
+    }
 
+    void iterate(ResultSet& results) {
+        GeometryPtr geometry = getGeometry();
+
+        const void* data = &_vertexBuffer[0];
 
         glBegin(geometry->getPrimitiveType());
         for (size_t i = 0; i < _vertexCount; ++i) {
-            if (glVertexd) {
-                glVertexd(data);
+            if (_vertexPump) {
+                data = _vertexPump(data);
             }
         }
         glEnd();
         
         results[0] += _vertexCount;
-/*
-        const std::vector<Triangle>& buffer = getTriangleBuffer();
-
-        glBegin(GL_TRIANGLES);
-        for (size_t i = 0; i < buffer.size(); ++i) {
-            glVertex(buffer[i].v1);
-            glVertex(buffer[i].v2);
-            glVertex(buffer[i].v3);
-        }
-        glEnd();
-*/
     }
+
+private:
+    size_t _vertexCount;
+    std::vector<GLubyte> _vertexBuffer;
+    Zeroed<VertexPump> _vertexPump;
 };
 SCRY_REF_PTR(ImmediateTest);
 
-
 SCRY_END_NAMESPACE
-
 
 #endif

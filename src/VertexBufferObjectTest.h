@@ -28,44 +28,46 @@ public:
     }
 
     void setup() {
-#if 0
-        const std::vector<Triangle>& vertexArray = getTriangleBuffer();
+        _vertexCount = getVertexCount();
+
+        GeometryPtr geometry = getGeometry();
 
         glGenBuffersARB(1, &_buffer);
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, _buffer);
 
-        glBufferDataARB(
-            GL_ARRAY_BUFFER_ARB,
-            vertexArray.size() * sizeof(vertexArray[0]),
-            &vertexArray[0],
-            GL_STATIC_DRAW_ARB);
 
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, _buffer);
-        ::glVertexPointer(Triangle::Vector::Size,
-                          GLTypeConstant<Triangle::Vector::DataType>::Result,
-                          0, NULL);
-#endif
+        if (ArrayPtr v = geometry->vertices) {
+            glEnableClientState(GL_VERTEX_ARRAY);
+
+            std::vector<GLubyte> vertexBuffer(
+                _vertexCount * v->getSize() * v->getTypeSize());
+            v->build(&vertexBuffer[0], _vertexCount);
+
+            glBufferDataARB(
+                GL_ARRAY_BUFFER_ARB,
+                vertexBuffer.size(),
+                &vertexBuffer[0],
+                GL_STATIC_DRAW_ARB /* This should be settable. */);
+
+            ::glVertexPointer(v->getSize(), v->getTypeConstant(), 0, NULL);
+        }
     }
 
     void iterate(ResultSet& results) {
-#if 0
-        const std::vector<Triangle>& vertexArray = getTriangleBuffer();
-        glDrawArrays(GL_TRIANGLES, 0, vertexArray.size() * 3);
-        results[0] += vertexArray.size();
-#endif
+        GeometryPtr geo = getGeometry();
+        glDrawArrays(geo->getPrimitiveType(), 0, _vertexCount);
+        results[0] += _vertexCount;
     }
 
     void teardown() {
-#if 0
         glDisableClientState(GL_VERTEX_ARRAY);
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
         glDeleteBuffersARB(1, &_buffer);
-#endif
     }
 
 private:
+    size_t _vertexCount;
     GLuint _buffer;
 };
 SCRY_REF_PTR(VertexBufferObjectTest);
