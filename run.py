@@ -79,6 +79,10 @@ def main(argv=sys.argv):
     os.chdir(datadir)
 
     print 'Data directory:', datadir
+    
+    print '\nQueuing tests for execution:'
+    for t in tests:
+        print "  " + t
 
     for t in tests:
         print
