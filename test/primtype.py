@@ -15,15 +15,15 @@ def defineGeometry(type, v):
 
 test = CompiledVertexArrayTest
 tests = [
-    test("POINTS",         defineGeometry(GL_POINTS,         defineArray(2, [ul]))),
-    test("LINES",          defineGeometry(GL_LINES,          defineArray(2, [ul, lr]))),
-    test("LINE_STRIP",     defineGeometry(GL_LINE_STRIP,     defineArray(2, [ul, lr]))),
-    test("LINE_LOOP",      defineGeometry(GL_LINE_LOOP,      defineArray(2, [ul, lr]))),
-    test("TRIANGLES",      defineGeometry(GL_TRIANGLES,      defineArray(2, [ul, ll, ur]))),
-    test("TRIANGLE_STRIP", defineGeometry(GL_TRIANGLE_STRIP, defineArray(2, [ul, ll, ur]))),
-    test("TRIANGLE_FAN",   defineGeometry(GL_TRIANGLE_FAN,   defineArray(2, [ll, ur], initial=[ul]))),
-    test("QUADS",          defineGeometry(GL_QUADS,          defineArray(2, [ul, ll, lr, ur]))),
-    test("QUAD_STRIP",     defineGeometry(GL_QUAD_STRIP,     defineArray(2, [ul, ll, ur, lr]))),
-    test("POLYGON",        defineGeometry(GL_POLYGON,        defineArray(2, [ll, ur], initial=[ul])))]
+    test("POINTS",         defineGeometry(GL_POINTS,         defineArray(Array_f, 2, [ul]))),
+    test("LINES",          defineGeometry(GL_LINES,          defineArray(Array_f, 2, [ul, lr]))),
+    test("LINE_STRIP",     defineGeometry(GL_LINE_STRIP,     defineArray(Array_f, 2, [ul, lr]))),
+    test("LINE_LOOP",      defineGeometry(GL_LINE_LOOP,      defineArray(Array_f, 2, [ul, lr]))),
+    test("TRIANGLES",      defineGeometry(GL_TRIANGLES,      defineArray(Array_f, 2, [ul, ll, ur]))),
+    test("TRIANGLE_STRIP", defineGeometry(GL_TRIANGLE_STRIP, defineArray(Array_f, 2, [ul, ll, ur]))),
+    test("TRIANGLE_FAN",   defineGeometry(GL_TRIANGLE_FAN,   defineArray(Array_f, 2, [ll, ur], initial=[ul]))),
+    test("QUADS",          defineGeometry(GL_QUADS,          defineArray(Array_f, 2, [ul, ll, lr, ur]))),
+    test("QUAD_STRIP",     defineGeometry(GL_QUAD_STRIP,     defineArray(Array_f, 2, [ul, ll, ur, lr]))),
+    test("POLYGON",        defineGeometry(GL_POLYGON,        defineArray(Array_f, 2, [ll, ur], initial=[ul])))]
 
 runTests('primtype.data', tests, 10, "VertexRate")

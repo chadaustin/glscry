@@ -18,9 +18,9 @@ ll_tc = (0, 1)
 lr_tc = (1, 1)
 ur_tc = (1, 0)
 
-v  = defineArray(2, [ul, ll, lr, ur])
-c  = defineArray(3, [r, g, b, w])
-tc = defineArray(2, [ul_tc, ll_tc, lr_tc, ur_tc])
+v  = defineArray(Array_f, 2, [ul, ll, lr, ur])
+c  = defineArray(Array_f, 3, [r, g, b, w])
+tc = defineArray(Array_f, 2, [ul_tc, ll_tc, lr_tc, ur_tc])
 
 geo_v = Geometry(GL_QUADS)
 geo_v.vertices = v

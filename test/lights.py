@@ -1,8 +1,8 @@
 from glscry import *
 
 geo = Geometry(GL_TRIANGLES)
-geo.vertices = defineArray(2, [(0, 0), (0, 1), (1, 1)])
-geo.normals  = defineArray(3, [(1, 0, 0), (0, 1, 0), (0, 0, 1)])
+geo.vertices = defineArray(Array_f, 2, [(0, 0), (0, 1), (1, 1)])
+geo.normals  = defineArray(Array_f, 3, [(1, 0, 0), (0, 1, 0), (0, 0, 1)])
 
 tests = []
 

@@ -18,10 +18,10 @@ ll_tc = (0, 1)
 lr_tc = (1, 1)
 ur_tc = (1, 0)
 
-v = defineArray(2, [ul, ll, lr, ur])
-c = defineArray(3, [r, g, b, w])
-n = defineArray(3, [r, g, b, w])
-t = defineArray(2, [ul_tc, ll_tc, lr_tc, ur_tc])
+v = defineArray(Array_f, 2, [ul, ll, lr, ur])
+c = defineArray(Array_f, 3, [r, g, b, w])
+n = defineArray(Array_f, 3, [r, g, b, w])
+t = defineArray(Array_f, 2, [ul_tc, ll_tc, lr_tc, ur_tc])
 
 fmt = GL_TRIANGLES
 geo_v    = buildGeometry(fmt, v=v)
