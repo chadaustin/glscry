@@ -139,24 +139,28 @@ def runTest(test, runFor, resultName=None, printedName=None):
     
     if not resultName:
         resultName = test.name
-        
+
     if not printedName:
         printedName = test.name
 
-    if test.isSupported():
-        print "\nRunning test '%s'" % printedName
+    try:
+        if test.isSupported():
+            print "\nRunning test '%s'" % printedName
 
-        resultSet = test.run(runFor)
+            resultSet = test.run(runFor)
 
-        for r, d in zip(resultSet, test.getResultDescs()):
-            print "  %s = %s %s" % (d.name, r, d.units)
+            for r, d in zip(resultSet, test.getResultDescs()):
+                print "  %s = %s %s" % (d.name, r, d.units)
+
+            return Result(resultName, test.getResultDescs(), resultSet)
             
-        return Result(resultName, test.getResultDescs(), resultSet)
-    else:
-        # Return zeroes if the test isn't supported.
-        resultSet = ResultSet()
-        resultSet[:] = [0] * len(test.getResultDescs())
-        return Result(resultName, test.getResultDescs(), resultSet)
+    except GLError, e:
+        print e.value()
+
+    # Return zeroes if the test isn't supported or throws an exception.
+    resultSet = ResultSet()
+    resultSet[:] = [0] * len(test.getResultDescs())
+    return Result(resultName, test.getResultDescs(), resultSet)
 
 
 def runTests(testList, runFor):
@@ -170,7 +174,7 @@ def runTests(testList, runFor):
 
 def runTestRange(test, runFor, variedProperty, range, coerce=None):
     """Runs a test and returns a GraphLine object."""
-    
+
     resultList = []
     for v in range:
         if coerce:

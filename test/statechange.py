@@ -31,13 +31,12 @@ def runStateChange(suffix, state1, state2):
         testNoChange,
         testChange,
         testNoChangeFull,
-        testChangeFull,
-        testNoChangeFinish,
-        testChangeFinish]
+        testChangeFull]
+    #testList.extend([testNoChangeFinish, testChangeFinish])
 
     power = 1.4
     start = floor(log(1) / log(power))
-    end   = ceil(log(1024) / log(power))
+    end   = ceil(log(4096) / log(power))
     range = uniquePowerRange(start, end, power)
 
     results = runTestsRange(testList, 1, 'batchSize', range)
