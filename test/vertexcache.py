@@ -25,7 +25,8 @@ def run(filename, testtype):
         test = testtype(str(i), geo)
         testList.append(test)
 
-    runTests(filename, testList, 5, "VertexRate")
+    results = runTests(testList, 5)
+    generateBarGraph(filename, results, 'VertexRate', xlabel='Indices Used')
 
 run('vertexcache_imm.data', ImmediateTest)
 run('vertexcache_dl.data',  DisplayListTest)
