@@ -14,7 +14,7 @@ state1 = buildStateSet()
 state2 = buildStateSet()
 finishAction = FinishAction()
 
-geo = buildGeometry(GL_TRIANGLES)
+geo = buildGeometry(GL_TRIANGLES, v=defineArray(Array_f, 2))
 testNoChange       = TestType("NoChange",       geo)
 testChange         = TestType("Change",         geo)
 testNoChangeFull   = TestType("NoChangeFull",   geo)

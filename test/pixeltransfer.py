@@ -3,8 +3,8 @@ from glscry import *
 copy = CopyPixelTest("Copy")
 draw = DrawPixelTest("Draw")
 read = ReadPixelTest("Read")
-testList = [copy, draw, read]
-
-results = runTests(testList, 5)
-generateBarGraph("pixeltransfer.data", testList, results, "PixelRate",
-                 'Color Buffer Operation')
+generateBarGraph(
+    "pixeltransfer.data",
+    runTests([copy, draw, read], 5),
+    "PixelRate",
+    'Color Buffer Operation')

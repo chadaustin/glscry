@@ -30,11 +30,6 @@ def Zeroes():
         GL_TRIANGLES,
         v=defineArray(Array_f, 2))
 
-def SmallTriangles():
-    return buildGeometry(
-        GL_TRIANGLES,
-        v=defineArray(Array_f, 2, [(0, 0), (0, 1), (1, 1)]))
-
 def getTitle():
     vendor   = glGetString(GL_VENDOR)
     renderer = glGetString(GL_RENDERER)
@@ -109,6 +104,13 @@ def uniquePowerRange(low, high, power):
     return make_unique(list)
 
 def runTests(testList, runFor):
+    """Runs a list of tests and returns the results.
+
+    Returns a list of (testName, resultDesc, result) tuples where
+    testName is the test's name, resultDesc is a list of ResultDesc
+    objects, and result is a ResultSet (list of numbers).  For any i, the value
+    in result[i] corresponds to resultDesc[i].
+    """
     resultList = []
     
     for t in testList:
@@ -122,11 +124,11 @@ def runTests(testList, runFor):
             for r, d in zip(results, t.getResultDescs()):
                 print "  %s = %s %s" % (d.name, r, d.units)
             
-            resultList += [results]
+            resultList += [(t.name, t.getResultDescs(), results)]
         else:
             results = ResultSet()
             results[:] = [0] * len(t.getResultDescs())
-            resultList += [results]
+            resultList += [(t.name, t.getResultDescs(), results)]
 
     return resultList
 
@@ -158,33 +160,52 @@ def runTestsRange(filename, testList, runFor, depVar, indVar, range):
                           desc.name + " in " + desc.units,
                           indVar, range)
 
-def generateBarGraph(datafile, testList, resultList, measured, xlabel=None):
+def reduceResults(resultList, measured):
+    """Reduces results returned by runTests to a single list of
+    numbers and a units string.
+
+    Given a results list returned by runTests, reduceResults removes
+    everything except the results named by the 'measured' parameter.
+    If any of the result sets do not contain any results named the
+    value of measured, an exception is raised.  Returns a 2-tuple
+    where the first element is the list of result values and the
+    second is a units string.
+    """
+
+    resultUnits = None
+
+    rv = []
+    for testName, resultDescs, results in resultList:
+        assert len(resultDescs) == len(results)
+        resultIndex = -1
+        for i in range(len(resultDescs)):
+            d = resultDescs[i]
+            if d.name == measured:
+                resultIndex = i
+                if resultUnits is not None:
+                    assert d.units == resultUnits
+                else:
+                    resultUnits = d.units
+                break
+            
+        if resultIndex == -1:
+            raise IndexError, "Test has no result '%s'" % measured
+        
+        rv.append(results[resultIndex])
+        
+    return (rv, resultUnits)
+
+def generateBarGraph(datafile, resultList, measured, xlabel=None):
     print "\nWriting data file: %s" % datafile
 
     resultUnits = None
 
     of = open(datafile, 'w')
     writeID(of)
-    for t, r in zip(testList, resultList):
-        descs = t.getResultDescs()
-        assert len(descs) == len(r)
 
-        resultIndex = -1;
-        for i in range(len(descs)):
-            d = descs[i]
-            if d.name == measured:
-                resultIndex = i
-                if resultUnits:
-                    assert d.units == resultUnits
-                else:
-                    resultUnits = d.units
-                break
-
-        if resultIndex == -1:
-            raise IndexError, 'Test has no such result'
-        result = r[resultIndex]
-
-        print >> of, result
+    results, resultUnits = reduceResults(resultList, measured)
+    for r in results:
+        print >> of, r
 
     
     script = datafile + '.sh'
@@ -197,16 +218,16 @@ def generateBarGraph(datafile, testList, resultList, measured, xlabel=None):
     print >> plot, 'set size 2,2'
     print >> plot, 'set output "%s.png"' % datafile
     print >> plot, 'set title "%s"' % getTitle()
-    print >> plot, 'set xrange [-0.5:%s]' % (len(testList) - 0.5)
+    print >> plot, 'set xrange [-0.5:%s]' % (len(resultList) - 0.5)
     print >> plot, 'set yrange [0:*]'
     if xlabel:
         print >> plot, 'set xlabel "%s"' % xlabel
     print >> plot, 'set ylabel "%s"' % resultUnits
     print >> plot, 'set xtics (',
-    for i in range(len(testList)):
-        t = testList[i]
-        print >> plot, '"%s" %s' % (t.name, i),
-        if i + 1 < len(testList):
+    for i in range(len(resultList)):
+        testName = resultList[i][0]
+        print >> plot, '"%s" %s' % (testName, i),
+        if i + 1 < len(resultList):
             print >> plot, ', ',
     print >> plot, ')'
 
@@ -242,7 +263,7 @@ def generateLineGraph(datafile, testList, resultUnits, indVar, theRange):
     print >> plot, 'plot \\'
     for i in range(len(testList)):
         t = testList[i]
-        print >> plot, '  "%s" using 0:%d title "%s" with lines' % (datafile, i + 1, t.getName()),
+        print >> plot, '  "%s" using 0:%d title "%s" with lines' % (datafile, i + 1, t.name),
         if i + 1 < len(testList):
             print >> plot, ',\\',
         print >> plot
@@ -268,7 +289,7 @@ def output(file, test, results, depVar, indVar = None, indValue = None):
 
     print >> file, result,
 
-    print '  ' + test.getName(),
+    print '  ' + test.name,
     if indVar and indValue:
         print '(%s=%s)' % (indVar, indValue),
     print ': %s = %s %s' % (desc.name, long(result), desc.units)
