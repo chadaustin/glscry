@@ -15,8 +15,11 @@ def buildDirectionTest(i):
         light.specular = Vec4f(1, 1, 1, 1)
         light.position = Vec4f(0, 0, 1, 0)
 
+    stateSet = StateSet()
+    stateSet.setState(state)
+
     test = VertexArrayTest("%s lights" % i, geo)
-    test.setState(state)
+    test.addStateSet(stateSet)
     return test
 
 def buildPositionTest(i):
@@ -30,8 +33,11 @@ def buildPositionTest(i):
         light.specular = Vec4f(1, 1, 1, 1)
         light.position = Vec4f(1, 2, 3, 1)
 
+    stateSet = StateSet()
+    stateSet.setState(state)
+
     test = VertexArrayTest("%s lights" % i, geo)
-    test.setState(state)
+    test.addStateSet(stateSet)
     return test
 
 def buildSpotTest(i):
@@ -45,13 +51,21 @@ def buildSpotTest(i):
         light.specular = Vec4f(1, 1, 1, 1)
         light.position = Vec4f(1, 2, 1, 1)
         #light.spotExponent ?
-        light.spotCutoff = 45;
+        light.spotCutoff = 45
+
+    stateSet = StateSet()
+    stateSet.setState(state)
 
     test = VertexArrayTest("%s lights" % i, geo)
-    test.setState(state)
+    test.addStateSet(stateSet)
     return test
 
+def run(filename, testList, type):
+    results = runTests(testList, 10)
+    generateBarGraph(filename, results, 'VertexRate',
+                     xlabel='Number of %s Lights' % type)
+
 lightRange = range(len(LightState().lights) + 1)
-runTests("lights_dir.data",  [buildDirectionTest(i) for i in lightRange], 10, "VertexRate")
-runTests("lights_pos.data",  [buildPositionTest(i)  for i in lightRange], 10, "VertexRate")
-runTests("lights_spot.data", [buildSpotTest(i)      for i in lightRange], 10, "VertexRate")
+run("lights_dir.data",  map(buildDirectionTest, lightRange), 'Directional')
+run("lights_pos.data",  map(buildPositionTest,  lightRange), 'Positional')
+run("lights_spot.data", map(buildSpotTest,      lightRange), 'Spot')

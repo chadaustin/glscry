@@ -61,7 +61,7 @@ def main():
 
     for t in tests:
         print
-        print "Running test '%s'" % t
+        print "Running test script '%s'" % t
         os.system(sys.executable + ' ' + t)
 
 
