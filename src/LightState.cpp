@@ -12,7 +12,7 @@ namespace scry {
             .def(init<>())
             .def_readwrite("lights", &LightState::lights)
             ;
-            
+
         class_<Light>("Light")
             .def_readwrite("enable",               &Light::enable)
             .def_readwrite("ambient",              &Light::ambient)
@@ -26,7 +26,7 @@ namespace scry {
             .def_readwrite("linearAttenuation",    &Light::linearAttenuation)
             .def_readwrite("quadraticAttenuation", &Light::quadraticAttenuation)
             ;
-        
+
         typedef std::vector<Light> LightList;
         class_<LightList>("LightList")
             .def(vector_indexing_suite<LightList>())
@@ -34,13 +34,13 @@ namespace scry {
 
         implicitly_convertible<LightStatePtr, StatePtr>();
     }
-    
+
     LightState::LightState() {
         GLint max_lights;
         glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
         lights.resize(max_lights);
         SCRY_ASSERT(lights.size() >= 8); // OpenGL minimum max lights.
-        
+
         // Light0 is special.
         Light& light0 = lights[0];
         light0.diffuse = Vec4f(1, 1, 1, 1);
@@ -60,7 +60,7 @@ namespace scry {
         }
         glDisable(GL_LIGHTING);
     }
-    
+
     void LightState::Light::apply(GLenum light) {
         if (enable) {
             glEnable (light);
@@ -74,7 +74,9 @@ namespace scry {
             glLightf (light, GL_CONSTANT_ATTENUATION,  constantAttenuation);
             glLightf (light, GL_LINEAR_ATTENUATION,    linearAttenuation);
             glLightf (light, GL_QUADRATIC_ATTENUATION, quadraticAttenuation);
+        } else {
+            glDisable(light);
         }
     }
-    
+
 }

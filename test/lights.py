@@ -38,9 +38,8 @@ def buildSpotTest(i):
     test = VertexArrayTest("%s lights" % i, geo)
     test.setState(state)
     return test
-        
-lightRange = range(len(LightState().lights))
 
+lightRange = range(len(LightState().lights))
 runTests("lights_dir.data",  [buildDirectionTest(i) for i in lightRange], 10, "VertexRate")
 runTests("lights_pos.data",  [buildPositionTest(i)  for i in lightRange], 10, "VertexRate")
 runTests("lights_spot.data", [buildSpotTest(i)      for i in lightRange], 10, "VertexRate")
