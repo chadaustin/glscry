@@ -43,7 +43,7 @@ namespace scry {
         StateMapCIter toIter   = to._states.begin();
         StateMapCIter toEnd    = to._states.end();
 
-        while (fromIter != fromEnd && toIter != toEnd) {
+        while (fromIter != fromEnd || toIter != toEnd) {
             if (fromIter == fromEnd) {
                 switchFromDefault(*assertTrue(toIter->second),
                                   fullStateSwitch);

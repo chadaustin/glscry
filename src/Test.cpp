@@ -89,6 +89,8 @@ namespace scry {
                 setCurrentStateSet(_stateSetList[currentStateSet],
                                    _fullStateSwitch);
                 currentStateSet = (currentStateSet + 1) % _stateSetList.size();
+            } else {
+                setCurrentStateSet(0, _fullStateSwitch);
             }
 
             checkOpenGLErrors();

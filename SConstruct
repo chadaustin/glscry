@@ -8,7 +8,7 @@ defaultBoostIncludes = '/usr/local/include/boost-1_31'
 defaultBoostLibs     = '/usr/local/lib'
 if platform == 'win32':
     defaultBoostIncludes = Dir('#/third-party/vc7/include')
-    defaultBoostLibs     = Dir('#/third-party-vc7/lib')
+    defaultBoostLibs     = Dir('#/third-party/vc7/lib')
 
 opts = Options('options.cache')
 opts.AddOptions(
@@ -19,10 +19,12 @@ opts.AddOptions(
     BoolOption('nowarn', 'Disable warnings', 0))
 
 env = Environment(
-    ENV=os.environ,
     tools=['default', 'SDL', 'OpenGL', 'BoostPython', 'Python'],
     toolpath=['toolspec'],
     options=opts)
+
+if env['PLATFORM'] != 'win32':
+    env['ENV'] = os.environ
 
 Help(opts.GenerateHelpText(env))
 opts.Save('options.cache', env)
