@@ -27,12 +27,13 @@ stateSet.setState(colorBufferState)
 
 clearAction = ClearAction(GL_DEPTH_BUFFER_BIT)
 
-test1 = ImmediateTest("FrontToBack", genFrontToBack)
+test1 = ImmediateTest('Front to Back', genFrontToBack)
 test1.addStateSet(stateSet)
 test1.addAction(clearAction)
 
-test2 = ImmediateTest("BackToFront", genBackToFront)
+test2 = ImmediateTest('Back to Front', genBackToFront)
 test2.addStateSet(stateSet)
 test2.addAction(clearAction)
 
-runTests("hierz", [test1, test2], 10, "VertexRate")
+results = runTests([test1, test2], 10)
+generateGraph("hierz", GraphLine('Render Order', results), "VertexRate")

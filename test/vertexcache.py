@@ -14,7 +14,7 @@ theRange = uniquePowerRange(
     ceil(log(end) / log(power)),
     power)
 
-def run(filename, testtype):
+def run(filename, testtype, name):
     testList = []
     for i in theRange:
         repeat = range(i)
@@ -26,10 +26,15 @@ def run(filename, testtype):
         testList.append(test)
 
     results = runTests(testList, 5)
-    generateBarGraph(filename, results, 'VertexRate', xlabel='Indices Used')
+    line = GraphLine(name, results)
+    generateGraph(filename, line, 'VertexRate', xlabel='Referenced Indices')
+    return line
 
-run('vertexcache_imm', ImmediateTest)
-run('vertexcache_dl',  DisplayListTest)
-run('vertexcache_va',  VertexArrayTest)
-run('vertexcache_cva', CompiledVertexArrayTest)
-run('vertexcache_vbo', VertexBufferObjectTest)
+line1 = run('vertexcache_imm', ImmediateTest,           'Immediate')
+line2 = run('vertexcache_dl',  DisplayListTest,         'Display Lists')
+line3 = run('vertexcache_va',  VertexArrayTest,         'Vertex Arrays')
+line4 = run('vertexcache_cva', CompiledVertexArrayTest, 'Compiled Vertex Arrays')
+line5 = run('vertexcache_vbo', VertexBufferObjectTest,  'Vertex Buffer Objects')
+
+generateGraph('vertexcache', [line1, line2, line3, line4, line5], 'VertexRate',
+              xlabel='Referenced Indices')

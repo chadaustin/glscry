@@ -6,7 +6,7 @@ n=defineArray(Array_f, 3)
 t=defineArray(Array_f, 2)
 geo = buildGeometry(GL_TRIANGLES, v=v, c=c, n=n, t=t)
 
-def run(filename, storageMode):
+def run(filename, storageMode, name):
     testList = []
     for a in ['STREAM_DRAW',
               'STREAM_READ',
@@ -23,9 +23,13 @@ def run(filename, storageMode):
         test.setStorageMode(storageMode)
         testList.append(test)
 
-    runTests(filename, testList, 10, "VertexRate")
+    results = runTests(testList, 10)
+    line = GraphLine(name, results)
+    generateGraph(filename, line, "VertexRate", xlabel='Buffer Type')
+    return line
 
 SM = VertexBufferObjectTest.StorageMode
-run("vbo_separate",    SM.SEPARATE_BUFFERS)
-run("vbo_single",      SM.ONE_BUFFER)
-run("vbo_interleaved", SM.ONE_BUFFER_INTERLEAVED)
+line1 = run("vbo_separate",    SM.SEPARATE_BUFFERS,       'Separate Buffers')
+line2 = run("vbo_single",      SM.ONE_BUFFER,             'Single Buffer')
+line3 = run("vbo_interleaved", SM.ONE_BUFFER_INTERLEAVED, 'Interleaved Buffers')
+generateGraph('vbo', [line1, line2, line3], 'VertexRate', xlabel='Buffer Type')

@@ -54,4 +54,5 @@ test3.addStateSet(stateSet)
 test4 = type("ColoredTex", geo_vct)
 test4.addStateSet(stateSet)
 
-runTests('fillrate', [test1, test2, test3, test4], 1, "FillRate")
+results = runTests([test1, test2, test3, test4], 1)
+generateGraph('fillrate', GraphLine('Render Mode', results), 'FillRate')

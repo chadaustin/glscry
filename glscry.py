@@ -30,16 +30,19 @@ def Zeroes():
         GL_TRIANGLES,
         v=defineArray(Array_f, 2))
 
+
 def getTitle():
     vendor   = glGetString(GL_VENDOR)
     renderer = glGetString(GL_RENDERER)
     version  = glGetString(GL_VERSION)
     return '(%s), (%s), (%s)' % (vendor, renderer, version)
 
+
 def writeID(file):
     file.write("# Vendor   = %s\n" % glGetString(GL_VENDOR))
     file.write("# Renderer = %s\n" % glGetString(GL_RENDERER))
     file.write("# Version  = %s\n" % glGetString(GL_VERSION))
+
 
 class LinearRange:
     def __init__(self, begin, end, step = 1):
@@ -63,6 +66,7 @@ class LinearRange:
                     return value
         return Iterable()
 
+
 class PowerRange:
     def __init__(self, begin, end, power = 2):
         self.begin = begin
@@ -83,6 +87,7 @@ class PowerRange:
                     return value
         return Iterable()
 
+
 def make_unique(list):
     if not list:
         return list
@@ -99,112 +104,189 @@ def make_unique(list):
 
     return rv
 
+
 def uniquePowerRange(low, high, power):
     list = [int(power ** k) for k in range(int(low), int(high + 1))]
     return make_unique(list)
 
-def runTests(testList, runFor):
-    """Runs a list of tests and returns the results.
 
-    Returns a list of (testName, resultDesc, result) tuples where
-    testName is the test's name, resultDesc is a list of ResultDesc
-    objects, and result is a ResultSet (list of numbers).  For any i, the value
-    in result[i] corresponds to resultDesc[i].
+class Result:
+    """The result of running a test.
+
+    Result objects are the result of running a test.  They contain three
+    fields:
+
+    name         Name of the test.
+    resultDescs  List of ResultDesc objects.
+    resultSet    ResultSet object (list of numbers).  For any i, the value
+                 in result[i] corresponds to resultDescs[i].
     """
-    resultList = []
     
-    for t in testList:
-        betweenTests()
+    def __init__(self, name, resultDescs, resultSet):
+        self.name        = name
+        self.resultDescs = resultDescs
+        self.resultSet   = resultSet
 
-        if t.isSupported():
-            print "\nRunning test '%s'" % t.name
 
-            results = t.run(runFor)
+class GraphLine:
+    """The result of running a related list of tests."""
+    
+    def __init__(self, title, resultList):
+        self.title = title
+        self.resultList = resultList
 
-            for r, d in zip(results, t.getResultDescs()):
-                print "  %s = %s %s" % (d.name, r, d.units)
+
+def runTest(test, runFor, resultName=None, printedName=None):
+    """Runs a test and returns a Result object."""
+    
+    betweenTests()
+    
+    if not resultName:
+        resultName = test.name
+        
+    if not printedName:
+        printedName = test.name
+
+    if test.isSupported():
+        print "\nRunning test '%s'" % printedName
+
+        resultSet = test.run(runFor)
+
+        for r, d in zip(resultSet, test.getResultDescs()):
+            print "  %s = %s %s" % (d.name, r, d.units)
             
-            resultList += [(t.name, t.getResultDescs(), results)]
-        else:
-            results = ResultSet()
-            results[:] = [0] * len(t.getResultDescs())
-            resultList += [(t.name, t.getResultDescs(), results)]
+        return Result(resultName, test.getResultDescs(), resultSet)
+    else:
+        # Return zeroes if the test isn't supported.
+        resultSet = ResultSet()
+        resultSet[:] = [0] * len(test.getResultDescs())
+        return Result(resultName, test.getResultDescs(), resultSet)
 
-    return resultList
 
-def runTestsRange(filename, testList, runFor, depVar, indVar, range):
-    print "\nGenerating data for %s" % filename
+def runTests(testList, runFor):
+    """Runs a list of tests and returns a list of Result objects.
 
-    of = open(filename, 'w')
-    writeID(of)
+    Returns a list of Result objects containing the results of running
+    every test in testList.
+    """
+    return [runTest(t, runFor) for t in testList]
 
-    for indValue in range:
-        indValue = int(indValue)
-        for t in testList:
-            betweenTests()
 
-            t.setProperty(indVar, indValue)
-            if t.isSupported():
-                results = t.run(runFor)
-                output(of, t, results, depVar, indVar, indValue)
-            else:
-                pass # output a zero?
-        of.write('\n')
+def runTestRange(test, runFor, variedProperty, range, coerce=None):
+    """Runs a test and returns a GraphLine object."""
+    
+    resultList = []
+    for v in range:
+        if coerce:
+            v = coerce(v)
+        setattr(test, variedProperty, v)
+        resultList.append(
+            runTest(test,
+                    runFor,
+                    str(v),
+                    '%s (%s = %s)' % (test.name, variedProperty, v)))
+    return GraphLine(test.name, resultList)
 
-    if testList:
-        test = testList[0]
-        descs = test.getResultDescs()
-        desc = descs[0]
 
-        generateLineGraph(filename, testList,
-                          desc.name + " in " + desc.units,
-                          indVar, range)
+def runTestsRange(testList, runFor, variedProperty, range, coerce=None):
+    """Runs a list of tests and returns a list of GraphLine objects."""
+    return [runTestRange(t, runFor, variedProperty, range, coerce) for t in testList]
 
-def reduceResults(resultList, measured):
+
+def reduceResults(resultList, measuredResult):
     """Reduces results returned by runTests to a single list of
     numbers and a units string.
 
     Given a results list returned by runTests, reduceResults removes
-    everything except the results named by the 'measured' parameter.
+    everything except the results named by the measuredResult parameter.
     If any of the result sets do not contain any results named the
     value of measured, an exception is raised.  Returns a 2-tuple
     where the first element is the list of result values and the
     second is a units string.
     """
 
-    resultUnits = None
+    resultDesc = None
 
     rv = []
-    for testName, resultDescs, results in resultList:
+    for result in resultList:
+        results = result.resultSet
+        resultDescs = result.resultDescs
         assert len(resultDescs) == len(results)
+        
         resultIndex = -1
         for i in range(len(resultDescs)):
             d = resultDescs[i]
-            if d.name == measured:
+            if d.name == measuredResult:
                 resultIndex = i
-                if resultUnits is not None:
-                    assert d.units == resultUnits
+                if resultDesc is not None:
+                    assert d == resultDesc
                 else:
-                    resultUnits = d.units
+                    resultDesc = d
                 break
             
         if resultIndex == -1:
-            raise IndexError, "Test has no result '%s'" % measured
+            raise IndexError, "Test has no result '%s'" % measuredResult
         
         rv.append(results[resultIndex])
         
-    return (rv, resultUnits)
+    return (rv, resultDesc)
 
-def generateBarGraph(filename, resultList, measured, xlabel=None):
+
+def assertEqual(list):
+    if len(list) > 0:
+        for v in list[1:]:
+            assert list[0] == v
+
+
+class GraphType:
+    class BAR: pass
+    class LINE: pass
+
+
+def getGraphTypeStr(graphType):
+    if graphType == GraphType.BAR:  return 'boxes'
+    if graphType == GraphType.LINE: return 'lines'
+    assert false
+
+
+def generateGraph(filename, graphLineList, measured,
+                  xlabel=None, graphType=GraphType.BAR):
+    
+    if type(graphLineList) != type([]):
+        graphLineList = [graphLineList]
+    
+    # Empty lists aren't allowed.
+    assert len(graphLineList) >= 1
+    assert len(graphLineList[0].resultList) >= 1
+    lineCount = len(graphLineList)
+    resultCount = len(graphLineList[0].resultList)
+    
+    # All of the resultLists must have equal length.
+    assertEqual([len(x.resultList) for x in graphLineList])
+
+    # All rows must have equal test names.
+    for i in range(resultCount):
+        assertEqual([x.resultList[i].name for x in graphLineList])
+
+    # Reduce the graphLineList to a matrix of numbers and a unit.
+    reduced = [reduceResults(x.resultList, measured) for x in graphLineList]
+    resultMatrix = [x[0] for x in reduced]
+
+    # All result descriptions must be equal.
+    assertEqual([x[1] for x in reduced]) 
+    resultUnits = reduced[0][1].units
+
+    # Write the result matrix to a file.
     datafile = filename + '.data'
     print "\nWriting data file: %s" % datafile
 
     of = open(datafile, 'w')
     writeID(of)
 
-    results, resultUnits = reduceResults(resultList, measured)
-    for r in results:
-        print >> of, r
+    for i in range(resultCount):
+        for j in range(lineCount):
+            print >> of, resultMatrix[j][i],
+        print >> of
 
     script = filename + '.gnuplot'
     print "Generating graph script: %s" % script
@@ -214,77 +296,19 @@ def generateBarGraph(filename, resultList, measured, xlabel=None):
     print >> plot, 'set size 2,2'
     print >> plot, 'set output "%s.png"' % filename
     print >> plot, 'set title "%s"' % getTitle()
-    print >> plot, 'set xrange [-0.5:%s]' % (len(resultList) - 0.5)
+    print >> plot, 'set xrange [-0.5:%s]' % (resultCount - 0.5)
     print >> plot, 'set yrange [0:*]'
     if xlabel:
         print >> plot, 'set xlabel "%s"' % xlabel
     print >> plot, 'set ylabel "%s"' % resultUnits
-    print >> plot, 'set xtics (',
-    for i in range(len(resultList)):
-        testName = resultList[i][0]
-        print >> plot, '"%s" %s' % (testName, i),
-        if i + 1 < len(resultList):
-            print >> plot, ', ',
-    print >> plot, ')'
 
-    print >> plot, 'plot "%s" using 0:1 with boxes' % datafile
+    xtics = ', '.join(['"%s" %s' % (graphLineList[0].resultList[i].name, i)
+                       for i in range(resultCount)])
+    print >> plot, 'set xtics (%s)' % xtics
 
-
-def generateLineGraph(datafile, testList, resultUnits, indVar, theRange):
-    script = datafile + ".sh"
-    print '\nGenerating gnuplot script: ' + script
-    plot = open(script, 'w')
-
-    print >> plot, '#!/bin/sh'
-    print >> plot, 'cat <<EOF | gnuplot'
-    print >> plot, 'set terminal png'
-    print >> plot, 'set size 2,2'
-    print >> plot, 'set output "%s.png"' % datafile
-    print >> plot, 'set title "%s"' % getTitle()
-    print >> plot, 'set yrange [0:*]'
-    print >> plot, 'set xlabel "%s"' % indVar
-    print >> plot, 'set ylabel "%s"' % resultUnits
-    print >> plot, 'set xtics (',
-    first = True
-    j = 0
-    for i in theRange:
-        if not first:
-            print >> plot, ', ',
-        first = False
-        print >> plot, '"%s" %s' % (i, j),
-        j = j + 1
-    print >> plot, ')'
-
-    print >> plot, 'plot \\'
-    for i in range(len(testList)):
-        t = testList[i]
-        print >> plot, '  "%s" using 0:%d title "%s" with lines' % (datafile, i + 1, t.name),
-        if i + 1 < len(testList):
-            print >> plot, ',\\',
-        print >> plot
-
-    print >> plot, 'EOF'
-
-
-def output(file, test, results, depVar, indVar = None, indValue = None):
-    descs = test.getResultDescs()
-    assert len(descs) == len(results)
-
-    resultIndex = -1;
-    for i in range(len(descs)):
-        d = descs[i]
-        if d.name == depVar:
-            resultIndex = i
-            break
-
-    if resultIndex == -1:
-        raise IndexError, 'Test has no such result'
-    desc   = descs[resultIndex]
-    result = results[resultIndex]
-
-    print >> file, result,
-
-    print '  ' + test.name,
-    if indVar and indValue:
-        print '(%s=%s)' % (indVar, indValue),
-    print ': %s = %s %s' % (desc.name, long(result), desc.units)
+    plotList = ['"%s" using 0:%s title "%s" with %s' % (datafile, i + 1,
+                                                        graphLineList[i].title,
+                                                        getGraphTypeStr(graphType))
+                for i in range(lineCount)]
+    plotStr = ', '.join(plotList)
+    print >> plot, 'plot %s' % plotStr

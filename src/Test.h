@@ -38,6 +38,12 @@ namespace scry {
             return name == rhs.name && units == rhs.units;
         }
 
+        bool operator<(const ResultDesc& rhs) const {
+            if (name < rhs.name) return true;
+            if (name > rhs.name) return false;
+            return units < rhs.units;
+        }
+
         std::string name;
         std::string units;
     };

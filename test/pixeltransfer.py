@@ -1,17 +1,21 @@
 from glscry import *
 
+time = 10
+
 copy = CopyPixelTest("Copy")
 draw = DrawPixelTest("Draw")
 read = ReadPixelTest("Read")
-colorResults = runTests([copy, draw, read], 5)
+colorResults = runTests([copy, draw, read], time)
+colorLine = GraphLine('Color Buffer', colorResults)
 
 copy.copyType = GL_DEPTH
 draw.format = GL_DEPTH_COMPONENT
 draw.type   = GL_FLOAT
 read.format = GL_DEPTH_COMPONENT
 read.type   = GL_FLOAT
-depthResults = runTests([copy, draw, read], 5)
+depthResults = runTests([copy, draw, read], time)
+depthLine = GraphLine('Depth Buffer', depthResults)
 
-generateBarGraph("pixeltransfer_color", colorResults, "PixelRate")
-generateBarGraph("pixeltransfer_depth", depthResults, "PixelRate")
-generateBarGraph("pixeltransfer", colorResults + depthResults, "PixelRate")
+generateGraph("pixeltransfer_color", colorLine, "PixelRate")
+generateGraph("pixeltransfer_depth", depthLine, "PixelRate")
+generateGraph("pixeltransfer", [colorLine, depthLine], "PixelRate")

@@ -62,10 +62,14 @@ def buildSpotTest(i):
 
 def run(filename, testList, type):
     results = runTests(testList, 10)
-    generateBarGraph(filename, results, 'VertexRate',
-                     xlabel='Number of %s Lights' % type)
+    line = GraphLine(type, results)
+    generateGraph(filename, line, 'VertexRate',
+                     xlabel='Number of Lights')
+    return line
 
 lightRange = range(len(LightState().lights) + 1)
-run("lights_dir",  map(buildDirectionTest, lightRange), 'Directional')
-run("lights_pos",  map(buildPositionTest,  lightRange), 'Positional')
-run("lights_spot", map(buildSpotTest,      lightRange), 'Spot')
+dirLine  = run("lights_dir",  map(buildDirectionTest, lightRange), 'Directional')
+posLine  = run("lights_pos",  map(buildPositionTest,  lightRange), 'Positional')
+spotLine = run("lights_spot", map(buildSpotTest,      lightRange), 'Spot')
+generateGraph("lights", [dirLine, posLine, spotLine], 'VertexRate',
+              xlabel='Number of Lights')

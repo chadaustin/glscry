@@ -35,6 +35,8 @@ namespace scry {
         class_<ResultDesc>("ResultDesc", no_init)
             .def_readonly("name",  &ResultDesc::name)
             .def_readonly("units", &ResultDesc::units)
+            .def(self == self)
+            .def(self < self)
             ;
 
         class_<ResultDescList>("ResultDescList")

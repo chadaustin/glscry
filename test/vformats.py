@@ -33,7 +33,7 @@ geo_vct  = buildGeometry(fmt, v=v, c=c, t=t)
 geo_vnt  = buildGeometry(fmt, v=v, n=n, t=t)
 geo_vcnt = buildGeometry(fmt, v=v, c=c, n=n, t=t)
 
-def run(file, test):
+def run(file, test, name):
     tests = [
         test("V", geo_v),
         test("VC", geo_vc),
@@ -45,10 +45,15 @@ def run(file, test):
         test("VCNT", geo_vcnt)]
 
     print "Writing data to %s" % file
-    runTests(file, tests, 10, "VertexRate")
+    results = runTests(tests, 10)
+    line = GraphLine(name, results)
+    generateGraph(file, line, 'VertexRate')
+    return line
 
-run('vformats_imm', ImmediateTest)
-run('vformats_dl',  DisplayListTest)
-run('vformats_va',  VertexArrayTest)
-run('vformats_cva', CompiledVertexArrayTest)
-run('vformats_vbo', VertexBufferObjectTest)
+line1 = run('vformats_imm', ImmediateTest,           'Immediate')
+line2 = run('vformats_dl',  DisplayListTest,         'Display Lists')
+line3 = run('vformats_va',  VertexArrayTest,         'Vertex Arrays')
+line4 = run('vformats_cva', CompiledVertexArrayTest, 'Compiled Vertex Arrays')
+line5 = run('vformats_vbo', VertexBufferObjectTest,  'Vertex Buffers')
+
+generateGraph('vformats', [line1, line2, line3, line4, line5], 'VertexRate')
