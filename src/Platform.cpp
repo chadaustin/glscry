@@ -141,35 +141,32 @@ namespace scry {
 #elif defined(WIN32) || defined(_WIN32)  // ******* WINDOWS
 
 #include <windows.h>
+#include "CPUInfo.h"
 
 namespace scry {
 
-    static string getProcArchString(WORD arch) {
-        switch (arch) {
-            case PROCESSOR_ARCHITECTURE_UNKNOWN:       return "Unknown";
-            case PROCESSOR_ARCHITECTURE_INTEL:         return "Intel";
-            case PROCESSOR_ARCHITECTURE_MIPS:          return "MIPS";
-            case PROCESSOR_ARCHITECTURE_PPC:           return "PPC";
-            case PROCESSOR_ARCHITECTURE_IA64:          return "IA64";
-            case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64: return "IA32 on Win64";
-            case PROCESSOR_ARCHITECTURE_AMD64:         return "AMD64";
-            default:                                   return "Unknown";
-        }
-    }
-
     ProcessorList getProcessors() {
-        SYSTEM_INFO info;
-        GetSystemInfo(&info);
+        std::vector<CPUInfo> info(getCPUCount());
+        int actual = getMultipleCPUInfo(&info[0]);
 
-        string type = getProcArchString(info.wProcessorArchitecture);
-        string speed = "Unimplemented check.";
-
-        Processor proc(type, speed);
-        return ProcessorList(info.dwNumberOfProcessors, proc);
+        ProcessorList rv;
+        for (int i = 0; i < actual; ++i) {
+            char speed[100];
+            sprintf(speed, "%d MHz", info[i].frequency);
+            rv.push_back(Processor(
+                info[i].getProcessorName(),
+                speed));
+        }
+        return rv;
     }
 
     string getMemorySize() {
-        return "Unimplemented check.";
+        MEMORYSTATUS mem;
+        GlobalMemoryStatus(&mem);
+
+        char buffer[100];
+        sprintf(buffer, "%d MB", int(mem.dwTotalPhys / 1000000));
+        return buffer;
     }
 
 }

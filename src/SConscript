@@ -43,6 +43,9 @@ sources = Split("""
     VertexBufferObjectTest.cpp
 """)
 
+if env['PLATFORM'] == 'win32':
+    sources.append('CPUInfo.cpp')
+
 modulename = env.subst('_glscry$SHLIBSUFFIX')
 env = env.Copy()
 env.Append(LIBPATH=['gmtl-python'], LIBS=['gmtl-python'])
