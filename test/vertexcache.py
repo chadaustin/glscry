@@ -14,14 +14,21 @@ theRange = uniquePowerRange(
     ceil(log(end) / log(power)),
     power)
 
-testList = []
-for i in theRange:
-    repeat = range(i)
+def run(filename, testtype):
+    testList = []
+    for i in theRange:
+        repeat = range(i)
         
-    indices = defineArray(Array_ui, 1, repeat)
+        indices = defineArray(Array_ui, 1, repeat)
     
-    geo = buildGeometry(GL_TRIANGLE_STRIP, v=v, i=indices)
-    test = VertexArrayTest(str(i), geo)
-    testList.append(test)
+        geo = buildGeometry(GL_TRIANGLE_STRIP, v=v, i=indices)
+        test = testtype(str(i), geo)
+        testList.append(test)
 
-runTests("vertexcache.data", testList, 5, "VertexRate")
+    runTests(filename, testList, 5, "VertexRate")
+
+run('vertexcache_imm.data', ImmediateTest)
+run('vertexcache_dl.data',  DisplayListTest)
+run('vertexcache_va.data',  VertexArrayTest)
+run('vertexcache_cva.data', CompiledVertexArrayTest)
+run('vertexcache_vbo.data', VertexBufferObjectTest)
