@@ -8,6 +8,7 @@
 #include "RefCounted.h"
 #include "StateSet.h"
 #include "Timer.h"
+#include "Types.h"
 
 
 #define SCRY_DEFINE_TEST_NAME(name)             \
@@ -99,6 +100,24 @@ namespace scry {
             getStateSet().setState(state);
         }
 
+        void setTransform(
+            const Vec4f& row1,
+            const Vec4f& row2,
+            const Vec4f& row3,
+            const Vec4f& row4
+        ) {
+            _transform.set(
+                row1[0], row1[1], row1[2], row1[3],
+                row2[0], row2[1], row2[2], row2[3],
+                row3[0], row3[1], row3[2], row3[3],
+                row4[0], row4[1], row4[2], row4[3]);
+        }
+
+        const Matrix44f& getTransform() const {
+            return _transform;
+        }
+            
+
         void addAction(ActionPtr action) {
             _actionList.push_back(action);
         }
@@ -118,6 +137,7 @@ namespace scry {
 
     private:
         std::string _name;
+        Matrix44f _transform;
         StateSet _stateSet;
         std::vector<ActionPtr> _actionList;
     };

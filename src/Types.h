@@ -14,6 +14,8 @@ namespace scry {
     using gmtl::Vec3f;
     using gmtl::Vec4f;
 
+    using gmtl::Matrix44f;
+
 }
 
 

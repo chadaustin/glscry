@@ -24,10 +24,15 @@ for i in [2 ** j for j in range(0, 12)]:
         
     indices = defineArray(Array_ui, 1, repeat)
     
-    geo = buildGeometry(GL_TRIANGLES, v=v, n=n, i=indices)
-    test = DisplayListTest(str(i), geo)
+    geo = buildGeometry(GL_TRIANGLE_STRIP, v=v, n=n, i=indices)
+    test = VertexArrayTest(str(i), geo)
     test.setState(lightstate)
     test.setState(matstate)
+    test.setTransform(
+        Vec4f(1, 0, 0, 0),
+        Vec4f(0, 1, 0, 0),
+        Vec4f(0, 0, 1, 0),
+        Vec4f(0, 0, 0, 1))
     testList.append(test)
 
 runTests("vertexcache.data", testList, 10, "VertexRate")

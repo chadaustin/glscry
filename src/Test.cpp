@@ -13,11 +13,14 @@ namespace scry {
     public:
         RunSentry(Test* test): _test(test) {
             _test->getStateSet().apply();
+            glPushMatrix();
+            glLoadMatrixf(_test->getTransform().getData());
             _test->setup();
         }
         ~RunSentry() {
             try {
                 _test->teardown();
+                glPopMatrix();
                 _test->getStateSet().reset();
             }
             catch (const std::exception& /*e*/) {
@@ -29,8 +32,9 @@ namespace scry {
 
     void Test::bind() {
         class_<Test, TestPtr, noncopyable>("Test", no_init)
-            .def("setState", &Test::setState)
-            .def("addAction", &Test::addAction)
+            .def("setState",     &Test::setState)
+            .def("setTransform", &Test::setTransform)
+            .def("addAction",    &Test::addAction)
             ;
     }
 
