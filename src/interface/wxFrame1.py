@@ -65,7 +65,7 @@ class wxFrame1(wxFrame):
               name='treeListCtrl1', parent=self.panel1, pos=wxPoint(8, 8),
               size=wxSize(256, 475), style=wxTR_HAS_BUTTONS)
 
-        self.button1 = wxButton(id=wxID_WXFRAME1BUTTON1, label='button1',
+        self.button1 = wxButton(id=wxID_WXFRAME1BUTTON1, label='Graph',
               name='button1', parent=self.panel1, pos=wxPoint(200, 500),
               size=wxSize(65, 25), style=0)
 
