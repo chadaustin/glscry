@@ -2,7 +2,7 @@ from glscry import *
 from random import randint
 from math import *
 
-v = defineArray(Array_f, 3, [0,0,0])
+v = defineArray(Array_f, 3, [5, 5, 0] + [5, 6, 0] + [6, 6, 0])
 
 vertexArraySize = 16384
 

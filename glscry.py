@@ -25,23 +25,19 @@ def buildGeometry(type, v=None, c=None, n=None, t=None, i=None):
     if i: geo.indices   = i
     return geo
 
-def Zeroes():
-    return buildGeometry(
-        GL_TRIANGLES,
-        v=defineArray(Array_f, 2))
-
-
 def getTitle():
-    vendor   = glGetString(GL_VENDOR)
-    renderer = glGetString(GL_RENDERER)
-    version  = glGetString(GL_VERSION)
-    return '(%s), (%s), (%s)' % (vendor, renderer, version)
+    version     = 'GLScry %s' % getVersion()
+    gl_vendor   = glGetString(GL_VENDOR)
+    gl_renderer = glGetString(GL_RENDERER)
+    gl_version  = glGetString(GL_VERSION)
+    return '  ::  '.join([version, gl_vendor, gl_renderer, gl_version])
 
 
 def writeID(file):
-    file.write("# Vendor   = %s\n" % glGetString(GL_VENDOR))
-    file.write("# Renderer = %s\n" % glGetString(GL_RENDERER))
-    file.write("# Version  = %s\n" % glGetString(GL_VERSION))
+    file.write("# GLScry Version  = %s\n" % getVersion())
+    file.write("# OpenGL Vendor   = %s\n" % glGetString(GL_VENDOR))
+    file.write("# OpenGL Renderer = %s\n" % glGetString(GL_RENDERER))
+    file.write("# OpenGL Version  = %s\n" % glGetString(GL_VERSION))
 
 
 class LinearRange:
@@ -239,18 +235,19 @@ def assertEqual(list):
 
 
 class GraphType:
-    class BAR: pass
-    class LINE: pass
+    class BAR:  typeString = 'boxes'
+    class LINE: typeString = 'lines'
 
 
-def getGraphTypeStr(graphType):
-    if graphType == GraphType.BAR:  return 'boxes'
-    if graphType == GraphType.LINE: return 'lines'
-    assert false
+def addIf(list, value):
+    if value:
+        return list[:] + [value]
+    else:
+        return list
 
 
 def generateGraph(filename, graphLineList, measured,
-                  xlabel=None, graphType=GraphType.BAR):
+                  xlabel=None, graphType=GraphType.BAR, normalizeBy=None):
     
     if type(graphLineList) != type([]):
         graphLineList = [graphLineList]
@@ -260,13 +257,14 @@ def generateGraph(filename, graphLineList, measured,
     assert len(graphLineList[0].resultList) >= 1
     lineCount = len(graphLineList)
     resultCount = len(graphLineList[0].resultList)
-    
+
     # All of the resultLists must have equal length.
-    assertEqual([len(x.resultList) for x in graphLineList])
+    assertEqual([len(x.resultList) for x in addIf(graphLineList, normalizeBy)])
 
     # All rows must have equal test names.
     for i in range(resultCount):
-        assertEqual([x.resultList[i].name for x in graphLineList])
+        assertEqual([x.resultList[i].name for x in
+                     addIf(graphLineList, normalizeBy)])
 
     # Reduce the graphLineList to a matrix of numbers and a unit.
     reduced = [reduceResults(x.resultList, measured) for x in graphLineList]
@@ -276,6 +274,12 @@ def generateGraph(filename, graphLineList, measured,
     assertEqual([x[1] for x in reduced]) 
     resultUnits = reduced[0][1].units
 
+    if normalizeBy:
+        normalizeTitle = normalizeBy.title
+        normalizeBy = reduceResults(normalizeBy.resultList, measured)
+        assert normalizeBy[1] == reduced[0][1]
+        normalizeBy = normalizeBy[0]
+
     # Write the result matrix to a file.
     datafile = filename + '.data'
     print "\nWriting data file: %s" % datafile
@@ -283,10 +287,16 @@ def generateGraph(filename, graphLineList, measured,
     of = open(datafile, 'w')
     writeID(of)
 
-    for i in range(resultCount):
-        for j in range(lineCount):
-            print >> of, resultMatrix[j][i],
-        print >> of
+    if normalizeBy:
+        for i in range(resultCount):
+            for j in range(lineCount):
+                print >> of, resultMatrix[j][i] / normalizeBy[i],
+            print >> of
+    else:
+        for i in range(resultCount):
+            for j in range(lineCount):
+                print >> of, resultMatrix[j][i],
+            print >> of
 
     script = filename + '.gnuplot'
     print "Generating graph script: %s" % script
@@ -300,7 +310,10 @@ def generateGraph(filename, graphLineList, measured,
     print >> plot, 'set yrange [0:*]'
     if xlabel:
         print >> plot, 'set xlabel "%s"' % xlabel
-    print >> plot, 'set ylabel "%s"' % resultUnits
+    if normalizeBy:
+        print >> plot, 'set ylabel "Normalized to %s"' % normalizeTitle
+    else:
+        print >> plot, 'set ylabel "%s"' % resultUnits
 
     xtics = ', '.join(['"%s" %s' % (graphLineList[0].resultList[i].name, i)
                        for i in range(resultCount)])
@@ -308,7 +321,7 @@ def generateGraph(filename, graphLineList, measured,
 
     plotList = ['"%s" using 0:%s title "%s" with %s' % (datafile, i + 1,
                                                         graphLineList[i].title,
-                                                        getGraphTypeStr(graphType))
+                                                        graphType.typeString)
                 for i in range(lineCount)]
     plotStr = ', '.join(plotList)
     print >> plot, 'plot %s' % plotStr

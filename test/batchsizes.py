@@ -1,6 +1,7 @@
 from glscry import *
 
-geo = Zeroes()
+v = defineArray(Array_f, 3, [(5, 5, 0) + (5, 6, 0) + (6, 6, 0)])
+geo = buildGeometry(GL_TRIANGLE_STRIP, v=v)
 testList = [
     ImmediateTest('Immediate', geo),
     DisplayListTest('Display Lists', geo),

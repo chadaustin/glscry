@@ -5,6 +5,7 @@ def runStateChange(suffix, state1, state2):
     TestType = VertexArrayTest
     finishAction = FinishAction()
 
+    v = defineArray(Array_f, 2, (5, 5) + (5, 6) + (6, 6))
     geo = buildGeometry(GL_TRIANGLES, v=defineArray(Array_f, 2))
     testNoChange       = TestType("No Change",          geo)
     testChange         = TestType("Change",             geo)
@@ -41,7 +42,7 @@ def runStateChange(suffix, state1, state2):
 
     results = runTestsRange(testList, 1, 'batchSize', range)
     generateGraph('statechange_%s' % suffix, results, "VertexRate",
-                  graphType=GraphType.LINE)
+                  graphType=GraphType.LINE, normalizeBy=results[0])
 
 def buildTextureSS():
     state = TextureState()

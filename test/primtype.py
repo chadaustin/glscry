@@ -3,10 +3,10 @@ from glscry import *
 w = 1
 h = 1
 
-ul = (0, 0)
-ll = (0, h)
-lr = (w, h)
-ur = (w, 0)
+ul = (5,   5)
+ll = (5,   5+h)
+lr = (5+w, 5+h)
+ur = (5+w, 5)
 
 def defineGeometry(type, v):
     g = Geometry(type)

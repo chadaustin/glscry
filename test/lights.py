@@ -1,7 +1,7 @@
 from glscry import *
 
 geo = buildGeometry(GL_TRIANGLES,
-        v=defineArray(Array_f, 2, [(0, 0), (0, 1), (1, 1)]),
+        v=defineArray(Array_f, 2, [(5, 5), (5, 6), (6, 6)]),
         n=defineArray(Array_f, 3, [(1, 0, 0), (0, 1, 0), (0, 0, 1)]))
 
 def buildDirectionTest(i):
