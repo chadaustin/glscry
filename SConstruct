@@ -15,7 +15,6 @@ opts.AddOptions(
     BoolOption('nowarn', 'Disable warnings', 0))
 
 env = Environment(
-    ENV=os.environ,
     tools=['default', 'SDL', 'OpenGL', 'BoostPython', 'Python'],
     toolpath=['toolspec'],
     options=opts)

@@ -94,7 +94,7 @@ namespace scry {
         const Buffer& getTexCoords() const { return _texcoords; }
 
     private:
-        void defineBuffer(ArrayPtr array, Buffer& buffer, const char* name);
+        void defineBuffer(ArrayPtr array, Buffer& buffer, const char* name, PumpGetter getter);
 
         Inited<size_t, 4096> _batchSize;
         Zeroed<size_t> _screenCoverage;

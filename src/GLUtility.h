@@ -16,7 +16,7 @@ namespace scry {
      * GL_FLOAT, etc.
      */
     template<typename Type>
-        struct GLTypeConstant;
+    struct GLTypeConstant;
 
 
     /**
@@ -24,7 +24,7 @@ namespace scry {
      * associated type.  GL_FLOAT -> float, etc.
      */
     template<GLenum TypeConstant>
-        struct GLType;
+    struct GLType;
 
 
 #define SCRY_MAP_TYPE_CONSTANT(type, constant) \
@@ -51,11 +51,12 @@ namespace scry {
 
 
     typedef const void* (*Pump)(const void* data);
+    typedef Pump (*PumpGetter)(GLenum type, int size);
 
     Pump getVertexPump(GLenum type, int size);
     Pump getColorPump(GLenum type, int size);
     Pump getNormalPump(GLenum type, int size);
-    Pump getTexCoord(GLenum type, int size);
+    Pump getTexCoordPump(GLenum type, int size);
 
 }
 

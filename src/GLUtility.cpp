@@ -17,6 +17,9 @@ namespace {
     /// Generic normal pump template.
     template<int size, typename T>
     const void* glNormal(const void* data);
+    
+    template<int size, typename T>
+    const void* glTexCoord(const void* data);
 
 
 #define SCRY_DEFINE_PUMP(name, size, wart, type)                        \
@@ -36,6 +39,9 @@ namespace {
 
 #define SCRY_DEFINE_NORMAL_PUMP(wart, type)     \
     SCRY_DEFINE_PUMP(glNormal, 3, wart, type)
+    
+#define SCRY_DEFINE_TEXCOORD_PUMP(size, wart, type) \
+    SCRY_DEFINE_PUMP(glTexCoord, size, wart, type)
 
 
 #define SCRY_DEFINE_VERTEX_PUMPS(size)                      \
@@ -53,6 +59,12 @@ namespace {
     SCRY_DEFINE_COLOR_PUMP(size, ui, GLuint);      \
     SCRY_DEFINE_COLOR_PUMP(size, f,  GLfloat);     \
     SCRY_DEFINE_COLOR_PUMP(size, d,  GLdouble);
+    
+#define SCRY_DEFINE_TEXCOORD_PUMPS(size)            \
+    SCRY_DEFINE_TEXCOORD_PUMP(size, s, GLshort);    \
+    SCRY_DEFINE_TEXCOORD_PUMP(size, i, GLint);      \
+    SCRY_DEFINE_TEXCOORD_PUMP(size, f, GLfloat);    \
+    SCRY_DEFINE_TEXCOORD_PUMP(size, d, GLdouble);
 
 
     SCRY_DEFINE_VERTEX_PUMPS(2);
@@ -67,6 +79,11 @@ namespace {
     SCRY_DEFINE_NORMAL_PUMP(i, GLint);
     SCRY_DEFINE_NORMAL_PUMP(f, GLfloat);
     SCRY_DEFINE_NORMAL_PUMP(d, GLdouble);
+    
+    SCRY_DEFINE_TEXCOORD_PUMPS(1);
+    SCRY_DEFINE_TEXCOORD_PUMPS(2);
+    SCRY_DEFINE_TEXCOORD_PUMPS(3);
+    SCRY_DEFINE_TEXCOORD_PUMPS(4);
 
 
     typedef std::pair<GLenum, int> VectorType;
@@ -76,6 +93,7 @@ namespace {
     PumpMap g_vertexPumps;
     PumpMap g_colorPumps;
     PumpMap g_normalPumps;
+    PumpMap g_texCoordPumps;
 
 
     template<int size, typename Type>
@@ -105,6 +123,12 @@ namespace {
 #define SCRY_REGISTER_NORMAL_PUMP(type)                         \
     SCRY_REGISTER_PUMP(g_normalPumps, glNormal, 3, type)
 
+#define SCRY_REGISTER_TEXCOORD_PUMPS(size)                              \
+    SCRY_REGISTER_PUMP(g_texCoordPumps, glTexCoord, size, GLshort);     \
+    SCRY_REGISTER_PUMP(g_texCoordPumps, glTexCoord, size, GLint);       \
+    SCRY_REGISTER_PUMP(g_texCoordPumps, glTexCoord, size, GLfloat);     \
+    SCRY_REGISTER_PUMP(g_texCoordPumps, glTexCoord, size, GLdouble);
+
     void initialize() {
         if (!g_initialized) {
             SCRY_REGISTER_VERTEX_PUMPS(2);
@@ -119,6 +143,11 @@ namespace {
             SCRY_REGISTER_NORMAL_PUMP(GLint);
             SCRY_REGISTER_NORMAL_PUMP(GLfloat);
             SCRY_REGISTER_NORMAL_PUMP(GLdouble);
+            
+            SCRY_REGISTER_TEXCOORD_PUMPS(1);
+            SCRY_REGISTER_TEXCOORD_PUMPS(2);
+            SCRY_REGISTER_TEXCOORD_PUMPS(3);
+            SCRY_REGISTER_TEXCOORD_PUMPS(4);
 
             g_initialized = true;
         }
@@ -142,6 +171,11 @@ namespace scry {
     Pump getNormalPump(GLenum type, int size) {
         initialize();
         return g_normalPumps[VectorType(type, size)];
+    }
+    
+    Pump getTexCoordPump(GLenum type, int size) {
+        initialize();
+        return g_texCoordPumps[VectorType(type, size)];
     }
 
 }

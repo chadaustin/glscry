@@ -11,7 +11,7 @@ namespace scry {
 
         implicitly_convertible<GeometryTestPtr, TestPtr>();
     }
-
+    
     void GeometryTest::setup() {
         _screenCoverage = 0;
         _vertices  = Buffer();
@@ -22,7 +22,7 @@ namespace scry {
         GeometryPtr geometry = getGeometry();
 
         if (ArrayPtr v = geometry->vertices) {
-            defineBuffer(v, _vertices, "vertices");
+            defineBuffer(v, _vertices, "vertices", getVertexPump);
 
             _screenCoverage = calculateCoverage(
                 geometry->getPrimitiveType(),
@@ -32,14 +32,14 @@ namespace scry {
                 _vertices.data_ptr());
         }
 
-        defineBuffer(geometry->colors,    _colors,    "colors");
-        defineBuffer(geometry->normals,   _normals,   "normals");
-        defineBuffer(geometry->texcoords, _texcoords, "texcoords");
+        defineBuffer(geometry->colors,    _colors,    "colors",    getColorPump);
+        defineBuffer(geometry->normals,   _normals,   "normals",   getNormalPump);
+        defineBuffer(geometry->texcoords, _texcoords, "texcoords", getTexCoordPump);
     }
 
 
     void GeometryTest::defineBuffer(ArrayPtr array, Buffer& buffer,
-                                    const char* name
+                                    const char* name, PumpGetter getter
     ) {
         if (!array) {
             return;
@@ -49,8 +49,7 @@ namespace scry {
                            array->getTypeSize());
         array->build(buffer.data_ptr(), getVertexCount());
 
-        buffer.pump = scry::getVertexPump(
-            array->getTypeConstant(), array->getSize());
+        buffer.pump = getter(array->getTypeConstant(), array->getSize());
         if (!buffer.pump) {
             std::cout << "Warning: " << name
                       << " specified but no pump found." << std::endl;
