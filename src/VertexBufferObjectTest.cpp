@@ -222,6 +222,7 @@ namespace scry {
                     glTexCoordPointer(t->getSize(), t->getTypeConstant(), totalStride, asBufferOffset(stride));
                     stride += getStride(t);
                 }
+
             } break;
 
             default: {

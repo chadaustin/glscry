@@ -34,7 +34,8 @@ namespace scry {
         plot << "#!/bin/sh" << std::endl
              << std::endl
              << "cat <<EOF | gnuplot\n"
-             << "set terminal png size 1000\n"
+             << "set terminal png\n"
+             << "set size 2,1\n"
              << "set output \"" << datafile << ".png\"\n"
              << "set title \"" << getTitle() << "\"\n"
              << "set xrange [-0.5:" << testList.size() - 0.5f << "]\n"
@@ -74,7 +75,8 @@ namespace scry {
         plot << "#!/bin/sh" << std::endl
              << std::endl
              << "cat <<EOF | gnuplot\n"
-             << "set terminal png size 1000\n"
+             << "set terminal png\n"
+             << "set size 2,1\n"
              << "set output \"" << datafile << ".png\"\n"
              << "set title \"" << getTitle() << "\"\n"
              << "set yrange [0:*]\n"
@@ -124,7 +126,7 @@ namespace scry {
         if (resultIndex == -1) {
             throw std::runtime_error("Test has no such result");
         }
-    
+
         os << results[resultIndex] << " ";
 
         std::cout << "  " << test->getName();
@@ -158,7 +160,7 @@ namespace scry {
     ) {
         std::cout << std::endl;
         std::cout << "Generating data for " << filename << std::endl;
-    
+
         std::ofstream of(filename.c_str());
         if (!of) {
             throw std::runtime_error("Could not open " + filename);
@@ -197,7 +199,7 @@ namespace scry {
     ) {
         std::cout << std::endl;
         std::cout << "Generating data for " << filename << std::endl;
-    
+
         std::ofstream of(filename.c_str());
         if (!of) {
             throw std::runtime_error("Could not open " + filename);

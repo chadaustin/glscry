@@ -25,6 +25,6 @@ def run(filename, storageMode):
 
     runTests(filename, testList, 10, "VertexRate")
 
-run("vbo_separate",    VertexBufferObjectTest.StorageMode.SEPARATE_BUFFERS)
-run("vbo_one",         VertexBufferObjectTest.StorageMode.ONE_BUFFER)
-run("vbo_interleaved", VertexBufferObjectTest.StorageMode.ONE_BUFFER_INTERLEAVED)
+run("vbo_separate.data",    VertexBufferObjectTest.StorageMode.SEPARATE_BUFFERS)
+run("vbo_one.data",         VertexBufferObjectTest.StorageMode.ONE_BUFFER)
+run("vbo_interleaved.data", VertexBufferObjectTest.StorageMode.ONE_BUFFER_INTERLEAVED)
