@@ -41,7 +41,7 @@ geo_vct  = buildGeometry(fmt, v=v, c=c, t=t)
 geo_vnt  = buildGeometry(fmt, v=v, n=n, t=t)
 geo_vcnt = buildGeometry(fmt, v=v, c=c, n=n, t=t)
 
-type = CompiledVertexArrayTest
+type = DisplayListTest
 tests = [
     type("V", geo_v),
     type("VC", geo_vc),
