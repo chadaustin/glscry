@@ -30,8 +30,11 @@ genFrontToBack.vertices = defineArray(quad, 4 * (0, 0, 1))
 genBackToFront = Geometry(GL_QUADS)
 genBackToFront.vertices = defineArray(quad, 4 * (0, 0, -1))
 
-runTests("heir_z.data",
-         [VertexArrayTest("FrontToBack", genFrontToBack),
-          VertexArrayTest("BackToFront", genBackToFront)],
-         1,
-         "VertexRate")
+test1 = VertexArrayTest("FrontToBack", genFrontToBack)
+test1.setState(DepthState())
+
+test2 = VertexArrayTest("BackToFront", genBackToFront)
+test2.setState(DepthState())
+
+runTestsRange("heir_z.data", [test1, test2], 10, "VertexRate",
+         "BatchSize", LinearRange(2 ** 12, 2 ** 12))
