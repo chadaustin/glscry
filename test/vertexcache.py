@@ -1,44 +1,47 @@
 from glscry import *
 from random import randint
+from math import *
 
-v = defineArray(
-    Array_f, 3,
-    repeat=[1, 1, 0, 1, 2, 0, 2, 2, 0],
-    offset=[0, 0, 1, 0, 0, 1, 0, 0, 1])
-n = defineArray(Array_f, 3, [0, 0, 1])
-
-lightstate = LightState()
-for l in lightstate.lights:
-    l.enable = True
-    l.ambient = Vec4f(0.5, 0.5, 0.5, 1.0)
-    l.diffuse = Vec4f(0.5, 0.5, 0.5, 1.0)
-    l.specular = Vec4f(0.5, 0.5, 0.5, 1.0)
-    
-matstate = MaterialState()
-matstate.front.shininess = 20
-matstate.front.specular = Vec4f(1, 1, 1, 1)
-matstate.back = matstate.front
+v = defineArray(Array_f, 3, [0,0,0])
 
 vertexArraySize = 16384
 
+def make_unique(list):
+    if not list:
+        return list
+
+    rv = []
+
+    list.sort()
+    last = list[0]
+    rv.append(last)
+    for b in list[1:]:
+        if b != last:
+            last = b
+            rv.append(last)
+
+    return rv
+
+def getPowerRange(low, high, power):
+    list = [int(power ** k) for k in range(int(low), int(high + 1))]
+    return make_unique(list)
+
+power = 1.1
+start = 1
+end   = 1024
+theRange = getPowerRange(
+    floor(log(start) / log(power)),
+    ceil(log(end) / log(power)),
+    power)
+
 testList = []
-step = 1
-for i in range(step, 32, step):#[2 ** j for j in range(0, 12)]:
-    repeat = [randint(0, i-1) for j in range(vertexArraySize)]
-    # Guarantee that we're using arrays of the same size.
-    repeat.append(vertexArraySize)
+for i in theRange:
+    repeat = range(i)
         
     indices = defineArray(Array_ui, 1, repeat)
     
-    geo = buildGeometry(GL_TRIANGLE_STRIP, v=v, n=n, i=indices)
+    geo = buildGeometry(GL_TRIANGLE_STRIP, v=v, i=indices)
     test = VertexArrayTest(str(i), geo)
-    test.setState(lightstate)
-    test.setState(matstate)
-    test.setTransform(
-        Vec4f(1, 0, 0, 0),
-        Vec4f(0, 1, 0, 0),
-        Vec4f(0, 0, 1, 0),
-        Vec4f(0, 0, 0, 1))
     testList.append(test)
 
 runTests("vertexcache.data", testList, 5, "VertexRate")
