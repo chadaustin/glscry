@@ -17,22 +17,27 @@ namespace scry {
         GeometryTest::setup();
 
         GeometryPtr geometry = getGeometry();
+
+        if (ArrayPtr i = geometry->indices) {
+            _buffers.push_back(createVBO(getIndices(), GL_ELEMENT_ARRAY_BUFFER_ARB));
+        }
+
         if (ArrayPtr v = geometry->vertices) {
-            _buffers.push_back(createVertexBuffer(getVertices()));
+            _buffers.push_back(createVBO(getVertices()));
 
             glEnableClientState(GL_VERTEX_ARRAY);
             glVertexPointer(v->getSize(), v->getTypeConstant(), 0, 0);
         }
 
         if (ArrayPtr c = geometry->colors) {
-            _buffers.push_back(createVertexBuffer(getColors()));
+            _buffers.push_back(createVBO(getColors()));
 
             glEnableClientState(GL_COLOR_ARRAY);
             glColorPointer(c->getSize(), c->getTypeConstant(), 0, 0);
         }
 
         if (ArrayPtr n = geometry->normals) {
-            _buffers.push_back(createVertexBuffer(getNormals()));
+            _buffers.push_back(createVBO(getNormals()));
 
             glEnableClientState(GL_NORMAL_ARRAY);
             assert(n->getSize() == 3);
@@ -40,7 +45,7 @@ namespace scry {
         }
 
         if (ArrayPtr t = geometry->texcoords) {
-            _buffers.push_back(createVertexBuffer(getTexCoords()));
+            _buffers.push_back(createVBO(getTexCoords()));
 
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glTexCoordPointer(t->getSize(), t->getTypeConstant(), 0, 0);
@@ -51,8 +56,14 @@ namespace scry {
         GeometryPtr geo = getGeometry();
 
         // In indexing support, use glDrawRangeElements or glDrawElements.
-
-        glDrawArrays(geo->getPrimitiveType(), 0, getVertexCountPerBatch());
+        if (ArrayPtr i = geo->indices) {
+            glDrawElements(geo->getPrimitiveType(),
+                           getVertexCountPerBatch(),
+                           i->getTypeConstant(),
+                           0);
+        } else {
+            glDrawArrays(geo->getPrimitiveType(), 0, getVertexCountPerBatch());
+        }
         results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();
         results[2] += getScreenCoverage();
@@ -65,17 +76,18 @@ namespace scry {
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
         for (size_t i = 0; i < _buffers.size(); ++i) {
             glDeleteBuffersARB(1, &_buffers[i]);
         }
     }
 
-    GLuint VertexBufferObjectTest::createVertexBuffer(const Buffer& buffer) {
+    GLuint VertexBufferObjectTest::createVBO(const Buffer& buffer, GLenum target) {
         GLuint handle;
         glGenBuffersARB(1, &handle);
-        glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
+        glBindBufferARB(target, handle);
         glBufferDataARB(
-            GL_ARRAY_BUFFER_ARB,
+            target,
             buffer.data.size(),
             buffer.data_ptr(),
             GL_STATIC_DRAW_ARB /* This should be settable. */);

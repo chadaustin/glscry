@@ -40,7 +40,16 @@ namespace scry {
 
     void VertexArrayTest::iterate(ResultSet& results) {
         GeometryPtr geometry = getGeometry();
-        glDrawArrays(geometry->getPrimitiveType(), 0, getVertexCountPerBatch());
+        if (ArrayPtr i = geometry->indices) {
+            glDrawElements(geometry->getPrimitiveType(),
+                           getVertexCountPerBatch(),
+                           i->getTypeConstant(),
+                           getIndices().data_ptr());
+        } else {
+            glDrawArrays(geometry->getPrimitiveType(),
+                         0,
+                         getVertexCountPerBatch());
+        }
         results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();
         results[2] += getScreenCoverage();

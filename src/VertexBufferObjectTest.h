@@ -28,7 +28,8 @@ namespace scry {
         void teardown();
 
     private:
-        GLuint createVertexBuffer(const Buffer& buffer);
+        GLuint createVBO(const Buffer& buffer,
+                         GLenum target = GL_ARRAY_BUFFER_ARB);
 
         std::vector<GLuint> _buffers;
     };
