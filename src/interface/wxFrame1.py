@@ -133,8 +133,10 @@ class wxFrame1(wxFrame):
         self.browse_button = wxButton(id=wxID_WXFRAME1BROWSE_BUTTON,
               label=u'Browse', name=u'browse_button', parent=self.panel1,
               pos=wxPoint(160, 16), size=wxSize(75, 23), style=0)
+        #EVT_BUTTON(self.browse_button, wxID_WXFRAME1BROWSE_BUTTON,
+        #      self.OnBrowse_buttonButton)
         EVT_BUTTON(self.browse_button, wxID_WXFRAME1BROWSE_BUTTON,
-              self.OnBrowse_buttonButton)
+              self.BuildFolder)      
 
         self.treeCtrl1 = wxTreeCtrl(id=wxID_WXFRAME1TREECTRL1, name='treeCtrl1',
               parent=self.panel1, pos=wxPoint(8, 56), size=wxSize(216, 536),
@@ -176,95 +178,48 @@ class wxFrame1(wxFrame):
         dlg.Destroy()    
     def OnMenu1Id_exitMenu(self, event):
         self.Close(true)
+  
+      #
+      #build tree according to root directory
+      #
+       
+    def BuildFolder(self, event):
 
-    def OnBrowse_buttonButton(self, event):
-        dlg = wxDirDialog(self, "Choose a directory:",
-                      style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
-        if dlg.ShowModal() == wxID_OK:
-            self.textCtrl1.Clear()
-            self.textCtrl1.WriteText(dlg.GetPath())
-        dlg.Destroy()
-    #tree ctrl functions
-    
-    def OnRightClick(self, event):
-        pt = event.GetPosition();
-        item, flags = self.treeCtrl1.HitTest(pt)
-        self.log.WriteText("OnRightClick: %s, %s, %s\n" %
-                           (self.treeCtrl1.GetItemText(item), type(item), item.__class__))
-        self.treeCtrl1.SelectItem(item)
+        dlg = wxDirDialog(self)
 
+        try:
+            if dlg.ShowModal() == wxID_OK:
+                dir = dlg.GetPath()
+                self.textCtrl1.Clear()
+                self.textCtrl1.WriteText(dir)
+                self.root = ""
+                self.treeCtrl1.DeleteAllItems()
+                self.StartBuildFromDir(dir)
+                self.treeCtrl1.Expand(self.root)
+        finally:
+            dlg.Destroy()
 
-    def OnRightUp(self, event):
-        pt = event.GetPosition();
-        item, flags = self.treeCtrl1.HitTest(pt)
-        self.log.WriteText("OnRightUp: %s (manually starting label edit)\n"
-                           % self.treeCtrl1.GetItemText(item))
-        self.treeCtrl1.EditLabel(item)
+    def StartBuildFromDir(self, dir):
+        rootname = os.path.split(dir)
+        self.root = self.treeCtrl1.AddRoot(rootname[1])
+        self.rootdir = dir
+        self.BuildChildrenFromDir(self.root, dir)
 
+    def BuildChildrenFromDir(self, parent, dir):
+        dirlisting = os.listdir(dir)
+        for listing in dirlisting:
+            pathinquestion = os.path.join(dir, listing)
+            if os.path.isfile(pathinquestion):
+                extension = os.path.splitext(pathinquestion)
+                extension = extension[1]
+                if extension == ".mp3":
+                    child = self.treeCtrl1.AppendItem(parent, listing)
+                    childdata = self.treeCtrl1.GetItemData(child)
+                    childdata.path = pathinquestion
+                    
+            elif os.path.isdir(pathinquestion):
+                newparent = self.treeCtrl1.AppendItem(parent, listing)
+                newdir = os.path.join(dir, listing)
+                self.BuildChildrenFromDir(newparent, newdir)
 
-
-    def OnBeginEdit(self, event):
-        self.log.WriteText("OnBeginEdit\n")
-        # show how to prevent edit...
-        if self.treeCtrl1.GetItemText(event.GetItem()) == "The Root Item":
-            wxBell()
-            self.log.WriteText("You can't edit this one...\n")
-
-            # Lets just see what's visible of its children
-            cookie = 0
-            root = event.GetItem()
-            (child, cookie) = self.treeCtrl1.GetFirstChild(root, cookie)
-            while child.IsOk():
-                self.log.WriteText("Child [%s] visible = %d" %
-                                   (self.treeCtrl1.GetItemText(child),
-                                    self.treeCtrl1.IsVisible(child)))
-                (child, cookie) = self.treeCtrl1.GetNextChild(root, cookie)
-
-            event.Veto()
-
-
-    def OnEndEdit(self, event):
-        self.log.WriteText("OnEndEdit\n")
-        # show how to reject edit, we'll not allow any digits
-        for x in event.GetLabel():
-            if x in string.digits:
-                self.log.WriteText("You can't enter digits...\n")
-                event.Veto()
-                return
-
-
-    def OnLeftDClick(self, event):
-        pt = event.GetPosition();
-        item, flags = self.treeCtrl1.HitTest(pt)
-        self.log.WriteText("OnLeftDClick: %s\n" % self.treeCtrl1.GetItemText(item))
-        parent = self.treeCtrl1.GetItemParent(item)
-        self.treeCtrl1.SortChildren(parent)
-        event.Skip()
-
-
-    def OnSize(self, event):
-        w,h = self.GetClientSizeTuple()
-        self.treeCtrl1.SetDimensions(0, 0, w, h)
-
-
-    def OnItemExpanded(self, event):
-        item = event.GetItem()
-        self.log.WriteText("OnItemExpanded: %s\n" % self.treeCtrl1.GetItemText(item))
-
-    def OnItemCollapsed(self, event):
-        item = event.GetItem()
-        self.log.WriteText("OnItemCollapsed: %s\n" % self.treeCtrl1.GetItemText(item))
-
-    def OnSelChanged(self, event):
-        self.item = event.GetItem()
-        self.log.WriteText("OnSelChanged: %s\n" % self.treeCtrl1.GetItemText(self.item))
-        if wxPlatform == '__WXMSW__':
-            self.log.WriteText("BoundingRect: %s\n" %
-                               self.treeCtrl1.GetBoundingRect(self.item, True))
-        #items = self.tree.GetSelections()
-        #print map(self.tree.GetItemText, items)
-        event.Skip()
-
-
-    def OnActivate(self, event):
-        self.log.WriteText("OnActivate: %s\n" % self.treeCtrl1.GetItemText(self.item))     
+   
