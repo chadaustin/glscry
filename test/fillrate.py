@@ -33,26 +33,31 @@ geo_vt = Geometry(GL_QUADS)
 geo_vt.vertices  = v
 geo_vt.texcoords = tc
 
-geo_vct = Geometry(GL_QUADS)
-geo_vct.vertices  = v
-geo_vct.colors    = c
-geo_vct.texcoords = tc
-
-texState = TextureState()
-texState.texture = Texture()
-texState.texture.minFilter = GL_NEAREST
-texState.texture.magFilter = GL_NEAREST
-
-stateSet = StateSet()
-stateSet.setState(texState)
-
 type = ImmediateTest
-test1 = type("Flat", geo_v)
-test2 = type("Gouraud", geo_vc)
-test3 = type("Tex", geo_vt)
-test3.addStateSet(stateSet)
-test4 = type("ColoredTex", geo_vct)
-test4.addStateSet(stateSet)
 
-results = runTests('Render Mode', [test1, test2, test3, test4], 1)
+def buildTextureTest(textureCount):
+    ts = TextureState()
+    for i in range(textureCount):
+        texture = Texture()
+        texture.minFilter = GL_NEAREST
+        texture.magFilter = GL_NEAREST
+        ts.setTexture(i, texture)
+
+    stateSet = StateSet()
+    stateSet.setState(ts)
+
+    test = type("%d Textures" % textureCount, geo_vt)
+    test.addStateSet(stateSet)
+    return test
+
+def buildTextureTests():
+    t = TextureState()
+    return [buildTextureTest(i) for i in range(t.textureCount + 1)]
+        
+
+testList = [type("Flat", geo_v), type("Gouraud", geo_vc)] + \
+           buildTextureTests()
+
+runFor = 0.1 # seconds
+results = runTests('Render Mode', testList, runFor)
 generateGraph('fillrate', results, 'FillRate')
