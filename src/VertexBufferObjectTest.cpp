@@ -146,12 +146,9 @@ namespace scry {
                     getStride(geometry->normals) +
                     getStride(geometry->texcoords);
 
-                SCRY_ASSERT(totalStride * getVertexArraySize() == totalSize,
+                SCRY_ASSERT(totalStride * getVertexArraySize() == totalSize &&
                             "Incorrect buffer size or stride.");
 
-                GLuint handle;
-                glGenBuffersARB(1, &handle);
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
                 std::vector<GLubyte> buffer(totalSize);
                 GLubyte* start = &buffer[0];
                 GLubyte* out = start;
@@ -160,7 +157,7 @@ namespace scry {
                     size_t stride = getStride(v);
                     const GLubyte* write = &(getVertices().data)[0];
                     for (size_t i = 0; i < getVertexArraySize(); ++i) {
-                        memcpy(out + totalStride * i, write + totalStride * i, stride);
+                        memcpy(out + totalStride * i, write + stride * i, stride);
                     }
                     out += stride;
                 }
@@ -169,7 +166,7 @@ namespace scry {
                     size_t stride = getStride(c);
                     const GLubyte* write = &(getColors().data)[0];
                     for (size_t i = 0; i < getVertexArraySize(); ++i) {
-                        memcpy(out + totalStride * i, write + totalStride * i, stride);
+                        memcpy(out + totalStride * i, write + stride * i, stride);
                     }
                     out += stride;
                 }
@@ -178,7 +175,7 @@ namespace scry {
                     size_t stride = getStride(n);
                     const GLubyte* write = &(getNormals().data)[0];
                     for (size_t i = 0; i < getVertexArraySize(); ++i) {
-                        memcpy(out + totalStride * i, write + totalStride * i, stride);
+                        memcpy(out + totalStride * i, write + stride * i, stride);
                     }
                     out += stride;
                 }
@@ -187,13 +184,16 @@ namespace scry {
                     size_t stride = getStride(t);
                     const GLubyte* write = &(getTexCoords().data)[0];
                     for (size_t i = 0; i < getVertexArraySize(); ++i) {
-                        memcpy(out + totalStride * i, write + totalStride * i, stride);
+                        memcpy(out + totalStride * i, write + stride * i, stride);
                     }
                     out += stride;
                 }
 
                 SCRY_ASSERT(out == start + totalStride &&
                             "We didn't write the same amount of data we said we would.");
+                GLuint handle;
+                glGenBuffersARB(1, &handle);
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
                 glBufferDataARB(GL_ARRAY_BUFFER_ARB, totalSize, start, _bufferType);
                 _buffers.push_back(handle);
 
