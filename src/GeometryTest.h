@@ -15,7 +15,9 @@ protected:
 
 public:
     SCRY_BEGIN_RESULT_DESCS()
-        SCRY_RESULT_DESC("VertexRate", "tri/s")
+        SCRY_RESULT_DESC("VertexRate", "vertex/s")
+        SCRY_RESULT_DESC("PrimitiveRate", "prim/s")
+        SCRY_RESULT_DESC("FillRate", "pixel/s")
     SCRY_END_RESULT_DESCS()
 
     static void bind();

@@ -49,7 +49,14 @@ public:
                 &vertexBuffer[0],
                 GL_STATIC_DRAW_ARB /* This should be settable. */);
 
-            ::glVertexPointer(v->getSize(), v->getTypeConstant(), 0, NULL);
+            glVertexPointer(v->getSize(), v->getTypeConstant(), 0, NULL);
+
+            _screenCoverage = calculateCoverage(
+                geometry->getPrimitiveType(),
+                v->getTypeConstant(),
+                v->getSize(),
+                _vertexCount,
+                &vertexBuffer[0]);
         }
     }
 
@@ -57,6 +64,8 @@ public:
         GeometryPtr geo = getGeometry();
         glDrawArrays(geo->getPrimitiveType(), 0, _vertexCount);
         results[0] += _vertexCount;
+        results[1] += getBatchSize();
+        results[2] += _screenCoverage;
     }
 
     void teardown() {
@@ -67,7 +76,8 @@ public:
     }
 
 private:
-    size_t _vertexCount;
+    Zeroed<size_t> _vertexCount;
+    Zeroed<size_t> _screenCoverage;
     GLuint _buffer;
 };
 SCRY_REF_PTR(VertexBufferObjectTest);

@@ -6,24 +6,11 @@
 #include <vector>
 #include <gmtl/gmtl.h>
 #include "glew.h"
+#include "GLUtility.h"
 #include "RefCounted.h"
 
 
 namespace scry {
-
-
-    template<typename T>
-    struct GLTypeConstant { };
-
-    template<>
-    struct GLTypeConstant<float> {
-        enum { Result = GL_FLOAT };
-    };
-
-    template<>
-    struct GLTypeConstant<double> {
-        enum { Result = GL_DOUBLE };
-    };
 
 
     class Array : public RefCounted {
@@ -112,6 +99,8 @@ namespace scry {
         }
 
         ArrayPtr vertices;
+        ArrayPtr colors;
+        ArrayPtr normals;
 
     private:
         GLenum _primitiveType;

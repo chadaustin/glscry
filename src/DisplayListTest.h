@@ -37,6 +37,13 @@ public:
             v->build(&vertexBuffer[0], _vertexCount);
 
             vertexPump = getVertexPump(v->getTypeConstant(), v->getSize());
+
+            _screenCoverage = calculateCoverage(
+                geometry->getPrimitiveType(),
+                v->getTypeConstant(),
+                v->getSize(),
+                _vertexCount,
+                &vertexBuffer[0]);
         }
 
 
@@ -58,6 +65,8 @@ public:
     void iterate(ResultSet& results) {
         glCallList(_list);
         results[0] += _vertexCount;
+        results[1] += getBatchSize();
+        results[2] += _screenCoverage;
     }
 
     void teardown() {
@@ -65,7 +74,8 @@ public:
     }
 
 private:
-    size_t _vertexCount;
+    Zeroed<size_t> _vertexCount;
+    Zeroed<size_t> _screenCoverage;
     GLuint _list;
 };
 SCRY_REF_PTR(DisplayListTest);

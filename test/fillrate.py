@@ -13,19 +13,14 @@ g = (0, 1, 0)
 b = (0, 0, 1)
 w = (1, 1, 1)
 
-ul = (0, 0)
-ll = (0, 1)
-lr = (1, 1)
-ur = (1, 0)
+ul_tc = (0, 0)
+ll_tc = (0, 1)
+lr_tc = (1, 1)
+ur_tc = (1, 0)
 
-v = Arrayf(2)
-v.repeat = [ul, ll, lr, ur]
-
-c = Arrayf(3)
-c.repeat = [r, g, b, w]
-
-tc = Arrayf(2)
-tc.repeat = [ul_tc, ll_tc, lr_tc, ur_tc]
+v  = defineArray(2, [ul, ll, lr, ur])
+c  = defineArray(3, [r, g, b, w])
+tc = defineArray(2, [ul_tc, ll_tc, lr_tc, ur_tc])
 
 geo_v = Geometry(GL_QUADS)
 geo_v.vertices = v
@@ -43,7 +38,7 @@ geo_vct.vertices  = v
 geo_vct.colors    = c
 geo_vct.texcoords = tc
 
-type = CompiledVertexArrayTest
+type = ImmediateTest
 test1 = type("Flat", geo_v)
 test2 = type("Gouraud", geo_vc)
 test3 = type("Tex", geo_vt)

@@ -21,7 +21,9 @@ namespace scry {
         class_<Geometry, GeometryPtr, boost::noncopyable>
             ("Geometry", no_init)
             .def(init<GLenum>())
-            .def_readwrite("vertices", &Geometry::vertices);
+            .def_readwrite("vertices", &Geometry::vertices)
+            .def_readwrite("colors",   &Geometry::colors)
+            .def_readwrite("normals",  &Geometry::normals);
 
     }
 

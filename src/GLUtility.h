@@ -2,12 +2,42 @@
 #define SCRY_GL_UTILITY_H
 
 
+#include <stdexcept>
 #include <vector>
 #include <gmtl/gmtl.h>
 #include "Base.h"
 
 
 SCRY_BEGIN_NAMESPACE
+
+
+template<typename Type>
+struct GLTypeConstant;
+
+template<>
+struct GLTypeConstant<float> {
+    enum { Result = GL_FLOAT };
+};
+
+template<>
+struct GLTypeConstant<double> {
+    enum { Result = GL_DOUBLE };
+};
+
+
+template<GLenum TypeConstant>
+struct GLType;
+
+template<>
+struct GLType<GL_FLOAT> {
+    typedef float Result;
+};
+
+template<>
+struct GLType<GL_DOUBLE> {
+    typedef double Result;
+};
+
 
 template<size_t size, typename T>
 const void* glVertex(const void* data);

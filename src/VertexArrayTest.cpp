@@ -26,12 +26,21 @@ namespace scry {
            
             glVertexPointer(v->getSize(), v->getTypeConstant(),
                             0, &_vertexBuffer[0]);
+
+            _screenCoverage = calculateCoverage(
+                geometry->getPrimitiveType(),
+                v->getTypeConstant(),
+                v->getSize(),
+                _vertexCount,
+                &_vertexBuffer[0]);
         }
     }
 
     void VertexArrayTest::iterate(ResultSet& results) {
         glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
         results[0] += _vertexCount;
+        results[1] += getBatchSize();
+        results[2] += _screenCoverage;
     }
 
     void VertexArrayTest::teardown() {

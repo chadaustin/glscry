@@ -35,6 +35,13 @@ public:
             v->build(&_vertexBuffer[0], _vertexCount);
 
             _vertexPump = getVertexPump(v->getTypeConstant(), v->getSize());
+
+            _screenCoverage = calculateCoverage(
+                geometry->getPrimitiveType(),
+                v->getTypeConstant(),
+                v->getSize(),
+                _vertexCount,
+                &_vertexBuffer[0]);
         }
     }
 
@@ -43,19 +50,25 @@ public:
 
         const void* data = &_vertexBuffer[0];
 
-        glBegin(geometry->getPrimitiveType());
-        for (size_t i = 0; i < _vertexCount; ++i) {
-            if (_vertexPump) {
-                data = _vertexPump(data);
+        if (VertexPump pump = _vertexPump) {
+            glBegin(geometry->getPrimitiveType());
+            for (size_t i = 0; i < _vertexCount; ++i) {
+                data = pump(data);
             }
+            glEnd();
+        } else {
+            glBegin(geometry->getPrimitiveType());
+            glEnd();
         }
-        glEnd();
         
         results[0] += _vertexCount;
+        results[1] += getBatchSize();
+        results[2] += _screenCoverage;
     }
 
 private:
-    size_t _vertexCount;
+    Zeroed<size_t> _vertexCount;
+    Zeroed<size_t> _screenCoverage;
     std::vector<GLubyte> _vertexBuffer;
     Zeroed<VertexPump> _vertexPump;
 };

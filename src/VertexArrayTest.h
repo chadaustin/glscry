@@ -29,6 +29,7 @@ public:
 
 private:
     Zeroed<size_t> _vertexCount;
+    Zeroed<size_t> _screenCoverage;
     std::vector<GLubyte> _vertexBuffer;
 };
 SCRY_REF_PTR(VertexArrayTest);
