@@ -33,7 +33,8 @@ if env['PLATFORM'] in ['cygwin', 'win32']:
     env.Append(CPPDEFINES=['WIN32', '_WIN32'])
 
 if env.subst('$CC') == 'gcc':
-    env.Append(CCFLAGS=['-O2', '-Wall'])
+    env.Append(CCFLAGS=['-Wall', '-g'])
+    #env.Append(CCFLAGS=['-O2', '-Wall'])
 
 env.Append(CPPDEFINES=['GLEW_STATIC'])
 env.Append(CPPPATH=['src/gmtl-python'])
@@ -156,7 +157,7 @@ gmtlPythonSources = Split("""
 modulename = env.subst('_glscry$SHLIBSUFFIX')
 module = env.SharedLibrary(
     File(modulename),
-    [os.path.join('src', s) for s in sources] +
+    [os.path.join('src', s) for s in sources] + \
     [os.path.join('src/gmtl-python', s) for s in gmtlPythonSources])
 
 

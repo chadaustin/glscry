@@ -13,22 +13,22 @@ g = (0, 1, 0)
 b = (0, 0, 1)
 w = (1, 1, 1)
 
-ul = (0, 0)
-ll = (0, 1)
-lr = (1, 1)
-ur = (1, 0)
+ul_tc = (0, 0)
+ll_tc = (0, 1)
+lr_tc = (1, 1)
+ur_tc = (1, 0)
 
 v = Arrayf(2)
-v.repeat = [ul, ll, lr, ur]
+v.repeat[:] = flatten([ul, ll, lr, ur])
 
 c = Arrayf(3)
-c.repeat = [r, g, b, w]
+c.repeat[:] = flatten([r, g, b, w])
 
 n = Arrayf(3)
-n.repeat = [r, g, b, w]
+n.repeat[:] = flatten([r, g, b, w])
 
 tc = Arrayf(2)
-tc.repeat = [ul_tc, ll_tc, lr_tc, ur_tc]
+tc.repeat[:] = flatten([ul_tc, ll_tc, lr_tc, ur_tc])
 
 geo_v = Geometry(GL_TRIANGLES)
 geo_v.vertices = v
