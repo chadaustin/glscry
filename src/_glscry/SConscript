@@ -23,6 +23,7 @@ sources = Split("""
     LightState.cpp
     LineState.cpp
     MaterialState.cpp
+    ShaderState.cpp
     TextureState.cpp
 
     Test.cpp

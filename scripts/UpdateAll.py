@@ -16,10 +16,10 @@ def main(argv=sys.argv):
     os.chdir(projectDir)
     
     header = 'scripts/header.txt'
-    sources = ['run.py', 'glscry.py'] + \
-              glob.glob('src/*.cpp') + \
-              glob.glob('src/*.h') + \
-              glob.glob('src/*.c')
+    sources = ['run.py', 'src/glscry.py'] + \
+              glob.glob('src/_glscry/*.cpp') + \
+              glob.glob('src/_glscry/*.h') + \
+              glob.glob('src/_glscry/*.c')
 
     exceptions = ['glew.c', 'glew.h', 'wglew.h', 'glxew.h',
                   'CPUInfo.h', 'CPUInfo.cpp']

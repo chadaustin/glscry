@@ -23,6 +23,7 @@
 #include "LightState.h"
 #include "LineState.h"
 #include "MaterialState.h"
+#include "ShaderState.h"
 #include "TextureState.h"
 
 #include "Geometry.h"
@@ -70,6 +71,7 @@ BOOST_PYTHON_MODULE(_glscry) {
     LightState::bind();
     LineState::bind();
     MaterialState::bind();
+    ShaderState::bind();
     TextureState::bind();
 
     // Actions.
