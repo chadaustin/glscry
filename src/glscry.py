@@ -335,6 +335,14 @@ def addIf(list, value):
         return list
 
 
+def div(num, den):
+    if den == 0:
+        return 0
+    else:
+        return num / den
+        
+
+
 def _generateActualGraph(filename, graphLineList, measured,
                          xunits=None, graphType=GraphType.BAR, normalizeBy=None):
 
@@ -378,7 +386,7 @@ def _generateActualGraph(filename, graphLineList, measured,
     if normalizeBy:
         for i in range(resultCount):
             for j in range(lineCount):
-                print >> of, resultMatrix[j][i] / normalizeBy[i],
+                print >> of, div(resultMatrix[j][i], normalizeBy[i]),
             print >> of
     else:
         for i in range(resultCount):
