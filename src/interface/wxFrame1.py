@@ -9,8 +9,9 @@ def create(parent):
 
 [wxID_WXFRAME1, wxID_WXFRAME1BROWSE_BUTTON, wxID_WXFRAME1GRAPH_BUTTON, 
  wxID_WXFRAME1NOTEBOOK1, wxID_WXFRAME1PANEL1, wxID_WXFRAME1PANEL2, 
- wxID_WXFRAME1TEXTCTRL1, wxID_WXFRAME1TREECTRL1, wxID_WXFRAME1WINDOW1, 
-] = map(lambda _init_ctrls: wxNewId(), range(9))
+ wxID_WXFRAME1STATICBITMAP1, wxID_WXFRAME1TEXTCTRL1, wxID_WXFRAME1TREECTRL1, 
+ wxID_WXFRAME1WINDOW1, 
+] = map(lambda _init_ctrls: wxNewId(), range(10))
 
 [wxID_WXFRAME1MENU1ID_EXIT, wxID_WXFRAME1MENU1ID_NEW, 
  wxID_WXFRAME1MENU1ID_OPEN, wxID_WXFRAME1MENU1ID_SAVE, 
@@ -133,10 +134,8 @@ class wxFrame1(wxFrame):
         self.browse_button = wxButton(id=wxID_WXFRAME1BROWSE_BUTTON,
               label=u'Browse', name=u'browse_button', parent=self.panel1,
               pos=wxPoint(160, 16), size=wxSize(75, 23), style=0)
-        #EVT_BUTTON(self.browse_button, wxID_WXFRAME1BROWSE_BUTTON,
-        #      self.OnBrowse_buttonButton)
         EVT_BUTTON(self.browse_button, wxID_WXFRAME1BROWSE_BUTTON,
-              self.BuildFolder)      
+              self.BuildFolder)
 
         self.treeCtrl1 = wxTreeCtrl(id=wxID_WXFRAME1TREECTRL1, name='treeCtrl1',
               parent=self.panel1, pos=wxPoint(8, 56), size=wxSize(216, 536),
@@ -145,6 +144,15 @@ class wxFrame1(wxFrame):
         self.graph_button = wxButton(id=wxID_WXFRAME1GRAPH_BUTTON,
               label=u'Graph', name=u'graph_button', parent=self.panel1,
               pos=wxPoint(160, 608), size=wxSize(75, 31), style=0)
+        EVT_BUTTON(self.graph_button, wxID_WXFRAME1GRAPH_BUTTON, self.loadGraph)
+        
+        self.image = 'blank.png'
+        self.staticBitmap1 = wxStaticBitmap(bitmap=wxBitmap(self.image, 
+              wxBITMAP_TYPE_PNG), id=wxID_WXFRAME1STATICBITMAP1,
+              name='staticBitmap1', parent=self.window1, pos=wxPoint(0, 0),
+              size=wxSize(775, 692), style=0)
+        self.staticBitmap1.SetAutoLayout(True)
+        self.staticBitmap1.Center(wxBOTH)
 
         self._init_coll_notebook1_Pages(self.notebook1)
 
@@ -178,6 +186,15 @@ class wxFrame1(wxFrame):
         dlg.Destroy()    
     def OnMenu1Id_exitMenu(self, event):
         self.Close(true)
+    
+    def loadGraph(self, event):
+        selected = self.treeCtrl1.GetSelection()
+        #obj = eval(open(self.treeCtrl1.GetSelections()).read())
+        #d= wxMessageDialog( self, selected , wxOK | wxICON_INFORMATION)
+        #d.ShowModal()
+        #d.Destroy()    
+        
+        
   
       #
       #build tree according to root directory
@@ -212,7 +229,7 @@ class wxFrame1(wxFrame):
             if os.path.isfile(pathinquestion):
                 extension = os.path.splitext(pathinquestion)
                 extension = extension[1]
-                if extension == ".mp3":
+                if extension == ".png":
                     child = self.treeCtrl1.AppendItem(parent, listing)
                     childdata = self.treeCtrl1.GetItemData(child)
                     childdata.path = pathinquestion
