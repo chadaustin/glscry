@@ -47,7 +47,7 @@ namespace scry {
             _storageMode = storageMode;
         }
 
-        bool supported() const {
+        bool isSupported() const {
             return GLEW_ARB_vertex_buffer_object != 0;
         }
 

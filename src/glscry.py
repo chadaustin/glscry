@@ -225,15 +225,17 @@ def runTest(test, runFor, resultName=None, printedName=None):
 
     GLError = RuntimeError
     try:
+        print "\nRunning test '%s'" % printedName
+        
         if test.isSupported():
-            print "\nRunning test '%s'" % printedName
-
             resultSet = test.run(runFor)
 
             for value, desc in zip(resultSet, test.getResultDescs()):
                 print "  %s = %s %s" % (desc.name, value, desc.units)
 
             return makeResultSet(resultSet)
+        else:
+            print "  Unsupported"
 
     except GLError, e:
         print e

@@ -33,7 +33,7 @@ namespace scry {
         : GeometryTest(name, geo) {
         }
 
-        bool supported() const {
+        bool isSupported() const {
             return GLEW_EXT_compiled_vertex_array != 0;
         }
 

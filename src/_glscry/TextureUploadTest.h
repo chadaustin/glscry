@@ -42,14 +42,6 @@ namespace scry {
         int getType() const    { return _type; }
         void setType(int type) { _type = type; }
 
-        const char* name() const {
-            return "TextureUploadTest";
-        }
-
-        bool supported() const {
-            return true;
-        }
-
         SCRY_BEGIN_RESULT_DESCS()
             SCRY_RESULT_DESC("PixelRate", "pixels/sec")
             SCRY_RESULT_DESC("ByteRate",  "bytes/sec")

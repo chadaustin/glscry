@@ -39,10 +39,6 @@ namespace scry {
         : Test(name) {
         }
 
-        const char* name() const {
-            return "TextureMemoryTest";
-        }
-
         size_t getTextureCount() const {
             return _textureCount;
         }
