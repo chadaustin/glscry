@@ -19,17 +19,24 @@ using namespace boost::python;
 namespace scry {
 
     void VertexArrayTest::bind() {
-        class_<VertexArrayTest, VertexArrayTestPtr, bases<GeometryTest>,
-            boost::noncopyable>("VertexArrayTest", no_init)
-            .def(init<const char*, GeometryPtr>());
+        typedef VertexArrayTest C;
+        typedef VertexArrayTestPtr CPtr;
+        class_<C, CPtr, bases<GeometryTest>, boost::noncopyable>
+            ("VertexArrayTest", no_init)
+            .def(init<const char*, GeometryPtr>())
+            .def_readwrite("compiled", &C::compiled)
+            ;
 
-        implicitly_convertible<VertexArrayTestPtr, GeometryTestPtr>();
+        implicitly_convertible<CPtr, GeometryTestPtr>();
     }
 
     void VertexArrayTest::setup() {
         GeometryTest::setup();
 
         enableArrays();
+        if (compiled) {
+            glLockArraysEXT(0, getVertexArraySize());
+        }
     }
 
     void VertexArrayTest::iterate(ResultValues& results) {
@@ -51,6 +58,9 @@ namespace scry {
     }
 
     void VertexArrayTest::teardown() {
+        if (compiled) {
+            glUnlockArraysEXT();
+        }
         disableArrays();
     }
 

@@ -122,6 +122,12 @@ def uniquePowerRange(low, high, power):
     return make_unique(list)
 
 
+def CompiledVertexArrayTest(name, geo):
+    test = VertexArrayTest(name, geo)
+    test.compiled = True
+    return test
+
+
 def writeID(file):
     class Property:
         def __init__(self, name, value):

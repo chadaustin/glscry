@@ -31,11 +31,20 @@ namespace scry {
 
         VertexArrayTest(const char* name, GeometryPtr geo)
         : GeometryTest(name, geo) {
+            compiled = false;
+        }
+
+        bool isSupported() const {
+            return compiled
+                ? bool(GLEW_EXT_compiled_vertex_array)
+                : true;
         }
 
         void setup();
         void iterate(ResultValues& results);
         void teardown();
+
+        bool compiled;
     };
     SCRY_REF_PTR(VertexArrayTest);
 

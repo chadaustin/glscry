@@ -30,7 +30,6 @@
 #include "ImmediateTest.h"
 #include "DisplayListTest.h"
 #include "VertexArrayTest.h"
-#include "CompiledVertexArrayTest.h"
 #include "VertexBufferObjectTest.h"
 
 #include "CopyPixelTest.h"
@@ -101,7 +100,6 @@ BOOST_PYTHON_MODULE(_glscry) {
     ImmediateTest::bind();
     DisplayListTest::bind();
     VertexArrayTest::bind();
-    CompiledVertexArrayTest::bind();
     VertexBufferObjectTest::bind();
 
     warnings.attr("resetwarnings")();
