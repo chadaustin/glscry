@@ -1,6 +1,6 @@
 from glscry import *
 
-runFor = 4 # seconds
+runFor = 5 # seconds
 
 gridSize = 100  # width and height of grid on which geometry is generated.
 stripCount = 100
@@ -56,14 +56,39 @@ def buildBatchedTest(stripLength):
         i=defineArray(Array_ui, 1, indices))
     return testType(str(stripLength), geo_batched)
 
+def buildTriListTest(stripLength):
+    indices = []
+    
+    for y in xrange(stripCount):
+        for t in xrange(stripLength):
+            x = t / 2
+            if t % 2 == 0:
+                indices += [
+                    idx(x,   y),
+                    idx(x,   y+1),
+                    idx(x+1, y) ]
+            else:
+                indices += [
+                    idx(x+1, y),
+                    idx(x,   y+1),
+                    idx(x+1, y+1) ]
+
+    assert len(indices) % 3 == 0
+    geo_trilist = buildGeometry(
+        (GL_TRIANGLES, stripLength * stripCount),
+        v=defineArray(Array_f, 2, grid),
+        i=defineArray(Array_ui, 1, indices))
+    return testType(str(stripLength), geo_trilist)
 
 samples = xrange(1, gridSize, 3)
 degenerateTests = [buildDegenerateTest(stripLength) for stripLength in samples]
 batchedTests    = [buildBatchedTest(stripLength)    for stripLength in samples]
+trilistTests    = [buildTriListTest(stripLength)    for stripLength in samples]
 
-degenerateResultList = runTests('Degenerate', degenerateTests, runFor)
-batchedResultList    = runTests('Batched',    batchedTests,    runFor)
+testList = [
+    runTests('Degenerate Triangles', degenerateTests, runFor),
+    runTests('Separate Strips',      batchedTests,    runFor),
+    runTests('Triangle Lists',       trilistTests,    runFor) ]
 
 # Using the test results, generate a gnuplot graph script.
-generateGraph('tristrip', [degenerateResultList, batchedResultList],
-              'VertexRate', xlabel='Strip Length')
+generateGraph('tristrip', testList, 'PrimitiveRate', xlabel='Strip Length')

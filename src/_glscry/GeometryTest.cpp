@@ -71,15 +71,17 @@ namespace scry {
             defineBuffer(_buffers.vertices, v, getVertexArraySize(),
                          "vertices", FunctionPumpFactory(getVertexPump));
 
-            // @todo: THIS IS WRONG WHEN USING INDEXED GEOMETRY
-            // @todo: It is also wrong when using transform matrices.
-            for (size_t i = 0; i < geometry->batches.size(); ++i) {
-                _screenCoverage += calculateCoverage(
-                    geometry->batches[i].primitiveType,
-                    v->getTypeConstant(),
-                    v->getVectorSize(),
-                    geometry->batches[i].getVertexCount(),
-                    _buffers.vertices.data_ptr());
+            if (!geometry->indices) {
+                // @todo: THIS IS WRONG WHEN USING INDEXED GEOMETRY
+                // @todo: It is also wrong when using transform matrices.
+                for (size_t i = 0; i < geometry->batches.size(); ++i) {
+                    _screenCoverage += calculateCoverage(
+                        geometry->batches[i].primitiveType,
+                        v->getTypeConstant(),
+                        v->getVectorSize(),
+                        geometry->batches[i].getVertexCount(),
+                        _buffers.vertices.data_ptr());
+                }
             }
         }
 
