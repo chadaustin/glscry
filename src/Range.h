@@ -28,7 +28,7 @@ namespace scry {
     public:
         static void bind();
 
-        LinearRange(size_t begin, size_t end, size_t step = 1) {
+        LinearRange(float begin, float end, float step = 1) {
             SCRY_ASSERT(step > 0);
 
             _begin = begin;
@@ -43,17 +43,17 @@ namespace scry {
                 _current = _begin;
                 return false;
             }
-            out = _current;
+            out = static_cast<size_t>(_current);
             _current += _step;
             return true;
         }
 
     private:
-        size_t _begin;
-        size_t _end;
-        size_t _step;
+        float _begin;
+        float _end;
+        float _step;
 
-        size_t _current;
+        float _current;
     };
     SCRY_REF_PTR(LinearRange);
 
@@ -65,7 +65,7 @@ namespace scry {
     public:
         static void bind();
 
-        PowerRange(size_t begin, size_t end, size_t power = 2) {
+        PowerRange(float begin, float end, float power = 2) {
             _begin = begin;
             _end   = end;
             _power = power;
@@ -79,17 +79,17 @@ namespace scry {
                 return false;
             }
             // It's too bad there's not an integer version of pow().
-            out = static_cast<size_t>(pow(double(_power), double(_current)));
+            out = static_cast<size_t>(pow(_power, _current));
             _current += 1;
             return true;
         }
 
     private:
-        size_t _begin;
-        size_t _end;
-        size_t _power;
+        float _begin;
+        float _end;
+        float _power;
 
-        size_t _current;
+        float _current;
     };
     SCRY_REF_PTR(PowerRange);
 

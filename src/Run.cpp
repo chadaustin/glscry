@@ -7,6 +7,16 @@
 
 namespace scry {
 
+    std::string getTitle() {
+        std::ostringstream title;
+        const GLubyte* vendor = glGetString(GL_VENDOR);
+        const GLubyte* renderer = glGetString(GL_RENDERER);
+        const GLubyte* version  = glGetString(GL_VERSION);
+        title << "(" << vendor << "), (" << renderer << "), ("
+              << version << ")";
+        return title.str();
+    }
+
     void generateBarGraph(
         const string& datafile,
         const std::vector<TestPtr>& testList,
@@ -23,12 +33,13 @@ namespace scry {
 
         plot << "#!/bin/sh" << std::endl
              << std::endl
-             << "cat <<EOF | gnuplot" << std::endl
-             << "set terminal png" << std::endl
-             << "set output \"" << datafile << ".png\"" << std::endl
-             << "set xrange [-0.5:" << testList.size() - 0.5f << "]" << std::endl
-             << "set yrange [0:*]" << std::endl
-             << "set ylabel \"" << resultUnits << "\"" << std::endl;
+             << "cat <<EOF | gnuplot\n"
+             << "set terminal png size 1000\n"
+             << "set output \"" << datafile << ".png\\n"
+             << "set title \"" << getTitle() << "\"\n"
+             << "set xrange [-0.5:" << testList.size() - 0.5f << "]\n"
+             << "set yrange [0:*]\n"
+             << "set ylabel \"" << resultUnits << "\"\n" << std::flush;
 
         plot << "set xtics (";
         for (size_t i = 0; i < testList.size(); ++i) {
@@ -62,12 +73,13 @@ namespace scry {
 
         plot << "#!/bin/sh" << std::endl
              << std::endl
-             << "cat <<EOF | gnuplot" << std::endl
-             << "set terminal png" << std::endl
-             << "set output \"" << datafile << ".png\"" << std::endl
-             << "set yrange [0:*]" << std::endl
-             << "set xlabel \"" << indVar << "\"" << std::endl
-             << "set ylabel \"" << resultUnits << "\"" << std::endl;
+             << "cat <<EOF | gnuplot\n"
+             << "set terminal png size 1000\n"
+             << "set output \"" << datafile << ".png\"\n"
+             << "set title \"" << getTitle() << "\"\n"
+             << "set yrange [0:*]\n"
+             << "set xlabel \"" << indVar << "\"\n"
+             << "set ylabel \"" << resultUnits << "\"\n" << std::flush;
 
         plot << "set xtics (";
         size_t count = 0;
@@ -95,7 +107,8 @@ namespace scry {
 
 
     void output(std::ostream& os, TestPtr test, const ResultSet& results,
-                const std::string& depVar
+                const std::string& depVar, const char* indVar = 0,
+                const size_t* indValue = 0
     ) {
         std::vector<ResultDesc> descs;
         test->getResultDescs(descs);
@@ -114,10 +127,20 @@ namespace scry {
     
         os << results[resultIndex] << " ";
 
-        std::cout << "  " << test->getName() << ": "
+        std::cout << "  " << test->getName();
+        if (indVar && indValue) {
+            std::cout << '(' << indVar << '=' << *indValue << ')';
+        }
+        std::cout << ": "
                   << descs[resultIndex].name << " = "
                   << Uint64(results[resultIndex]) << " "
                   << descs[resultIndex].units << std::endl;
+    }
+
+    void writeID(std::ostream& os) {
+        os << "# Vendor = " << glGetString(GL_VENDOR) << "\n"
+           << "# Renderer = " << glGetString(GL_RENDERER) << "\n"
+           << "# Version = " << glGetString(GL_VERSION) << "\n";
     }
 
     void flip() {
@@ -140,6 +163,8 @@ namespace scry {
         if (!of) {
             throw std::runtime_error("Could not open " + filename);
         }
+
+        writeID(of);
 
         for (size_t i = 0; i < testList.size(); ++i) {
             betweenTests();
@@ -178,6 +203,8 @@ namespace scry {
             throw std::runtime_error("Could not open " + filename);
         }
 
+        writeID(of);
+
         size_t indValue;
         while (range->next(indValue)) {
             for (size_t i = 0; i < testList.size(); ++i) {
@@ -187,7 +214,8 @@ namespace scry {
                 test->setProperty(indVar, indValue);
                 if (test->isSupported()) {
                     ResultSet results = test->run(runFor);
-                    output(of, test, results, depVar);
+                    output(of, test, results, depVar,
+                           indVar.c_str(), &indValue);
                 } else {
                     // output a zero
                 }

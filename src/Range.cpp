@@ -11,7 +11,7 @@ namespace scry {
     void LinearRange::bind() {
         class_<LinearRange, LinearRangePtr, boost::noncopyable>
             ("LinearRange", no_init)
-            .def(init< size_t, size_t, optional<size_t> >());
+            .def(init< float, float, optional<float> >());
         
         implicitly_convertible<LinearRangePtr, RangePtr>();
     }
@@ -19,7 +19,7 @@ namespace scry {
     void PowerRange::bind() {
         class_<PowerRange, PowerRangePtr, boost::noncopyable>
             ("PowerRange", no_init)
-            .def(init< size_t, size_t, optional<size_t> >());
+            .def(init< float, float, optional<float> >());
 
         implicitly_convertible<PowerRangePtr, RangePtr>();
     }
