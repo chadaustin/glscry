@@ -90,11 +90,14 @@ namespace scry {
         Texture::bind();
 
         typedef TextureState C;
-        class_<C, TextureStatePtr, bases<State>, boost::noncopyable>
+        typedef TextureStatePtr CPtr;
+        class_<C, CPtr, bases<State>, boost::noncopyable>
             ("TextureState", no_init)
             .def(init<>())
             .add_property("texture", &C::getTexture, &C::setTexture)
             ;
+
+        implicitly_convertible<CPtr, StatePtr>();
     }
 
     TextureState* TextureState::clone() const {

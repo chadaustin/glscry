@@ -32,7 +32,7 @@ namespace scry {
 
     void StateSet::bind() {
         class_<StateSet, StateSetPtr, boost::noncopyable>("StateSet", no_init)
-            .def(init<>())
+            .def(init< optional<StatePtr> >())
             .def("setState", &StateSet::setState)
             ;
     }

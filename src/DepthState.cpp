@@ -11,7 +11,9 @@ namespace scry {
         class_<C, CPtr, bases<State>, boost::noncopyable>
             ("DepthState", no_init)
             .def(init<>())
-            .add_property("depthTest", &C::getDepthTest, &C::setDepthTest)
+            .add_property("enableDepthTest", &C::getEnableDepthTest, &C::setEnableDepthTest)
+            .add_property("depthFunc", &C::getDepthFunc, &C::setDepthFunc)
+            .add_property("depthMask", &C::getDepthMask, &C::setDepthMask)
             ;
 
         implicitly_convertible<CPtr, StatePtr>();
@@ -33,6 +35,17 @@ namespace scry {
         ) {
             glSetEnabled(GL_DEPTH_TEST, ds._enableDepthTest);
         }
+
+        if (fullStateSwitch || _depthFunc != ds._depthFunc
+        ) {
+            glDepthFunc(ds._depthFunc);
+        }
+
+        if (fullStateSwitch || _depthMask != ds._depthMask
+        ) {
+            glDepthMask(ds._depthMask);
+        }
+
     }
 
 }

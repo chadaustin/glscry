@@ -83,7 +83,7 @@ namespace scry {
                 _actionList[i]->execute();
             }
 
-            checkOpenGLErrors();
+            //checkOpenGLErrors();
 
             if (!_stateSetList.empty()) {
                 setCurrentStateSet(_stateSetList[currentStateSet],
@@ -93,7 +93,7 @@ namespace scry {
                 setCurrentStateSet(0, _fullStateSwitch);
             }
 
-            checkOpenGLErrors();
+            //checkOpenGLErrors();
 
             iterate(results);
 

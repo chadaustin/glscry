@@ -7,6 +7,7 @@
 #include <boost/python/detail/api_placeholder.hpp> // for len()
 #include "Context.h"
 
+#include "BlendState.h"
 #include "ColorBufferState.h"
 #include "DepthState.h"
 #include "LightState.h"
@@ -49,6 +50,7 @@ BOOST_PYTHON_MODULE(_glscry) {
     // States.
     StateSet::bind();
     State::bind();
+    BlendState::bind();
     ColorBufferState::bind();
     DepthState::bind();
     LightState::bind();

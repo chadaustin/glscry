@@ -11,10 +11,19 @@
 namespace scry {
 
     class StateSet : public RefCounted {
+    protected:
+        ~StateSet() { }
+
     public:
         static void bind();
 
-        void setState(State* state) {
+        StateSet(const StatePtr& initial = 0) {
+            if (initial) {
+                setState(initial);
+            }
+        }
+
+        void setState(const StatePtr& state) {
             _states[typeid(*state)] = state;
         }
         

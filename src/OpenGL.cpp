@@ -12,6 +12,10 @@ namespace scry {
     void bindOpenGL() {
 #define DEF(name) scope().attr((#name)) = (name)
 
+        // Boolean.
+        DEF(GL_TRUE);
+        DEF(GL_FALSE);
+
         // Data types.
         DEF(GL_BYTE);
         DEF(GL_UNSIGNED_BYTE);
@@ -84,6 +88,27 @@ namespace scry {
         DEF(GL_DEPTH_BUFFER_BIT);
         DEF(GL_ACCUM_BUFFER_BIT);
         DEF(GL_STENCIL_BUFFER_BIT);
+
+        DEF(GL_NEVER);
+        DEF(GL_LESS);
+        DEF(GL_LEQUAL);
+        DEF(GL_EQUAL);
+        DEF(GL_GREATER);
+        DEF(GL_NOTEQUAL);
+        DEF(GL_GEQUAL);
+        DEF(GL_ALWAYS);
+
+        DEF(GL_ZERO);
+        DEF(GL_ONE);
+        DEF(GL_SRC_COLOR);
+        DEF(GL_ONE_MINUS_SRC_COLOR);
+        DEF(GL_DST_COLOR);
+        DEF(GL_ONE_MINUS_DST_COLOR);
+        DEF(GL_SRC_ALPHA);
+        DEF(GL_ONE_MINUS_SRC_ALPHA);
+        DEF(GL_DST_ALPHA);
+        DEF(GL_ONE_MINUS_DST_ALPHA);
+        DEF(GL_SRC_ALPHA_SATURATE);
 
         def("glGetString", glGetString);
     }
