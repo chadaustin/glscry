@@ -29,7 +29,7 @@ geo_vc = Geometry(GL_QUADS)
 geo_vc.vertices = v
 geo_vc.colors   = c
 
-type = ImmediateTest
+type = VertexArrayTest
 
 def buildTextureTest(textureCount):
     geo_vt = Geometry(GL_QUADS)
@@ -53,11 +53,11 @@ def buildTextureTest(textureCount):
 def buildTextureTests():
     t = TextureState()
     return [buildTextureTest(i) for i in range(t.textureCount + 1)]
-        
+
 
 testList = [type("Flat", geo_v), type("Gouraud", geo_vc)] + \
            buildTextureTests()
 
-runFor = 2 # seconds
+runFor = 5 # seconds
 results = runTests('Render Mode', testList, runFor)
 generateGraph('fillrate', results, 'FillRate')
