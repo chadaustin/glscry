@@ -1,8 +1,3 @@
-#ifdef WIN32
-//#include <windows.h>  // For IsDebuggerPresent, etc.
-#endif
-
-
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp> // for len()
 #include "Context.h"
@@ -28,6 +23,7 @@
 
 #include "TextureUploadTest.h"
 #include "TextureMemoryTest.h"
+#include "Version.h"
 
 using namespace boost::python;
 using namespace scry;
@@ -46,6 +42,9 @@ BOOST_PYTHON_MODULE(_glscry) {
     exportGMTL();
     bindOpenGL();
     bindContext();
+
+    def("getVersion", getVersion);
+    def("getBuildID", getBuildID);
 
     // States.
     StateSet::bind();
