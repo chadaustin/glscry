@@ -1,8 +1,10 @@
 from glscry import *
 from random import randint
 
-# zeroes should be fine.
-v = defineArray(Array_f, 2, [0, 0, 0, 1, 1, 1])
+v = defineArray(
+    Array_f, 3,
+    repeat=[0, 0, 0, 0, 1, 0, 1, 1, 0],
+    offset=[0, 0, 1, 0, 0, 1, 0, 0, 1])
 n = defineArray(Array_f, 3, [0, 0, 1])
 
 lightstate = LightState()
