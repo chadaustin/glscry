@@ -1,10 +1,8 @@
 from glscry import *
 
-vertices = Arrayf(2)
-vertices.repeat[:] = flatten( [(0, 0), (0, 1), (1, 1)] )
-
 geo = Geometry(GL_TRIANGLES)
-geo.vertices = vertices
+geo.vertices = defineArray(2, [(0, 0), (0, 1), (1, 1)])
+geo.normals  = defineArray(3, [(1, 0, 0), (0, 1, 0), (0, 0, 1)])
 
 tests = []
 
@@ -18,4 +16,4 @@ for i in range(8):
     test.setState(state)
     tests.append(test)
 
-runTests("light.data", tests, 1, "VertexRate")
+runTests("light.data", tests, 10, "VertexRate")
