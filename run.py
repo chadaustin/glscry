@@ -4,40 +4,66 @@ import os
 import string
 import sys
 from glob import glob
-from optparse import OptionParser
+import getopt
 
-# Parse options.
-parser = OptionParser()
-parser.add_option('-a', '--all', action='store_true', dest='all',
-                  help='Run all tests')
-(options, args) = parser.parse_args()
 
-# Modify PYTHONPATH
-pythonpath = os.environ.get('PYTHONPATH')
-if pythonpath:
-    pythonpath = pythonpath + ':' + os.getcwd()
-else:
-    pythonpath = os.getcwd()
-os.environ['PYTHONPATH'] = pythonpath
+def usage():
+    print """\
+Usage: python run.py [OPTIONS] [TESTS]
 
-# Get test list.
-tests = []
-if options.all:
-    tests.extend(glob('test/*.py'))
-tests = map(os.path.abspath, tests)
+Options:
+    -a, --all       Run all tests.
+    -h, --help      Show this help text.
+"""
 
-# Create data directory if it does not exist and switch to it.
-try:
-    os.mkdir('data')
-except OSError:
-    pass
-os.chdir('data')
+def main():
+    # Parse options.
+    try:
+        options, args = getopt.getopt(sys.argv[1:], 'a', ['help', 'all'])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(1)
 
-if not tests:
-    print "No tests specified.  Specify a test explicitly or use -a."
-    sys.exit(1)
+    allTests = False
+    for o, a in options:
+        if o in ('-h', '--help'):
+            usage()
+            sys.exit(0)
+        elif o in ('-a', '--all'):
+            allTests = True
 
-for t in tests:
-    print "Running test '%s'" % t
-    os.system(sys.executable + ' ' + t)
-    print
+    # Modify PYTHONPATH
+    pythonpath = os.environ.get('PYTHONPATH')
+    if pythonpath:
+        pythonpath = pythonpath + ':' + os.getcwd()
+    else:
+        pythonpath = os.getcwd()
+    os.environ['PYTHONPATH'] = pythonpath
+
+    # Get test list.
+    tests = args
+    if allTests:
+        tests.extend(glob('test/*.py'))
+    tests = map(os.path.abspath, tests)
+
+    # Create data directory if it does not exist and switch to it.
+    try:
+        os.mkdir('data')
+    except OSError:
+        pass
+    os.chdir('data')
+
+    if not tests:
+        print "No tests specified.  Specify a test explicitly or use -a."
+        print
+        usage()
+        sys.exit(1)
+
+    for t in tests:
+        print
+        print "Running test '%s'" % t
+        os.system(sys.executable + ' ' + t)
+
+
+if __name__ == '__main__':
+    main()

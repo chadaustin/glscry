@@ -11,12 +11,17 @@ if platform == 'win32':
 opts = Options('options.cache')
 opts.AddOptions(
     PathOption('boostIncludes', 'Directory containing boost header files',
-               defaultBoostIncludes))
+               defaultBoostIncludes),
+    BoolOption('nowarn', 'Disable warnings', 0))
 
 env = Environment(
+    ENV=os.environ,
     tools=['default', 'SDL', 'OpenGL', 'BoostPython', 'Python'],
     toolpath=['toolspec'],
     options=opts)
+
+Help(opts.GenerateHelpText(env))
+opts.Save('options.cache', env)
 
 env.Append(CPPPATH=['#/third-party/all'])
 if env.subst('$CXX') == 'cl':
@@ -27,8 +32,8 @@ if env.subst('$CXX') == 'cl':
         CPPPATH=['#/third-party/vc7/include'],
         LIBPATH=['#/third-party/vc7/lib'])
 
-Help(opts.GenerateHelpText(env))
-opts.Save('options.cache', env)
+if env['nowarn']:
+    env.Append(CCFLAGS=['-w'])
 
 if env['PLATFORM'] in ['cygwin', 'win32']:
     env.Append(CPPDEFINES=['WIN32', '_WIN32'])
@@ -46,6 +51,8 @@ if env.subst('$CC') == 'gcc':
 
 sources = Split("""
     Module.cpp
+    
+    Context.cpp
     glew.c
     GLUtility.cpp
     Range.cpp

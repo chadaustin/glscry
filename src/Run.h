@@ -2,12 +2,7 @@
 #define SCRY_RUN_H
 
 
-#include <fstream>
-#include <SDL.h>
-#include "Context.h"
-#include "glew.h"
 #include "Range.h"
-#include "ScopeGuard.h"
 #include "Test.h"
 
 

@@ -1,3 +1,4 @@
+#include "Context.h"
 #include "GeometryTest.h"
 using namespace boost::python;
 

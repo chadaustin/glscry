@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <vector>
 #include <gmtl/gmtl.h>
-#include "glew.h"
+#include "OpenGL.h"
 
 
 namespace scry {

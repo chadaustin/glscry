@@ -3,8 +3,8 @@
 
 
 #include <string>
+#include <vector>
 #include "glew.h"
-#include "Context.h"
 #include "RefCounted.h"
 #include "StateSet.h"
 #include "Timer.h"

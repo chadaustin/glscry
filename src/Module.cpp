@@ -5,6 +5,7 @@
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp> // for len()
+#include "Context.h"
 #include "Run.h"
 
 #include "DepthState.h"
