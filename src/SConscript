@@ -1,0 +1,36 @@
+import os
+
+opts = Options('options.cache')
+opts.AddOptions(
+    PathOption('boostIncludes', 'Directory containing boost header files',
+               '/usr/local/include/boost-1_31'))
+
+env = Environment(
+    ENV=os.environ,
+    tools=['default', 'SDL', 'OpenGL', 'BoostPython', 'Python'],
+    toolpath=['toolspec'],
+    options=opts)
+
+Help(opts.GenerateHelpText(env))
+opts.Save('options.cache', env)
+
+if env['PLATFORM'] in ['cygwin', 'win32']:
+    env.Append(CPPDEFINES=['WIN32', '_WIN32'])
+
+if env.subst('$CC') == 'gcc':
+    env.Append(CCFLAGS=['-O2', '-Wall'])
+
+env.Append(CPPDEFINES=['GLEW_STATIC'])
+env.SharedLibrary(File(env.subst('../_triagara$SHLIBSUFFIX')), Split("""
+    Module.cpp
+    glew.c
+    Test.cpp
+    Timer.cpp
+    TextureUploadTest.cpp
+"""))
+env.Program('../triagara', Split("""
+    Main.cpp
+    glew.c
+    Test.cpp
+    Timer.cpp
+"""))
