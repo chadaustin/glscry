@@ -6,9 +6,9 @@ geo = buildGeometry(GL_TRIANGLES,
 
 def buildDirectionTest(i):
     state = LightState()
-    for j in range(i):
+    for j in range(len(state.lights)):
         light = state.lights[j]
-        light.enable  = True
+        light.enable  = j < i
         light.ambient = Vec4f(1, 1, 1, 1)
         light.diffuse = Vec4f(1, 1, 1, 1)
         light.specular = Vec4f(1, 1, 1, 1)
@@ -20,9 +20,9 @@ def buildDirectionTest(i):
 
 def buildPositionTest(i):
     state = LightState()
-    for j in range(i):
+    for j in range(len(state.lights)):
         light = state.lights[j]
-        light.enable  = True
+        light.enable  = j < i
         light.ambient = Vec4f(1, 1, 1, 1)
         light.diffuse = Vec4f(1, 1, 1, 1)
         light.specular = Vec4f(1, 1, 1, 1)
@@ -34,9 +34,9 @@ def buildPositionTest(i):
 
 def buildSpotTest(i):
     state = LightState()
-    for j in range(i):
+    for j in range(len(state.lights)):
         light = state.lights[j]
-        light.enable  = True
+        light.enable  = j < i
         light.ambient = Vec4f(1, 1, 1, 1)
         light.diffuse = Vec4f(1, 1, 1, 1)
         light.specular = Vec4f(1, 1, 1, 1)
@@ -48,7 +48,7 @@ def buildSpotTest(i):
     test.setState(state)
     return test
 
-lightRange = range(len(LightState().lights))
+lightRange = range(len(LightState().lights) + 1)
 runTests("lights_dir.data",  [buildDirectionTest(i) for i in lightRange], 10, "VertexRate")
 runTests("lights_pos.data",  [buildPositionTest(i)  for i in lightRange], 10, "VertexRate")
 runTests("lights_spot.data", [buildSpotTest(i)      for i in lightRange], 10, "VertexRate")
