@@ -32,12 +32,16 @@ opts.Save('options.cache', env)
 if env['PLATFORM'] in ['cygwin', 'win32']:
     env.Append(CPPDEFINES=['WIN32', '_WIN32'])
 
-if env.subst('$CC') == 'gcc':
-    env.Append(CCFLAGS=['-Wall', '-g'])
-    #env.Append(CCFLAGS=['-O2', '-Wall'])
+# If using GCC, deal with ld O(n^2) algorithm.
+#if env['CXX'][:3] == 'g++' and WhereIs('objcopy'):
+#    env['CXXCOM']   = [env['CXXCOM'],   'objcopy --set-section-flags .debug_str=contents,debug $TARGET']
+#    env['SHCXXCOM'] = [env['SHCXXCOM'], 'objcopy --set-section-flags .debug_str=contents,debug $TARGET']
 
 env.Append(CPPDEFINES=['GLEW_STATIC'])
 env.Append(CPPPATH=['src/gmtl-python'])
+
+if env.subst('$CC') == 'gcc':
+    env.Append(CCFLAGS=['-Wall'])
 
 sources = Split("""
     Module.cpp
@@ -154,11 +158,18 @@ gmtlPythonSources = Split("""
 """)
 
 
+# When building gmtl-python in Cygwin with g++, the linker tries to allocate
+# over 4 GB of RAM if debugging symbols are allocated.
+gmtlPythonEnv = env.Copy()
+if gmtlPythonEnv['PLATFORM'] == 'cygwin':
+    if '-g' in (gmtlPythonEnv.get('CCFLAGS') or []):
+        gmtlPythonEnv['CCFLAGS'].remove('-g')
+
 modulename = env.subst('_glscry$SHLIBSUFFIX')
 module = env.SharedLibrary(
     File(modulename),
-    [os.path.join('src', s) for s in sources] + \
-    [os.path.join('src/gmtl-python', s) for s in gmtlPythonSources])
+    [os.path.join('src', s) for s in sources] +
+    [gmtlPythonEnv.SharedObject(os.path.join('src/gmtl-python', s)) for s in gmtlPythonSources])
 
 
 env = DefaultEnvironment()

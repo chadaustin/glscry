@@ -5,7 +5,6 @@ vertices.repeat[:] = flatten( [(0, 0), (0, 1), (1, 1)] )
 
 geo = Geometry(GL_TRIANGLES)
 geo.vertices = vertices
-    
 
 tests = []
 
