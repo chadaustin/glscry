@@ -8,8 +8,8 @@ platform = DefaultEnvironment()['PLATFORM']
 defaultBoostIncludes = '/usr/local/include/boost-1_31'
 defaultBoostLibs     = '/usr/local/lib'
 if platform == 'win32':
-    defaultBoostIncludes = Dir('#/third-party/vc7/include')
-    defaultBoostLibs     = Dir('#/third-party/vc7/lib')
+    defaultBoostIncludes = Dir('#/third-party/vc7/Boost/include')
+    defaultBoostLibs     = Dir('#/third-party/vc7/Boost/lib')
 
 opts = Options('options.cache')
 opts.AddOptions(
@@ -35,9 +35,7 @@ if env.subst('$CXX') == 'cl':
     env.Append(
         CPPDEFINES=['_WIN32_WINNT=0x0400'],
         CXXFLAGS=['/GX', '/GR', '/MD', '/Z7'],
-        LINKFLAGS=['/DEBUG'],
-        CPPPATH=['#/third-party/vc7/include'],
-        LIBPATH=['#/third-party/vc7/lib'])
+        LINKFLAGS=['/DEBUG'])
 
 if env['nowarn']:
     env.Append(CCFLAGS=['-w'])

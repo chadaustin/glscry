@@ -8,7 +8,9 @@ def generate(env):
                    LIBPATH = os.path.join(prefix, 'lib'),
                    LIBS = ['SDL', 'SDLmain'])
     elif env['PLATFORM'] == 'win32':
-        env.Append(LIBS=['SDL', 'SDLmain'])
+        env.Append(CPPPATH=['#/third-party/vc7/SDL/include'],
+                   LIBPATH=['#/third-party/vc7/SDL/lib'],
+                   LIBS=['SDL', 'SDLmain'])
     else:
         env.ParseConfig('sdl-config --cflags --libs')
         if env['PLATFORM'] == 'irix':
