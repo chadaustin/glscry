@@ -28,7 +28,7 @@ namespace scry {
                 v->getTypeConstant(),
                 v->getSize(),
                 getVertexCount(),
-                &_vertices.data[0]);
+                _vertices.data_ptr());
         }
 
         defineBuffer(geometry->colors,    _colors,    "colors");
@@ -46,7 +46,7 @@ namespace scry {
 
         buffer.data.resize(getVertexCount() * array->getSize() *
                            array->getTypeSize());
-        array->build(&buffer.data[0], getVertexCount());
+        array->build(buffer.data_ptr(), getVertexCount());
 
         buffer.pump = scry::getVertexPump(
             array->getTypeConstant(), array->getSize());

@@ -43,6 +43,9 @@ public:
 
 protected:
     struct Buffer {
+              void* data_ptr()       { return &data[0]; }
+        const void* data_ptr() const { return &data[0]; }
+
         std::vector<GLubyte> data;
         Zeroed<Pump> pump;
     };

@@ -41,15 +41,22 @@ geo_vct  = buildGeometry(fmt, v=v, c=c, t=t)
 geo_vnt  = buildGeometry(fmt, v=v, n=n, t=t)
 geo_vcnt = buildGeometry(fmt, v=v, c=c, n=n, t=t)
 
-type = DisplayListTest
-tests = [
-    type("V", geo_v),
-    type("VC", geo_vc),
-    type("VN", geo_vn),
-    type("VT", geo_vt),
-    type("VCN", geo_vcn),
-    type("VCT", geo_vct),
-    type("VNT", geo_vnt),
-    type("VCNT", geo_vcnt)]
+def run(file, test):
+    tests = [
+        test("V", geo_v),
+        test("VC", geo_vc),
+        test("VN", geo_vn),
+        test("VT", geo_vt),
+        test("VCN", geo_vcn),
+        test("VCT", geo_vct),
+        test("VNT", geo_vnt),
+        test("VCNT", geo_vcnt)]
 
-runTests('fillrate.py', tests, 10, "VertexRate")
+    print "Writing data to %s" % file
+    runTests(file, tests, 10, "VertexRate")
+
+run('vformats_imm.data', ImmediateTest)
+run('vformats_dl.data',  DisplayListTest)
+run('vformats_va.data',  VertexArrayTest)
+run('vformats_cva.data', CompiledVertexArrayTest)
+run('vformats_vbo.data', VertexBufferObjectTest)
