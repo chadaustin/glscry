@@ -1,6 +1,6 @@
 from glscry import *
 
-geo = buildGeometry(GL_QUADS, defineArray(Array_f, 3))
+geo = buildGeometry(GL_TRIANGLES, defineArray(Array_f, 3))
 
 testList = []
 for a in ['GL_STREAM_DRAW_ARB',
