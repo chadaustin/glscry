@@ -1,13 +1,14 @@
 import os
 
 SConsignFile()
-#CacheDir('cache')
+CacheDir('cache')
 
 
 
 # Options
 
 platform = DefaultEnvironment()['PLATFORM']
+
 defaultBoostIncludes = '/usr/local/include/boost-1_31'
 defaultBoostLibs     = '/usr/local/lib'
 if platform == 'win32':

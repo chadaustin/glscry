@@ -37,13 +37,25 @@ namespace scry {
             return _primitiveType;
         }
 
+        typedef std::vector<ArrayPtr> ArrayPtrList;
+
+        /**
+         * Must contain scalar integers -- that is, indices.getSize()
+         * == 1 and indices.getTypeConstant() is an integer type.
+         *
+         * If set to null, the attribute arrays are drawn directly.
+         * Otherwise, 'indices' contains indices into the other
+         * arrays.
+         */
+        ArrayPtr indices;
+
         ArrayPtr vertices;
         ArrayPtr colors;
         ArrayPtr normals;
-        ArrayPtr texcoords;
-        ArrayPtr indices;   // Must contain scalars. (Array.getSize() == 1)
+        ArrayPtrList texcoords;
 
     private:
+        size_t _maxTextureUnits;
         GLenum _primitiveType;
     };
     SCRY_REF_PTR(Geometry);

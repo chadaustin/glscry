@@ -34,17 +34,22 @@ namespace scry {
     void GeometryTest::setup() {
         _screenCoverage  = 0;
         _vertexArraySize = 0;
+
+        // Clear previous buffer data.
+        _indices   = Buffer();
         _vertices  = Buffer();
         _colors    = Buffer();
         _normals   = Buffer();
-        _texcoords = Buffer();
+        std::fill(_texcoords.begin(), _texcoords.end(), Buffer());
 
         GeometryPtr geometry = getGeometry();
 
         if (ArrayPtr i = geometry->indices) {
-            defineBuffer(_indices, i, getVertexCountPerBatch(), "indices", getIndexPump);
+            defineBuffer(_indices, i, getVertexCountPerBatch(),
+                         "indices", FunctionPumpFactory(getIndexPump));
 
-            // Calculate the largest index value and use that+1 as the vertex array size.
+            // Calculate the largest index value and use that+1 as the
+            // vertex array size.
             for (size_t j = 0; j < getVertexCountPerBatch(); ++j) {
                 size_t value = i->getUInt(_indices.data_ptr(), j);
                 _vertexArraySize = std::max<size_t>(_vertexArraySize, value);
@@ -53,7 +58,8 @@ namespace scry {
         }
 
         if (ArrayPtr v = geometry->vertices) {
-            defineBuffer(_vertices, v, getVertexArraySize(), "vertices", getVertexPump);
+            defineBuffer(_vertices, v, getVertexArraySize(),
+                         "vertices", FunctionPumpFactory(getVertexPump));
 
             // @todo: THIS IS WRONG WHEN USING INDEXED GEOMETRY
             _screenCoverage = calculateCoverage(
@@ -64,9 +70,20 @@ namespace scry {
                 _vertices.data_ptr());
         }
 
-        defineBuffer(_colors,    geometry->colors,    getVertexArraySize(), "colors",    getColorPump);
-        defineBuffer(_normals,   geometry->normals,   getVertexArraySize(), "normals",   getNormalPump);
-        defineBuffer(_texcoords, geometry->texcoords, getVertexArraySize(), "texcoords", getTexCoordPump);
+        defineBuffer(_colors,  geometry->colors,  getVertexArraySize(),
+                     "colors",  FunctionPumpFactory(getColorPump));
+        defineBuffer(_normals, geometry->normals, getVertexArraySize(),
+                     "normals", FunctionPumpFactory(getNormalPump));
+
+        for (size_t i = 0; i < _texcoords.size(); ++i) {
+            std::ostringstream os;
+            os << "texcoords[" << i << "]";
+            defineBuffer(_texcoords[i],
+                         geometry->texcoords[i],
+                         getVertexArraySize(),
+                         os.str().c_str(),
+                         TexCoordPumpFactory(GL_TEXTURE0 + i));
+        }
     }
 
 
@@ -92,17 +109,21 @@ namespace scry {
         ArrayPtr array,
         size_t vertexCount,
         const char* name,
-        PumpGetter getter
+        const PumpFactory& pumpFactory
     ) {
         if (!array) {
+            buffer = Buffer();
             return;
         }
 
+        buffer.array = array;
         buffer.data.resize(vertexCount * array->getSize() *
                            array->getTypeSize());
         array->build(buffer.data_ptr(), vertexCount * array->getSize());
 
-        buffer.pump = getter(array->getTypeConstant(), array->getSize());
+        buffer.pump = pumpFactory.getPump(
+            array->getTypeConstant(),
+            array->getSize());
         if (!buffer.pump) {
             std::cout << "Warning: " << name
                       << " specified but no pump found." << std::endl;

@@ -38,7 +38,7 @@ namespace scry {
 
         template<typename T>
         T assertTrue(T t) {
-            assert(t);
+            SCRY_ASSERT(t);
             return t;
         }
 
