@@ -171,7 +171,7 @@ def generateBarGraph(datafile, testList, resultUnits):
     print >> plot, 'set size 2,2'
     print >> plot, 'set output "%s.png"' % datafile
     print >> plot, 'set title "%s"' % getTitle()
-    print >> plot, 'set xrange [-0.5:%d]' % (len(testList) - 0.5)
+    print >> plot, 'set xrange [-0.5:%s]' % (len(testList) - 0.5)
     print >> plot, 'set yrange [0:*]'
     print >> plot, 'set ylabel "%s"' % resultUnits
     print >> plot, 'set xtics (',

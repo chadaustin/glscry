@@ -43,12 +43,15 @@ texState.texture = Texture()
 texState.texture.minFilter = GL_NEAREST
 texState.texture.magFilter = GL_NEAREST
 
+stateSet = StateSet()
+stateSet.setState(texState)
+
 type = ImmediateTest
 test1 = type("Flat", geo_v)
 test2 = type("Gouraud", geo_vc)
 test3 = type("Tex", geo_vt)
-test3.setState(texState)
+test3.addStateSet(stateSet)
 test4 = type("ColoredTex", geo_vct)
-test4.setState(texState)
+test4.addStateSet(stateSet)
 
 runTests('fillrate.data', [test1, test2, test3, test4], 1, "FillRate")

@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include "Context.h"
+#include "GLUtility.h"
 #include "Test.h"
 using namespace boost;
 using namespace boost::python;
@@ -49,7 +50,8 @@ namespace scry {
         class_<C, TestPtr, noncopyable>("Test", no_init)
             .def("getName",        &C::getName)
             .def("setTransform",   &C::setTransform)
-            .add_property("fullStateSwitch", &C::getFullStateSwitch, &C::setFullStateSwitch)
+            .add_property("fullStateSwitch",
+                          &C::getFullStateSwitch, &C::setFullStateSwitch)
             .def("addStateSet",    &C::addStateSet)
             .def("addAction",      &C::addAction)
             .def("run",            &C::run)
@@ -69,6 +71,8 @@ namespace scry {
 
         size_t currentStateSet = 0;
 
+        checkOpenGLErrors();
+
         // Don't time setup and teardown.
         glFinish();
 
@@ -77,11 +81,20 @@ namespace scry {
             for (size_t i = 0; i < _actionList.size(); ++i) {
                 _actionList[i]->execute();
             }
+
+            checkOpenGLErrors();
+
             if (!_stateSetList.empty()) {
-                setCurrentStateSet(_stateSetList[currentStateSet], _fullStateSwitch);
+                setCurrentStateSet(_stateSetList[currentStateSet],
+                                   _fullStateSwitch);
                 currentStateSet = (currentStateSet + 1) % _stateSetList.size();
             }
+
+            checkOpenGLErrors();
+
             iterate(results);
+
+            checkOpenGLErrors();
         }
         glFinish();
 

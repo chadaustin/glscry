@@ -11,6 +11,8 @@
 
 namespace scry {
 
+    void checkOpenGLErrors();
+
     inline void glSetEnabled(GLenum cap, bool enabled) {
         (enabled ? glEnable : glDisable)(cap);
     }
