@@ -182,7 +182,8 @@ namespace scry {
                     totalStride += getStride(buffers[i]->array);
                 }
 
-                SCRY_ASSERT(totalStride * getVertexArraySize() == totalSize &&
+                size_t vertexArraySize = getVertexArraySize(getGeometry());
+                SCRY_ASSERT(totalStride * vertexArraySize == totalSize &&
                             "Incorrect buffer size or stride.");
 
                 std::vector<GLubyte> buffer(totalSize);
@@ -192,7 +193,7 @@ namespace scry {
                 for (size_t i = 0; i < buffers.size(); ++i) {
                     if (ArrayPtr a = buffers[i]->array) {
                         size_t stride = getStride(a);
-                        for (size_t j = 0; j < getVertexArraySize(); ++j) {
+                        for (size_t j = 0; j < vertexArraySize; ++j) {
                             memcpy(out + totalStride * j,
                                    buffers[i]->data_ptr() + stride * j,
                                    stride);

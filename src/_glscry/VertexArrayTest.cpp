@@ -35,7 +35,7 @@ namespace scry {
 
         enableArrays();
         if (compiled) {
-            glLockArraysEXT(0, getVertexArraySize());
+            glLockArraysEXT(0, getVertexArraySize(getGeometry()));
         }
     }
 
