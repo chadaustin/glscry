@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp> // for len()
 #include "Context.h"
+#include "Platform.h"
 
 #include "BlendState.h"
 #include "ColorBufferState.h"
@@ -43,6 +44,7 @@ BOOST_PYTHON_MODULE(_glscry) {
     exportGMTL();
     bindOpenGL();
     bindContext();
+    bindPlatform();
 
     def("getVersion", getVersion);
     def("getBuildID", getBuildID);

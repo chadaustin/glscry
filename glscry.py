@@ -1,4 +1,7 @@
+import platform
+import socket
 from _glscry import *
+
 
 def flatten(list):
     r = []
@@ -9,12 +12,14 @@ def flatten(list):
             r.append(a)
     return r
 
+
 def defineArray(arraytype, size, repeat=[], offset=[], initial=[]):
     array = arraytype(size)
     array.repeat[:]  = flatten(repeat)
     array.offset[:]  = flatten(offset)
     array.initial[:] = flatten(initial)
     return array
+
 
 def buildGeometry(type, v=None, c=None, n=None, t=None, i=None):
     geo = Geometry(type)
@@ -25,19 +30,49 @@ def buildGeometry(type, v=None, c=None, n=None, t=None, i=None):
     if i: geo.indices   = i
     return geo
 
+
 def getTitle():
-    version     = 'GLScry %s' % getVersion()
-    gl_vendor   = glGetString(GL_VENDOR)
-    gl_renderer = glGetString(GL_RENDERER)
-    gl_version  = glGetString(GL_VERSION)
-    return '  ::  '.join([version, gl_vendor, gl_renderer, gl_version])
+    return '  ::  '.join([
+        'GLScry %s' % getVersion(),
+        socket.gethostname(),
+        glGetString(GL_VENDOR),
+        glGetString(GL_RENDERER),
+        glGetString(GL_VERSION)])
 
 
 def writeID(file):
-    file.write("# GLScry Version  = %s\n" % getVersion())
-    file.write("# OpenGL Vendor   = %s\n" % glGetString(GL_VENDOR))
-    file.write("# OpenGL Renderer = %s\n" % glGetString(GL_RENDERER))
-    file.write("# OpenGL Version  = %s\n" % glGetString(GL_VERSION))
+    class Property:
+        def __init__(self, name, value):
+            self.name  = name
+            self.value = value
+    propertyList = [
+        Property('GLScry Version',  getVersion()),
+        Property('Host',            socket.gethostname()),
+        Property('Platform',        platform.platform()),
+        Property('OpenGL Vendor',   glGetString(GL_VENDOR)),
+        Property('OpenGL Renderer', glGetString(GL_RENDERER)),
+        Property('OpenGL Version',  glGetString(GL_VERSION)) ]
+
+    processors = getProcessors()
+    if len(processors) == 1:
+        proc = processors[0]
+        propertyList += [
+            Property('CPU Type', proc.type),
+            Property('CPU Speed', proc.speed) ]
+    else:
+        for i, proc in enumerate(processors):
+            propertyList += [
+                Property('CPU%s Type' % i, proc.type),
+                Property('CPU%s Speed' % i, proc.speed) ]
+
+    propertyList.append(
+        Property('RAM Size', getMemorySize()))
+
+    maxNameLength = max([len(prop.name) for prop in propertyList])
+    for prop in propertyList:
+        file.write('# %s = %s\n' % (
+            prop.name.ljust(maxNameLength),
+            prop.value))
 
 
 class LinearRange:

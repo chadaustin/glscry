@@ -9,6 +9,7 @@ sources = Split("""
     Coverage.cpp
     glew.c
     GLUtility.cpp
+    Platform.cpp
     Timer.cpp
 
     Array.cpp

@@ -1,6 +1,7 @@
 import os
 
 SConsignFile()
+CacheDir('cache')
 
 platform = DefaultEnvironment()['PLATFORM']
 
