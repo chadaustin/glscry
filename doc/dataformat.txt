@@ -1,0 +1,28 @@
+{ "Version": "0.1.0",
+  "System": {
+    "Host":            "basilisk",
+    "Platform":        "Microsoft_Windows-XP-32bit-WindowsPE",
+    "OpenGL Vendor":   "ATI Technologies Inc.",
+    "OpenGL Renderer": "RADEON 9800 Pro x86/SSE2",
+    "OpenGL Version":  "1.5.4707 WinXP Release",
+    "CPUs": [{ "Type":  "Intel(R) Xeon(TM) CPU 2.80GHz",
+               "Speed": "2806 MHz" },
+             { "Type":  "Intel(R) Xeon(TM) CPU 2.80GHz",
+               "Speed": "2806 MHz" },
+             { "Type":  "Intel(R) Xeon(TM) CPU 2.80GHz",
+               "Speed": "2806 MHz" },
+             { "Type":  "Intel(R) Xeon(TM) CPU 2.80GHz",
+               "Speed": "2806 MHz" } ] },
+  "Test": {
+    "Name": "Example",
+    "YUnit": "vertex/s",
+    "XUnit": "Draw Method",
+    "Lines": [{ "Name": "Color Buffer",
+                "Data": [["Read", 531511616.613],
+                         ["Draw", 141255276.072],
+                         ["Copy", 27883756.4731]] },
+              { "Name": "Depth Buffer",
+                "Data": [["Read", 181217.460004],
+                         ["Draw", 274261.365798],
+                         ["Copy", 1427375.50738]] }]
+    } }
