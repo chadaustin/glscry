@@ -2,6 +2,7 @@
 #define SCRY_CONTEXT_H
 
 
+#include <string>
 #include <SDL.h>
 #include "glew.h"
 #include "GLUtility.h"

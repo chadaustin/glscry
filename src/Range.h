@@ -40,6 +40,7 @@ namespace scry {
 
         bool next(size_t& out) {
             if (_current > _end) {
+                _current = _begin;
                 return false;
             }
             out = _current;
@@ -74,6 +75,7 @@ namespace scry {
 
         bool next(size_t& out) {
             if (_current > _end) {
+                _current = _begin;
                 return false;
             }
             // It's too bad there's not an integer version of pow().

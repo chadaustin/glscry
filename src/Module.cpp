@@ -82,6 +82,8 @@ void exportGMTL();
 
 
 BOOST_PYTHON_MODULE(_glscry) {
+//    __asm int 3
+
     initContext();
 
     exportGMTL();

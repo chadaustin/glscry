@@ -12,7 +12,7 @@ for i in range(8):
         state.useLight(j, True)
         state.setAmbient(j, Vec4f(0.5, 0.5, 0.5, 1.0))
 
-    test = VertexArrayTest("VertexArray", geo)
+    test = VertexArrayTest("%s lights" % i, geo)
     test.setState(state)
     tests.append(test)
 
