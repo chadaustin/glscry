@@ -69,6 +69,14 @@ def buildLineSS(enableStipple, stippleFactor, stipplePattern):
     state.stipplePattern = stipplePattern
     return StateSet(state)
 
+def buildVertexShaderSS(source):
+    shaders = ShaderList()
+    shaders[:] = [VertexShader(source)]
+    program = Program(shaders)
+    state = ShaderState(program)
+    return StateSet(state)
+
+'''
 runStateChange('blend',
                buildBlendSS(True, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
                buildBlendSS(False, GL_ONE, GL_ZERO))
@@ -81,3 +89,11 @@ runStateChange('depth',
 runStateChange('linestipple',
                buildLineSS(False, 1, 0xFFFF),
                buildLineSS(True,  1, 0x5555))
+'''
+if ShaderState.isSupported():
+    if VertexShader.isSupported():
+        runStateChange('vertex_shader',
+                       buildVertexShaderSS('void main() { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }'),
+                       buildVertexShaderSS('void main() { gl_Position = ftransform(); }'))
+        #if FragmentShader.isSupported():
+        #    runStateChange('fragment_shader')
