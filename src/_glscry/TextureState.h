@@ -73,24 +73,43 @@ namespace scry {
         ~TextureState() { }
 
     public:
-        TextureState() {
-        }
+        static void bind();
+
+        TextureState();
 
         TextureState(const TextureState& rhs) {
-            _texture = rhs._texture;
+            _textures = rhs._textures;
         }
-
-        static void bind();
 
         TextureState* clone() const;
         const TextureState& getDefault() const;
         void switchTo(const State& to, bool fullStateSwitch) const;
 
-        void setTexture(TexturePtr texture) { _texture = texture; }
-        TexturePtr getTexture() const       { return _texture; }
+        size_t getTextureCount() const {
+            return _textures.size();
+        }
+
+        TexturePtr getTexture(size_t i) const {
+            SCRY_ASSERT(i < _textures.size());
+            return _textures[i];
+        }
+
+        void setTexture(size_t i, const TexturePtr& p) {
+            SCRY_ASSERT(i < _textures.size());
+            _textures[i] = p;
+        }
+
+        TexturePtr getSingleTexture() const {
+            return getTexture(0);
+        }
+
+        void setSingleTexture(const TexturePtr& p) {
+            setTexture(0, p);
+        }
 
     private:
-        TexturePtr _texture;
+        typedef std::vector<TexturePtr> TextureList;
+        TextureList _textures;
     };
     SCRY_REF_PTR(TextureState);
 

@@ -108,10 +108,26 @@ namespace scry {
         class_<C, CPtr, bases<State>, boost::noncopyable>
             ("TextureState", no_init)
             .def(init<>())
-            .add_property("texture", &C::getTexture, &C::setTexture)
+            .add_property("textureCount", &C::getTextureCount)
+            .add_property("texture",
+                          &C::getSingleTexture,
+                          &C::setSingleTexture)
+            .def("getTexture", &C::getTexture)
+            .def("setTexture", &C::setTexture)
             ;
 
         implicitly_convertible<CPtr, StatePtr>();
+    }
+
+    TextureState::TextureState() {
+        if (GLEW_ARB_multitexture) {
+            GLint textureCount;
+            glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &textureCount);
+            SCRY_ASSERT(textureCount >= 1);
+            _textures.resize(textureCount);
+        } else {
+            _textures.resize(1);
+        }
     }
 
     TextureState* TextureState::clone() const {
@@ -123,16 +139,33 @@ namespace scry {
         return *state;
     }
 
+    void bindTexture(size_t unit, const TexturePtr& texture) {
+        if (unit > 0) {
+            // Only call this function if we know multitexturing is
+            // supported.
+            glActiveTextureARB(GL_TEXTURE0_ARB + unit);
+        }
+
+        if (texture) {
+            /// @todo With shaders, you don't need to glEnable the texture.
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, texture->getHandle());
+        } else {
+            glDisable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+
+        if (unit > 0) {
+            glActiveTextureARB(GL_TEXTURE0_ARB);
+        }
+    }
+
     void TextureState::switchTo(const State& state, bool fullStateSwitch) const {
         const TextureState& ts = checked_cast_ref<const TextureState&>(state);
-        if (fullStateSwitch || _texture != ts._texture) {
-            if (ts._texture) {
-                /// @todo With shaders, you don't need to glEnable the texture.
-                glEnable(GL_TEXTURE_2D);
-                glBindTexture(GL_TEXTURE_2D, ts._texture->getHandle());
-            } else {
-                glDisable(GL_TEXTURE_2D);
-                glBindTexture(GL_TEXTURE_2D, 0);
+        SCRY_ASSERT(_textures.size() == ts._textures.size());
+        for (size_t i = 0; i < _textures.size(); ++i) {
+            if (fullStateSwitch || _textures[i] != ts._textures[i]) {
+                bindTexture(i, ts._textures[i]);
             }
         }
     }
