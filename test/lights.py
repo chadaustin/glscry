@@ -9,6 +9,9 @@ def buildDirectionTest(i):
     for j in range(i):
         light = state.lights[j]
         light.enable  = True
+        light.ambient = Vec4f(1, 1, 1, 1)
+        light.diffuse = Vec4f(1, 1, 1, 1)
+        light.specular = Vec4f(1, 1, 1, 1)
         light.position = Vec4f(0, 0, 1, 0)
 
     test = VertexArrayTest("%s lights" % i, geo)
@@ -20,6 +23,9 @@ def buildPositionTest(i):
     for j in range(i):
         light = state.lights[j]
         light.enable  = True
+        light.ambient = Vec4f(1, 1, 1, 1)
+        light.diffuse = Vec4f(1, 1, 1, 1)
+        light.specular = Vec4f(1, 1, 1, 1)
         light.position = Vec4f(1, 2, 3, 1)
 
     test = VertexArrayTest("%s lights" % i, geo)
@@ -31,6 +37,9 @@ def buildSpotTest(i):
     for j in range(i):
         light = state.lights[j]
         light.enable  = True
+        light.ambient = Vec4f(1, 1, 1, 1)
+        light.diffuse = Vec4f(1, 1, 1, 1)
+        light.specular = Vec4f(1, 1, 1, 1)
         light.position = Vec4f(1, 2, 1, 1)
         #light.spotExponent ?
         light.spotCutoff = 45;
