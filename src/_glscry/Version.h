@@ -25,7 +25,7 @@ namespace scry {
     #define SCRY_STR(x) SCRY_STR_(x)
 
     #define SCRY_VERSION_MAJOR 0
-    #define SCRY_VERSION_MINOR 1
+    #define SCRY_VERSION_MINOR 2
     #define SCRY_VERSION_PATCH 0
 
     #define SCRY_VERSION                            \
