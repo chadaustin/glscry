@@ -1,3 +1,5 @@
 env = Environment(tools=['default', 'SDL', 'OpenGL'],
                   toolpath=['../../toolspec'])
+if env.subst('$CC') == 'gcc':
+    env.Append(CCFLAGS=['-Wall'])
 env.Program('vcache', 'main.cpp')
