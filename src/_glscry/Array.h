@@ -28,7 +28,7 @@ namespace scry {
         ~ArrayInterface() { }
 
     public:
-        virtual size_t getSize() const = 0;
+        virtual size_t getVectorSize() const = 0;
         virtual GLenum getTypeConstant() const = 0;
         virtual void build(void* buffer, size_t elementCount) const = 0;
         virtual GLuint getUInt(const void* buffer, size_t offset) const = 0;
@@ -52,7 +52,7 @@ namespace scry {
             _size = size;
         }
 
-        size_t getSize() const {
+        size_t getVectorSize() const {
             return _size;
         }
 
@@ -109,6 +109,13 @@ namespace scry {
     };
 
 
+    inline size_t getArrayVectorSize(const ArrayPtr& a) {
+        return a
+            ? a->getVectorSize() * a->getTypeSize()
+            : 0;
+    }
+
+
     void bindArrayTypes();
 
 
@@ -118,20 +125,32 @@ namespace scry {
     using ::glTexCoordPointer;
 
     inline void glVertexPointer(ArrayPtr array, const void* buffer) {
-        glVertexPointer(array->getSize(), array->getTypeConstant(), 0, buffer);
+        glVertexPointer(
+            array->getVectorSize(),
+            array->getTypeConstant(),
+            0,
+            buffer);
     }
 
     inline void glColorPointer(ArrayPtr array, const void* buffer) {
-        glColorPointer(array->getSize(), array->getTypeConstant(), 0, buffer);
+        glColorPointer(
+            array->getVectorSize(),
+            array->getTypeConstant(),
+            0,
+            buffer);
     }
 
     inline void glNormalPointer(ArrayPtr array, const void* buffer) {
-        SCRY_ASSERT(array->getSize() == 3);
+        SCRY_ASSERT(array->getVectorSize() == 3);
         glNormalPointer(array->getTypeConstant(), 0, buffer);
     }
 
     inline void glTexCoordPointer(ArrayPtr array, const void* buffer) {
-        glTexCoordPointer(array->getSize(), array->getTypeConstant(), 0, buffer);
+        glTexCoordPointer(
+            array->getVectorSize(),
+            array->getTypeConstant(),
+            0,
+            buffer);
     }
 
 }

@@ -25,8 +25,8 @@ namespace scry {
     Uint64 calculateCoverage(
         GLenum primitiveType,
         GLenum dataType,
-        size_t size,
-        size_t vertexCount,
+        size_t size,         ///< Number of elements in vector.
+        size_t vertexCount,  ///< Number of vertices in array.
         const void* data);
 
 }

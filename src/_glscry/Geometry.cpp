@@ -20,30 +20,33 @@ using namespace boost::python;
 namespace scry {
 
     void Geometry::bind() {
+        class_<PrimitiveBatch>("PrimitiveBatch", no_init)
+            .def(init<GLenum, size_t>())
+            ;
+
+        class_<PrimitiveBatchList>("PrimitiveBatchList")
+            .def(vector_indexing_suite<PrimitiveBatchList>())
+            ;
 
         class_<ArrayPtrList>("ArrayList")
             .def(vector_indexing_suite<ArrayPtrList>())
             ;
 
-        class_<Geometry, GeometryPtr, boost::noncopyable>
+        typedef Geometry C;
+        class_<C, GeometryPtr, boost::noncopyable>
             ("Geometry", no_init)
-            .def(init<GLenum, size_t>())
-            .add_property("primitiveType", &Geometry::getPrimitiveType)
-            .add_property("batchSize",
-                          &Geometry::getBatchSize,
-                          &Geometry::setBatchSize)
-            .def_readwrite("indices",      &Geometry::indices)
-            .def_readwrite("vertices",     &Geometry::vertices)
-            .def_readwrite("colors",       &Geometry::colors)
-            .def_readwrite("normals",      &Geometry::normals)
-            .def_readwrite("texcoords",    &Geometry::texcoords)
+            .def(init<>())
+            .def_readwrite("batches",      &C::batches)
+            .def_readwrite("indices",      &C::indices)
+            .def_readwrite("vertices",     &C::vertices)
+            .def_readwrite("colors",       &C::colors)
+            .def_readwrite("normals",      &C::normals)
+            .def_readwrite("texcoords",    &C::texcoords)
             ;
     }
 
-    Geometry::Geometry(GLenum primitiveType, size_t batchSize) {
-        _primitiveType = primitiveType;
-        _batchSize = batchSize;
 
+    Geometry::Geometry() {
         if (GLEW_ARB_multitexture) {
             GLint textureCount;
             glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &textureCount);
@@ -55,5 +58,6 @@ namespace scry {
         
         texcoords.resize(_maxTextureUnits);
     }
+
 
 }

@@ -104,53 +104,24 @@ namespace scry {
     }
 
 
-    typedef const void* (*Pump)(const void* data);
-    typedef Pump (*PumpFactoryFunction)(GLenum type, int size);
-
-    Pump getIndexPump(GLenum type, int size);
-    Pump getVertexPump(GLenum type, int size);
-    Pump getColorPump(GLenum type, int size);
-    Pump getNormalPump(GLenum type, int size);
-    Pump getTexCoordPump(GLenum unit, GLenum type, int size);
-
-
-
-    // Multitexturing makes things complicated...
-
-    struct PumpFactory {
-    protected:
-        /// No polymorphic destruction.
-        ~PumpFactory() { }
-
-    public:
-        virtual Pump getPump(GLenum type, int size) const = 0;
-    };
-
-    struct FunctionPumpFactory : public PumpFactory {
-        FunctionPumpFactory(PumpFactoryFunction pff)
-        : _pff(pff) {
+    inline size_t getVertexCountPerBatch(
+        GLenum batchSize,
+        GLenum primitiveType
+    ) {
+        switch (primitiveType) {
+            case GL_POINTS:         return batchSize * 1; 
+            case GL_LINES:          return batchSize * 2;
+            case GL_LINE_STRIP:     return batchSize + 1;
+            case GL_LINE_LOOP:      return batchSize;
+            case GL_TRIANGLES:      return batchSize * 3;
+            case GL_TRIANGLE_STRIP: return batchSize + 2;
+            case GL_TRIANGLE_FAN:   return batchSize + 2;
+            case GL_QUADS:          return batchSize * 4;
+            case GL_QUAD_STRIP:     return batchSize * 2 + 2;
+            case GL_POLYGON:        return batchSize;
+            default:                return 0;
         }
-
-        Pump getPump(GLenum type, int size) const {
-            return _pff(type, size);
-        }
-
-    private:
-        PumpFactoryFunction _pff;
-    };
-
-    struct TexCoordPumpFactory : public PumpFactory {
-        TexCoordPumpFactory(GLenum unit)
-        : _unit(unit) {
-        }
-
-        Pump getPump(GLenum type, int size) const {
-            return getTexCoordPump(_unit, type, size);
-        }
-        
-    private:
-        GLenum _unit;
-    };
+    }
 
 
 }

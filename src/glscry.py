@@ -37,9 +37,16 @@ def defineArray(arraytype, size, repeat=[], offset=[], initial=[]):
     return array
 
 
-def buildGeometry(typeAndSize, v=None, c=None, n=None, t=None, i=None):
-    primtype, batchSize = typeAndSize
-    geo = Geometry(primtype, batchSize)
+def buildGeometry(batches, v=None, c=None, n=None, t=None, i=None):
+    if type(batches) is not list:
+        batches = [batches]
+
+    for idx, val in enumerate(batches):
+        if type(val) is not PrimitiveBatch:
+            batches[idx] = apply(PrimitiveBatch, val)
+        
+    geo = Geometry()
+    geo.batches[:] = batches
     if i: geo.indices   = i
     if v: geo.vertices  = v
     if c: geo.colors    = c

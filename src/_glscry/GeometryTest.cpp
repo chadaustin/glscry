@@ -25,62 +25,67 @@ namespace scry {
         typedef GeometryTest C;
         class_<C, GeometryTestPtr, bases<Test>, boost::noncopyable>
             ("GeometryTest", no_init)
-            .add_property("batchSize", &C::getBatchSize, &C::setBatchSize)
+            .add_property("geometry", &C::getGeometry)
             ;
 
         implicitly_convertible<GeometryTestPtr, TestPtr>();
     }
 
     GeometryTest::GeometryTest(const char* name, GeometryPtr geo)
-    : Test(name) {
+    : Test(name)
+    , _geometry(geo) {
         SCRY_ASSERT(geo);
-        _geometry.push_back(geo);
         _buffers.texcoords.resize(geo->texcoords.size());
     }
     
     void GeometryTest::setup() {
         _screenCoverage  = 0;
         _vertexArraySize = 0;
-        _currentGeometry = 0;
 
         // Clear previous buffer data.
         _buffers.indices   = Buffer();
         _buffers.vertices  = Buffer();
         _buffers.colors    = Buffer();
         _buffers.normals   = Buffer();
-        std::fill(_buffers.texcoords.begin(), _buffers.texcoords.end(), Buffer());
+        std::fill(_buffers.texcoords.begin(), _buffers.texcoords.end(),
+                  Buffer());
 
         GeometryPtr geometry = getGeometry();
 
         if (ArrayPtr i = geometry->indices) {
-            defineBuffer(_buffers.indices, i, getVertexCountPerBatch(),
+            defineBuffer(_buffers.indices, i, getVertexCountPerIteration(),
                          "indices", FunctionPumpFactory(getIndexPump));
 
             // Calculate the largest index value and use that+1 as the
             // vertex array size.
-            for (size_t j = 0; j < getVertexCountPerBatch(); ++j) {
+            for (size_t j = 0; j < getVertexCountPerIteration(); ++j) {
                 size_t value = i->getUInt(_buffers.indices.data_ptr(), j);
                 _vertexArraySize = std::max<size_t>(_vertexArraySize, value);
             }
             ++_vertexArraySize;
+        } else {
+            _vertexArraySize = getVertexCountPerIteration();
         }
 
         if (ArrayPtr v = geometry->vertices) {
-            defineBuffer(_buffers.vertices, v, getVertexArraySize(geometry),
+            defineBuffer(_buffers.vertices, v, getVertexArraySize(),
                          "vertices", FunctionPumpFactory(getVertexPump));
 
             // @todo: THIS IS WRONG WHEN USING INDEXED GEOMETRY
-            _screenCoverage = calculateCoverage(
-                geometry->getPrimitiveType(),
-                v->getTypeConstant(),
-                v->getSize(),
-                getVertexArraySize(geometry),
-                _buffers.vertices.data_ptr());
+            // @todo: It is also wrong when using transform matrices.
+            for (size_t i = 0; i < geometry->batches.size(); ++i) {
+                _screenCoverage += calculateCoverage(
+                    geometry->batches[i].primitiveType,
+                    v->getTypeConstant(),
+                    v->getVectorSize(),
+                    geometry->batches[i].getVertexCount(),
+                    _buffers.vertices.data_ptr());
+            }
         }
 
-        defineBuffer(_buffers.colors,  geometry->colors,  getVertexArraySize(geometry),
+        defineBuffer(_buffers.colors,  geometry->colors,  getVertexArraySize(),
                      "colors",  FunctionPumpFactory(getColorPump));
-        defineBuffer(_buffers.normals, geometry->normals, getVertexArraySize(geometry),
+        defineBuffer(_buffers.normals, geometry->normals, getVertexArraySize(),
                      "normals", FunctionPumpFactory(getNormalPump));
 
         for (size_t i = 0; i < _buffers.texcoords.size(); ++i) {
@@ -88,18 +93,18 @@ namespace scry {
             os << "texcoords[" << i << "]";
             defineBuffer(_buffers.texcoords[i],
                          geometry->texcoords[i],
-                         getVertexArraySize(geometry),
+                         getVertexArraySize(),
                          os.str().c_str(),
                          TexCoordPumpFactory(GL_TEXTURE0 + i));
         }
 
 
         _vertexDataSize = 0;
-        _vertexDataSize += getArrayVertexSize(geometry->vertices);
-        _vertexDataSize += getArrayVertexSize(geometry->colors);
-        _vertexDataSize += getArrayVertexSize(geometry->normals);
+        _vertexDataSize += getArrayVectorSize(geometry->vertices);
+        _vertexDataSize += getArrayVectorSize(geometry->colors);
+        _vertexDataSize += getArrayVectorSize(geometry->normals);
         for (size_t ti = 0; ti < geometry->texcoords.size(); ++ti) {
-            _vertexDataSize += getArrayVertexSize(geometry->texcoords[ti]);
+            _vertexDataSize += getArrayVectorSize(geometry->texcoords[ti]);
         }
     }
 
@@ -129,7 +134,7 @@ namespace scry {
         }
 
         if (ArrayPtr n = geometry->normals) {
-            SCRY_ASSERT(n->getSize() == 3);
+            SCRY_ASSERT(n->getVectorSize() == 3);
             glEnableClientState(GL_NORMAL_ARRAY);
             glNormalPointer(n, getNormals().data_ptr());
         }
@@ -167,20 +172,24 @@ namespace scry {
     }
 
 
-    size_t GeometryTest::getVertexCountPerBatch() const {
-        switch (getGeometry()->getPrimitiveType()) {
-            case GL_POINTS:         return getBatchSize() * 1; 
-            case GL_LINES:          return getBatchSize() * 2;
-            case GL_LINE_STRIP:     return getBatchSize() + 1;
-            case GL_LINE_LOOP:      return getBatchSize();
-            case GL_TRIANGLES:      return getBatchSize() * 3;
-            case GL_TRIANGLE_STRIP: return getBatchSize() + 2;
-            case GL_TRIANGLE_FAN:   return getBatchSize() + 2;
-            case GL_QUADS:          return getBatchSize() * 4;
-            case GL_QUAD_STRIP:     return getBatchSize() * 2 + 2;
-            case GL_POLYGON:        return getBatchSize();
-            default:                return 0;
+    size_t GeometryTest::getVertexCountPerIteration() const {
+        const PrimitiveBatchList& batches = getGeometry()->batches;
+
+        size_t total = 0;
+        for (size_t i = 0; i < batches.size(); ++i) {
+            total += batches[i].getVertexCount();
         }
+        return total;
+    }
+
+    size_t GeometryTest::getPrimitiveCountPerIteration() const {
+        const PrimitiveBatchList& batches = getGeometry()->batches;
+
+        size_t total = 0;
+        for (size_t i = 0; i < batches.size(); ++i) {
+            total += batches[i].batchSize;
+        }
+        return total;       
     }
 
 
@@ -197,13 +206,12 @@ namespace scry {
         }
 
         buffer.array = array;
-        buffer.data.resize(vertexCount * array->getSize() *
-                           array->getTypeSize());
-        array->build(buffer.data_ptr(), vertexCount * array->getSize());
+        buffer.data.resize(vertexCount * getArrayVectorSize(array));
+        array->build(buffer.data_ptr(), vertexCount * array->getVectorSize());
 
         buffer.pump = pumpFactory.getPump(
             array->getTypeConstant(),
-            array->getSize());
+            array->getVectorSize());
         if (!buffer.pump) {
             std::cout << "Warning: " << name
                       << " specified but no pump found." << std::endl;

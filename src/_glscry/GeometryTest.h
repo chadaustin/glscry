@@ -48,15 +48,6 @@ namespace scry {
         static void bind();
 
         GeometryTest(const char* name, GeometryPtr geo);
-        //GeometryTest(const char* name, std::vector<GeometryPtr> geos);
-
-        size_t getBatchSize() const {
-            return getGeometry()->getBatchSize();
-        }
-
-        void setBatchSize(size_t size) {
-            getGeometry()->setBatchSize(size);
-        }
 
         void setup();
 
@@ -66,24 +57,20 @@ namespace scry {
         void disableArrays() const;
 
         GeometryPtr getGeometry() const {
-            return _geometry[0];
+            return _geometry;
         }
 
-        size_t getVertexCountPerBatch() const;
-
-        size_t getVertexArraySize(GeometryPtr geo) {
-            return geo->indices
-                ? size_t(_vertexArraySize)
-                : getVertexCountPerBatch();
+        size_t getVertexCountPerIteration() const;
+        size_t getPrimitiveCountPerIteration() const;
+        size_t getBatchesPerIteration() const {
+            return getGeometry()->batches.size();
         }
 
-        size_t getArrayVertexSize(const ArrayPtr& a) {
-            return a
-                ? a->getSize() * a->getTypeSize()
-                : 0;
+        size_t getVertexArraySize() {
+            return _vertexArraySize;
         }
 
-        size_t getVertexDataSize() {
+        size_t getVertexDataSize() const {
             return _vertexDataSize;
         }
 
@@ -103,18 +90,17 @@ namespace scry {
             Buffer& buffer, ArrayPtr array, size_t vertexCount,
             const char* name, const PumpFactory& pumpFactory);
 
+        /// Number of pixels drawn to the screen per iteration.
         Zeroed<Uint64> _screenCoverage;
 
-        /// Size of vertex arrays when using indexed geometry.
+        /// Size of vertex arrays in scalars of 'datatype'.  (1000 floats, etc)
         Zeroed<size_t> _vertexArraySize;  // In 'datatype's
 
+        /// Size of each vertex in bytes.
         Zeroed<size_t> _vertexDataSize;
 
-        Zeroed<size_t> _currentGeometry;
-        std::vector<GeometryPtr> _geometry;
-
+        GeometryPtr _geometry;
         GeometryBuffers _buffers;
-
     };
     SCRY_REF_PTR(GeometryTest);
 

@@ -35,27 +35,38 @@ namespace scry {
 
         enableArrays();
         if (compiled) {
-            glLockArraysEXT(0, getVertexArraySize(getGeometry()));
+            glLockArraysEXT(0, getVertexArraySize());
         }
     }
 
     void VertexArrayTest::iterate(ResultValues& results) {
         GeometryPtr geometry = getGeometry();
+        const PrimitiveBatchList& batches = geometry->batches;
+
         if (ArrayPtr i = geometry->indices) {
-            glDrawElements(geometry->getPrimitiveType(),
-                           getVertexCountPerBatch(),
-                           i->getTypeConstant(),
-                           getIndices().data_ptr());
+            size_t drawn = 0;
+            for (size_t b = 0; b < batches.size(); ++b) {
+                glDrawElements(batches[b].primitiveType,
+                               batches[b].getVertexCount(),
+                               i->getTypeConstant(),
+                               getIndices().offset(drawn));
+                drawn += batches[b].getVertexCount();
+            }
         } else {
-            glDrawArrays(geometry->getPrimitiveType(),
-                         0,
-                         getVertexCountPerBatch());
+            size_t drawn = 0;
+            for (size_t b = 0; b < batches.size(); ++b) {
+                glDrawArrays(batches[b].primitiveType,
+                             drawn,
+                             batches[b].getVertexCount());
+                drawn += batches[b].getVertexCount();
+            }
         }
-        results[0] += getVertexCountPerBatch();
-        results[1] += getBatchSize();
+
+        results[0] += getVertexCountPerIteration();
+        results[1] += getPrimitiveCountPerIteration();
         results[2] += getScreenCoverage();
-        results[3] += 1;
-        results[4] += getVertexCountPerBatch() * getVertexDataSize();
+        results[3] += geometry->batches.size();
+        results[4] += getVertexCountPerIteration() * getVertexDataSize();
     }
 
     void VertexArrayTest::teardown() {

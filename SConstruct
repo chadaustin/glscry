@@ -1,7 +1,7 @@
 import os
 
 SConsignFile()
-CacheDir('cache')
+#CacheDir('cache')
 
 
 

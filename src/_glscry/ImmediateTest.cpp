@@ -53,11 +53,11 @@ namespace scry {
             doIterate();
         }
 
-        results[0] += getVertexCountPerBatch();
-        results[1] += getBatchSize();
+        results[0] += getVertexCountPerIteration();
+        results[1] += getPrimitiveCountPerIteration();
         results[2] += getScreenCoverage();
-        results[3] += 1;
-        results[4] += getVertexCountPerBatch() * getVertexDataSize();
+        results[3] += getBatchesPerIteration();
+        results[4] += getVertexCountPerIteration() * getVertexDataSize();
     }
 
     void ImmediateTest::teardown() {
@@ -71,7 +71,7 @@ namespace scry {
     void ImmediateTest::doSetup() {
         GeometryPtr geometry = getGeometry();
         if (ArrayPtr i = geometry->indices) {
-            if (i->getSize() != 1) {
+            if (i->getVectorSize() != 1) {
                 throw std::runtime_error("Indices array contains vectors, scalars expected.");
             }
 
@@ -81,24 +81,30 @@ namespace scry {
 
     void ImmediateTest::doIterate() {
         GeometryPtr geometry = getGeometry();
+        const PrimitiveBatchList& batches = geometry->batches;
+
         if (geometry->indices) {
             BufferIterator i(getIndices());
 
-            glBegin(geometry->getPrimitiveType());
-            for (size_t j = 0; j < getVertexCountPerBatch(); ++j) {
-                i.step();
+            for (size_t b = 0; b < batches.size(); ++b) {
+                glBegin(batches[b].primitiveType);
+                for (size_t j = 0; j < batches[b].getVertexCount(); ++j) {
+                    i.step();
+                }
+                glEnd();
             }
-            glEnd();
         } else {
             BufferIteratorList bi;
             fillBufferIteratorList(bi);
 
-            glBegin(geometry->getPrimitiveType());
-            for (size_t i = 0; i < getVertexCountPerBatch(); ++i) {
-                std::for_each(bi.begin(), bi.end(),
-                              std::mem_fun_ref(&BufferIterator::step));
+            for (size_t b = 0; b < batches.size(); ++b) {
+                glBegin(batches[b].primitiveType);
+                for (size_t i = 0; i < batches[b].getVertexCount(); ++i) {
+                    std::for_each(bi.begin(), bi.end(),
+                                  std::mem_fun_ref(&BufferIterator::step));
+                }
+                glEnd();
             }
-            glEnd();
         }
     }
 

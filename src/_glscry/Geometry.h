@@ -24,6 +24,27 @@
 
 namespace scry {
 
+    struct PrimitiveBatch {
+        PrimitiveBatch(GLenum type, size_t size)
+        : primitiveType(type)
+        , batchSize(size) {
+        }
+
+        bool operator==(const PrimitiveBatch& rhs) {
+            return primitiveType == rhs.primitiveType &&
+                   batchSize == rhs.batchSize;
+        }
+
+        size_t getVertexCount() const {
+            return getVertexCountPerBatch(batchSize, primitiveType);
+        }
+
+        GLenum primitiveType;
+        size_t batchSize;
+    };
+    typedef std::vector<PrimitiveBatch> PrimitiveBatchList;
+
+
     class Geometry : public RefCounted {
     protected:
         ~Geometry() { }
@@ -31,22 +52,13 @@ namespace scry {
     public:
         static void bind();
 
-        Geometry(GLenum primitiveType, size_t batchSize);
+        Geometry();
 
-        GLenum getPrimitiveType() const {
-            return _primitiveType;
-        }
-
-        size_t getBatchSize() const {
-            return _batchSize;
-        }
-
-        void setBatchSize(size_t batchSize) {
-            _batchSize = batchSize;
-        }
+        /// Must have at least one entry.
+        PrimitiveBatchList batches;
 
         typedef std::vector<ArrayPtr> ArrayPtrList;
-
+        
         /**
          * Must contain scalar integers -- that is, indices.getSize()
          * == 1 and indices.getTypeConstant() is an integer type.
@@ -63,9 +75,6 @@ namespace scry {
         ArrayPtrList texcoords;
 
     private:
-        GLenum _primitiveType;
-        size_t _batchSize;
-
         // Queried on creation.
         size_t _maxTextureUnits;
     };

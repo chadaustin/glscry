@@ -17,6 +17,7 @@
 
 
 #include "Array.h"
+#include "Pump.h"
 
 
 namespace scry {
@@ -25,10 +26,19 @@ namespace scry {
               GLubyte* data_ptr()       { return &data[0]; }
         const GLubyte* data_ptr() const { return &data[0]; }
 
+        // i is an offset into the buffer in *vectors*
+              GLubyte* offset(size_t i)       { return data_ptr() + i * getVectorSize(); }
+        const GLubyte* offset(size_t i) const { return data_ptr() + i * getVectorSize(); }
+        
+
+        size_t getVectorSize() const {
+            return getArrayVectorSize(array);
+        }
+
         ArrayPtr array;  // The array that filled this buffer.
         std::vector<GLubyte> data;
         Zeroed<Pump> pump;
-        Zeroed<GLsizei> stride;
+        //Zeroed<GLsizei> stride;
     };
 
 

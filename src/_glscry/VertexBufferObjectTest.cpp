@@ -58,21 +58,23 @@ namespace scry {
                     _buffers.push_back(createVBO(getVertices()));
 
                     glEnableClientState(GL_VERTEX_ARRAY);
-                    glVertexPointer(v->getSize(), v->getTypeConstant(), 0, 0);
+                    glVertexPointer(v->getVectorSize(),
+                                    v->getTypeConstant(), 0, 0);
                 }
 
                 if (ArrayPtr c = geometry->colors) {
                     _buffers.push_back(createVBO(getColors()));
 
                     glEnableClientState(GL_COLOR_ARRAY);
-                    glColorPointer(c->getSize(), c->getTypeConstant(), 0, 0);
+                    glColorPointer(c->getVectorSize(),
+                                   c->getTypeConstant(), 0, 0);
                 }
 
                 if (ArrayPtr n = geometry->normals) {
                     _buffers.push_back(createVBO(getNormals()));
 
                     glEnableClientState(GL_NORMAL_ARRAY);
-                    SCRY_ASSERT(n->getSize() == 3);
+                    SCRY_ASSERT(n->getVectorSize() == 3);
                     glNormalPointer(n->getTypeConstant(), 0, 0);
                 }
                 
@@ -83,7 +85,8 @@ namespace scry {
                         }
                         _buffers.push_back(createVBO(getTexCoords(ti)));
                         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                        glTexCoordPointer(t->getSize(), t->getTypeConstant(), 0, 0);
+                        glTexCoordPointer(t->getVectorSize(),
+                                          t->getTypeConstant(), 0, 0);
                         if (ti >= 1) {
                             glClientActiveTextureARB(GL_TEXTURE0);
                         }
@@ -127,21 +130,21 @@ namespace scry {
                 out = start;
                 if (ArrayPtr v = geometry->vertices) {
                     glEnableClientState(GL_VERTEX_ARRAY);
-                    glVertexPointer(v->getSize(), v->getTypeConstant(), 0,
-                                    asBufferOffset(out - start));
+                    glVertexPointer(v->getVectorSize(), v->getTypeConstant(),
+                                    0, asBufferOffset(out - start));
                     out += getVertices().data.size();
                 }
 
                 if (ArrayPtr c = geometry->colors) {
                     glEnableClientState(GL_COLOR_ARRAY);
-                    glColorPointer(c->getSize(), c->getTypeConstant(), 0,
-                                   asBufferOffset(out - start));
+                    glColorPointer(c->getVectorSize(), c->getTypeConstant(),
+                                   0, asBufferOffset(out - start));
                     out += getColors().data.size();
                 }
 
                 if (ArrayPtr n = geometry->normals) {
                     glEnableClientState(GL_NORMAL_ARRAY);
-                    SCRY_ASSERT(n->getSize() == 3);
+                    SCRY_ASSERT(n->getVectorSize() == 3);
                     glNormalPointer(n->getTypeConstant(), 0,
                                     asBufferOffset(out - start));
                     out += getNormals().data.size();
@@ -153,7 +156,8 @@ namespace scry {
                             glClientActiveTextureARB(GL_TEXTURE0 + ti);
                         }
                         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                        glTexCoordPointer(t->getSize(), t->getTypeConstant(), 0,
+                        glTexCoordPointer(t->getVectorSize(),
+                                          t->getTypeConstant(), 0,
                                           asBufferOffset(out - start));
                         if (ti >= 1) {
                             glClientActiveTextureARB(GL_TEXTURE0);
@@ -182,7 +186,7 @@ namespace scry {
                     totalStride += getStride(buffers[i]->array);
                 }
 
-                size_t vertexArraySize = getVertexArraySize(getGeometry());
+                size_t vertexArraySize = getVertexArraySize();
                 SCRY_ASSERT(totalStride * vertexArraySize == totalSize &&
                             "Incorrect buffer size or stride.");
 
@@ -215,21 +219,21 @@ namespace scry {
                 size_t stride = 0;
                 if (ArrayPtr v = geometry->vertices) {
                     glEnableClientState(GL_VERTEX_ARRAY);
-                    glVertexPointer(v->getSize(), v->getTypeConstant(),
+                    glVertexPointer(v->getVectorSize(), v->getTypeConstant(),
                                     totalStride, asBufferOffset(stride));
                     stride += getStride(v);
                 }
 
                 if (ArrayPtr c = geometry->colors) {
                     glEnableClientState(GL_COLOR_ARRAY);
-                    glColorPointer(c->getSize(), c->getTypeConstant(),
+                    glColorPointer(c->getVectorSize(), c->getTypeConstant(),
                                    totalStride, asBufferOffset(stride));
                     stride += getStride(c);
                 }
 
                 if (ArrayPtr n = geometry->normals) {
                     glEnableClientState(GL_NORMAL_ARRAY);
-                    SCRY_ASSERT(n->getSize() == 3);
+                    SCRY_ASSERT(n->getVectorSize() == 3);
                     glNormalPointer(n->getTypeConstant(), totalStride,
                                     asBufferOffset(stride));
                     stride += getStride(n);
@@ -241,7 +245,8 @@ namespace scry {
                             glClientActiveTextureARB(GL_TEXTURE0 + ti);
                         }
                         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                        glTexCoordPointer(t->getSize(), t->getTypeConstant(),
+                        glTexCoordPointer(t->getVectorSize(),
+                                          t->getTypeConstant(),
                                           totalStride,
                                           asBufferOffset(stride));
                         if (ti >= 1) {
@@ -261,21 +266,32 @@ namespace scry {
 
     void VertexBufferObjectTest::iterate(ResultValues& results) {
         GeometryPtr geo = getGeometry();
+        const PrimitiveBatchList& batches = geo->batches;
 
-        // In indexing support, use glDrawRangeElements or glDrawElements.
+        // When using indexed geometry, use glDrawRangeElements or
+        // glDrawElements.
         if (ArrayPtr i = geo->indices) {
-            glDrawElements(geo->getPrimitiveType(),
-                           getVertexCountPerBatch(),
-                           i->getTypeConstant(),
-                           0);
+            size_t drawn = 0;
+            for (size_t b = 0; b < batches.size(); ++b) {
+                glDrawElements(batches[b].primitiveType,
+                               batches[b].getVertexCount(),
+                               i->getTypeConstant(),
+                               asBufferOffset(drawn));
+            }
         } else {
-            glDrawArrays(geo->getPrimitiveType(), 0, getVertexCountPerBatch());
+            size_t drawn = 0;
+            for (size_t b = 0; b < batches.size(); ++b) {
+                glDrawArrays(batches[b].primitiveType,
+                             drawn,
+                             batches[b].getVertexCount());
+            }
         }
-        results[0] += getVertexCountPerBatch();
-        results[1] += getBatchSize();
+
+        results[0] += getVertexCountPerIteration();
+        results[1] += getPrimitiveCountPerIteration();
         results[2] += getScreenCoverage();
-        results[3] += 1;
-        results[4] += getVertexCountPerBatch() * getVertexDataSize();
+        results[3] += geo->batches.size();
+        results[4] += getVertexCountPerIteration() * getVertexDataSize();
     }
 
     void VertexBufferObjectTest::teardown() {
@@ -303,7 +319,7 @@ namespace scry {
 
     GLsizei VertexBufferObjectTest::getStride(ArrayPtr array) {
         if (array) {
-            return array->getSize() * array->getTypeSize();
+            return array->getVectorSize() * array->getTypeSize();
         } else {
             return 0;
         }
