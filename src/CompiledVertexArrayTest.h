@@ -3,13 +3,19 @@
 
 
 #include "GeometryTest.h"
+#include "GLUtility.h"
 
 
 SCRY_BEGIN_NAMESPACE
 
 class CompiledVertexArrayTest : public GeometryTest {
+protected:
+    ~CompiledVertexArrayTest() { }
+
 public:
-    CompiledVertexArrayTest(const GeometryGenerator* gen)
+    static void bind();
+
+    CompiledVertexArrayTest(GeometryGeneratorPtr gen)
         : GeometryTest(gen)
     {
     }
@@ -42,6 +48,7 @@ public:
         glDisableClientState(GL_VERTEX_ARRAY);
     }
 };
+SCRY_REF_PTR(CompiledVertexArrayTest);
 
 SCRY_END_NAMESPACE
 

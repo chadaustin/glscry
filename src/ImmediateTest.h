@@ -10,8 +10,13 @@ SCRY_BEGIN_NAMESPACE
 
 
 class ImmediateTest : public GeometryTest {
+protected:
+    ~ImmediateTest() { }
+
 public:
-    ImmediateTest(const GeometryGenerator* gen)
+    static void bind();
+
+    ImmediateTest(GeometryGeneratorPtr gen)
         : GeometryTest(gen)
     {
     }
@@ -34,6 +39,7 @@ public:
         results[0] += buffer.size();
     }
 };
+SCRY_REF_PTR(ImmediateTest);
 
 
 SCRY_END_NAMESPACE

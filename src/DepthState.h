@@ -2,6 +2,7 @@
 #define SCRY_DEPTH_STATE_H
 
 
+#include "glew.h"
 #include "State.h"
 
 
@@ -9,6 +10,12 @@ SCRY_BEGIN_NAMESPACE
 
 
 class DepthState : public State {
+protected:
+    ~DepthState() { }
+
+public:
+    static void bind();
+
     void apply() {
         glEnable(GL_DEPTH_TEST);
     }
@@ -17,6 +24,7 @@ class DepthState : public State {
         glDisable(GL_DEPTH_TEST);
     }
 };
+SCRY_REF_PTR(DepthState);
 
 
 SCRY_END_NAMESPACE

@@ -10,12 +10,17 @@
 SCRY_BEGIN_NAMESPACE
 
 class GeometryTest : public Test {
+protected:
+    ~GeometryTest() { }
+
 public:
     SCRY_BEGIN_RESULT_DESCS()
         SCRY_RESULT_DESC("TriangleRate", "tri/s")
     SCRY_END_RESULT_DESCS()
 
-    GeometryTest(const GeometryGenerator* gen) {
+    static void bind();
+
+    GeometryTest(GeometryGeneratorPtr gen) {
         assert(gen);
         _generator = gen;
     }
@@ -42,9 +47,10 @@ protected:
 private:
     Inited<size_t, 4096> _batchSize;
 
-    const GeometryGenerator* _generator;
+    GeometryGeneratorPtr _generator;
     std::vector<Triangle> _triangleBuffer;
 };
+SCRY_REF_PTR(GeometryTest);
 
 SCRY_END_NAMESPACE
 

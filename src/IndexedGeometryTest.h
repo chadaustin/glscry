@@ -3,15 +3,21 @@
 
 
 #include "GeometryTest.h"
+#include "GLUtility.h"
 
 
 SCRY_BEGIN_NAMESPACE
 
 class IndexedGeometryTest : public GeometryTest {
+protected:
+    ~IndexedGeometryTest() { }
+
 public:
+    static void bind();
+
     static const size_t triangleCount = 2048;
 
-    IndexedGeometryTest(const GeometryGenerator* gen)
+    IndexedGeometryTest(GeometryGeneratorPtr gen)
         : GeometryTest(gen)
     {
     }
@@ -52,6 +58,7 @@ private:
 
     std::vector<GLuint> _indices;
 };
+SCRY_REF_PTR(IndexedGeometryTest);
 
 SCRY_END_NAMESPACE
 

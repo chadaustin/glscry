@@ -14,10 +14,12 @@ protected:
     virtual ~State() { }
 
 public:
+    static void bind();
+
     virtual void apply() = 0;
     virtual void reset() = 0;
 };
-typedef boost::intrusive_ptr<State> StatePtr;
+SCRY_REF_PTR(State);
 
 
 SCRY_END_NAMESPACE

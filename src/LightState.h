@@ -3,14 +3,20 @@
 
 
 #include <vector>
-#include "Base.h"
+#include "glew.h"
+#include "State.h"
 
 
 SCRY_BEGIN_NAMESPACE
 
 
 class LightState : public State {
+protected:
+    ~LightState() { }
+
 public:
+    static void bind();
+
     LightState() {
         GLint max_lights;
         glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
@@ -58,6 +64,7 @@ private:
 
     std::vector<Light> _lights;
 };
+SCRY_REF_PTR(LightState);
 
 
 SCRY_END_NAMESPACE

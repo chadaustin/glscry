@@ -3,15 +3,19 @@
 
 
 #include "GeometryTest.h"
+#include "GLUtility.h"
 
 
 SCRY_BEGIN_NAMESPACE
 
 class VertexBufferObjectTest : public GeometryTest {
-    GLuint _buffer;
+protected:
+    ~VertexBufferObjectTest() { }
 
 public:
-    VertexBufferObjectTest(const GeometryGenerator* gen)
+    static void bind();
+
+    VertexBufferObjectTest(GeometryGeneratorPtr gen)
         : GeometryTest(gen)
     {
     }
@@ -38,9 +42,9 @@ public:
 
         glEnableClientState(GL_VERTEX_ARRAY);
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, _buffer);
-        glVertexPointer(Triangle::Vector::Size,
-                        GLTypeConstant<Triangle::Vector::DataType>::Result,
-                        0, NULL);
+        ::glVertexPointer(Triangle::Vector::Size,
+                          GLTypeConstant<Triangle::Vector::DataType>::Result,
+                          0, NULL);
     }
 
     void iterate(ResultSet& results) {
@@ -55,7 +59,11 @@ public:
 
         glDeleteBuffersARB(1, &_buffer);
     }
+
+private:
+    GLuint _buffer;
 };
+SCRY_REF_PTR(VertexBufferObjectTest);
 
 
 SCRY_END_NAMESPACE

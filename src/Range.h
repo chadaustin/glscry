@@ -3,21 +3,33 @@
 
 
 #include "Base.h"
+#include "RefCounted.h"
 
 
 SCRY_BEGIN_NAMESPACE
 
 
-class Range {
+class Range : public RefCounted {
+protected:
+    ~Range() { }
+
 public:
+    static void bind();
+
     Range& get() { return *this; }
 
     virtual bool next(size_t& out) = 0;
 };
+SCRY_REF_PTR(Range);
 
 
 class LinearRange : public Range {
+protected:
+    ~LinearRange() { }
+
 public:
+    static void bind();
+
     LinearRange(size_t begin, size_t end, size_t step = 1) {
         assert(step > 0);
 
@@ -44,10 +56,16 @@ private:
 
     size_t _current;
 };
+SCRY_REF_PTR(LinearRange);
 
 
 class PowerRange/*r*/ : public Range {
+protected:
+    ~PowerRange() { }
+
 public:
+    static void bind();
+
     PowerRange(size_t begin, size_t end, size_t power = 2) {
         _begin = begin;
         _end   = end;
@@ -73,6 +91,7 @@ private:
 
     size_t _current;
 };
+SCRY_REF_PTR(PowerRange);
 
 
 SCRY_END_NAMESPACE

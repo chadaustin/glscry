@@ -2,6 +2,9 @@
 #include <boost/python/detail/api_placeholder.hpp> // for len()
 #include "Run.h"
 
+#include "DepthState.h"
+#include "LightState.h"
+
 #include "ImmediateTest.h"
 #include "IndexedGeometryTest.h"
 #include "DisplayListTest.h"
@@ -43,12 +46,47 @@ void runTests(const std::string& filename, list testList, float runFor,
 }
 
 
+void runTestsRange(const std::string& filename, list testList, float runFor,
+                   const std::string& depVar, const std::string& indVar,
+                   RangePtr range) {
+    std::vector<TestPtr> tests;
+    for (int i = 0; i < len(testList); ++i) {
+        tests.push_back(extract<TestPtr>(testList[i]));
+    }
+
+    scry::runTestsRange(filename, tests, runFor, depVar, indVar, range);
+}
+
+
+void exportGMTL();
+
+
 BOOST_PYTHON_MODULE(_glscry) {
+    exportGMTL();
+
     bindOpenGL();
 
     def("run",            ::run);
     def("runTests_",      ::runTests);
     def("runTestsRange_", ::runTestsRange);
+
+    // General classes.
+    Range::bind();
+    LinearRange::bind();
+    PowerRange::bind();
+
+    // States.
+    State::bind();
+    DepthState::bind();
+    LightState::bind();
+
+    // Geometry generators.
+
+    GeometryGenerator::bind();
+    Zeroes::bind();
+    SmallTriangles::bind();
+
+    // Tests.
 
     Test::bind();
 
@@ -58,4 +96,12 @@ BOOST_PYTHON_MODULE(_glscry) {
     CopyPixelTest::bind();
     DrawPixelTest::bind();
     ReadPixelTest::bind();
+
+    GeometryTest::bind();
+    ImmediateTest::bind();
+    DisplayListTest::bind();
+    VertexArrayTest::bind();
+    CompiledVertexArrayTest::bind();
+    VertexBufferObjectTest::bind();
+    IndexedGeometryTest::bind();
 }

@@ -28,7 +28,8 @@ public:
 
 
 void Test::bind() {
-    class_<Test, TestPtr, noncopyable>("Test", no_init);
+    class_<Test, TestPtr, noncopyable>("Test", no_init)
+        .def("setState", &Test::setState);
 }
 
 

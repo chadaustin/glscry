@@ -81,7 +81,7 @@ void runTests(const std::string& filename, std::vector<TestPtr> testList,
 
 void runTestsRange(const std::string& filename, std::vector<TestPtr> testList,
                    float runFor, const std::string& depVar,
-                   const std::string& indVar, Range& range) {
+                   const std::string& indVar, RangePtr range) {
     
     std::ofstream of(filename.c_str());
     if (!of) {
@@ -89,7 +89,7 @@ void runTestsRange(const std::string& filename, std::vector<TestPtr> testList,
     }
 
     size_t indValue;
-    while (range.next(indValue)) {
+    while (range->next(indValue)) {
         for (size_t i = 0; i < testList.size(); ++i) {
             betweenTests();
 

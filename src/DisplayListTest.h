@@ -3,15 +3,19 @@
 
 
 #include "GeometryTest.h"
+#include "GLUtility.h"
 
 
 SCRY_BEGIN_NAMESPACE
 
 class DisplayListTest : public GeometryTest {
-    GLuint _list;
+protected:
+    ~DisplayListTest() { }
 
 public:
-    DisplayListTest(const GeometryGenerator* gen)
+    static void bind();
+
+    DisplayListTest(GeometryGeneratorPtr gen)
         : GeometryTest(gen)
     {
     }
@@ -45,7 +49,11 @@ public:
     void teardown() {
         glDeleteLists(_list, 1);
     }
+
+private:
+    GLuint _list;
 };
+SCRY_REF_PTR(DisplayListTest);
 
 
 SCRY_END_NAMESPACE
