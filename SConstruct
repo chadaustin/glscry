@@ -1,9 +1,12 @@
 import os
 
 SConsignFile()
-CacheDir('cache')
+#CacheDir('cache')
 
 platform = DefaultEnvironment()['PLATFORM']
+
+
+# Options
 
 defaultBoostIncludes = '/usr/local/include/boost-1_31'
 defaultBoostLibs     = '/usr/local/lib'
@@ -18,6 +21,9 @@ opts.AddOptions(
     PathOption('boostLibs', 'Directory containing boost library files',
                defaultBoostLibs),
     BoolOption('nowarn', 'Disable warnings', 0))
+
+
+# Base Environment
 
 env = Environment(
     tools=['default', 'SDL', 'OpenGL', 'BoostPython', 'Python'],
@@ -55,10 +61,22 @@ if env.subst('$CC') == 'gcc':
     env.Append(CCFLAGS=['-Wall', '-O2'])
 
 Export('env')
+
+
+# Build Metadata
+BuildData = {}
+Export('BuildData')
+
+
+# SConscripts
   
-module = SConscript(dirs=['src'])
+SConscript(dirs=['src'])
+
+
+# MSVS Project
 
 if 'MSVSProject' in env['BUILDERS'].keys():
     env.MSVSProject(target='glscry$MSVSPROJECTSUFFIX',
                     variant='Default',
-                    buildtarget=module)
+                    srcs=map(str, BuildData['NativeSources']),
+                    buildtarget=BuildData['NativeModule'])

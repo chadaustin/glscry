@@ -34,7 +34,7 @@ namespace scry {
         }
 
         void setup();
-        void iterate(ResultSet& results);
+        void iterate(ResultValues& results);
         void teardown();
     };
     SCRY_REF_PTR(ImmediateTest);

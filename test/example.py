@@ -13,6 +13,6 @@ test1 = ImmediateTest("Immediate",     geometry)
 test2 = VertexArrayTest("VertexArray", geometry)
 
 testList = [test1, test2]
-exampleResults = runTests(testList, runFor)
-exampleLine = GraphLine('Example Graph Line', exampleResults)
-generateGraph("example", exampleLine, "VertexRate")
+
+exampleResultList = runTests('Example Graph Line', testList, runFor)
+generateGraph("example", exampleResultList, "VertexRate", xunits='X Units')

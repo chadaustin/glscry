@@ -35,5 +35,5 @@ test2 = ImmediateTest('Back to Front', genBackToFront)
 test2.addStateSet(stateSet)
 test2.addAction(clearAction)
 
-results = runTests([test1, test2], 10)
-generateGraph("hierz", GraphLine('Render Order', results), "VertexRate")
+results = runTests('Render Order', [test1, test2], 10)
+generateGraph("hierz", results, "VertexRate")

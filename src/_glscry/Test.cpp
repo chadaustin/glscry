@@ -23,9 +23,8 @@ using namespace boost::python;
 
 namespace scry {
 
-    // Handles calling teardown() on exit in an exception-safe way.
+    /// Handles calling teardown() on exit in an exception-safe way.
     class RunSentry {
-        Test* _test;
     public:
         RunSentry(Test* test): _test(test) {
             glPushMatrix();
@@ -42,6 +41,9 @@ namespace scry {
 
             glPopMatrix();
         }
+
+    private:
+        Test* _test;
     };
 
 
@@ -57,8 +59,8 @@ namespace scry {
             .def(vector_indexing_suite<ResultDescList>())
             ;
 
-        class_<ResultSet>("ResultSet")
-            .def(vector_indexing_suite<ResultSet>())
+        class_<ResultValues>("ResultValues")
+            .def(vector_indexing_suite<ResultValues>())
             .def("normalize", &normalize)
             ;
 
@@ -77,12 +79,12 @@ namespace scry {
     }
 
 
-    ResultSet Test::run(float runFor) {
+    ResultValues Test::run(float runFor) {
         // Handles calling teardown() on exit in an exception-safe way.
         RunSentry sentry__(this);
 
         ResultDescList descs = getResultDescs();
-        ResultSet results(descs.size());
+        ResultValues results(descs.size());
 
         size_t currentStateSet = 0;
 

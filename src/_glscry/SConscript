@@ -27,8 +27,8 @@ sources = Split("""
 
     Test.cpp
 
-    TextureUploadTest.cpp
     TextureMemoryTest.cpp
+    TextureUploadTest.cpp
 
     PixelTransferTest.cpp
     CopyPixelTest.cpp
@@ -43,13 +43,69 @@ sources = Split("""
     VertexBufferObjectTest.cpp
 """)
 
+headers = Split("""
+    Version.h
+    Platform.h
+
+    OpenGL.cpp
+    GLUtility.h
+    glew.h
+    glxew.h
+    wglew.h
+
+    Action.h
+    Array.h
+    Context.h
+    Coverage.h
+    Geometry.h
+    LokiTypeInfo.h
+    RefCounted.h
+    ScopeGuard.h
+    Timer.h
+    Types.h
+    Utility.h
+
+    State.h
+    StateSet.h
+
+    BlendState.h
+    ColorBufferState.h
+    DepthState.h
+    LightState.h
+    LineState.h
+    MaterialState.h
+    TextureState.h
+    
+    Test.h
+    
+    TextureMemoryTest.h
+    TextureUploadTest.h
+
+    PixelTransferTest.h
+    CopyPixelTest.h
+    DrawPixelTest.h
+    ReadPixelTest.h
+
+    GeometryTest.h
+    CompiledVertexArrayTest.h
+    DisplayListTest.h
+    ImmediateTest.h
+    VertexArrayTest.h
+    VertexBufferObjectTest.h
+""")
+
 if env['PLATFORM'] == 'win32':
     sources.append('CPUInfo.cpp')
+    headers.append('CPUInfo.h')
+
+BuildData['NativeSources'] = map(File, sources + headers)
+
 
 modulename = env.subst('_glscry$SHLIBSUFFIX')
 env = env.Copy()
 env.Append(LIBPATH=['gmtl-python'], LIBS=['gmtl-python'])
+
 module = env.SharedLibrary(Dir('..').File(modulename), sources)
+BuildData['NativeModule'] = module
 
 SConscript(dirs=['gmtl-python'])
-Return('module')

@@ -59,7 +59,7 @@ namespace scry {
             glGenTextures(1, &_texture);
         }
 
-        void iterate(ResultSet& results) {
+        void iterate(ResultValues& results) {
             // Should add a way to test 1D and 3D textures.
             glBindTexture(GL_TEXTURE_2D, _texture);
 

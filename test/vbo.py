@@ -23,8 +23,7 @@ def run(filename, storageMode, name):
         test.setStorageMode(storageMode)
         testList.append(test)
 
-    results = runTests(testList, 10)
-    line = GraphLine(name, results)
+    line = runTests(name, testList, 10)
     generateGraph(filename, line, "VertexRate", xlabel='Buffer Type')
     return line
 

@@ -267,7 +267,7 @@ namespace scry {
         }
     }
 
-    void VertexBufferObjectTest::iterate(ResultSet& results) {
+    void VertexBufferObjectTest::iterate(ResultValues& results) {
         GeometryPtr geo = getGeometry();
 
         // In indexing support, use glDrawRangeElements or glDrawElements.

@@ -87,7 +87,7 @@ namespace scry {
         glEndList();
     }
 
-    void DisplayListTest::iterate(ResultSet& results) {
+    void DisplayListTest::iterate(ResultValues& results) {
         glCallList(_list);
         results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();

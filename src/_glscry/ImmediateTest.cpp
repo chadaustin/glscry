@@ -58,7 +58,7 @@ namespace scry {
         }
     }
 
-    void ImmediateTest::iterate(ResultSet& results) {
+    void ImmediateTest::iterate(ResultValues& results) {
         GeometryPtr geometry = getGeometry();
         if (geometry->indices) {
             BufferIterator i(getIndices());

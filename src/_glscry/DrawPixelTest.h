@@ -38,7 +38,7 @@ namespace scry {
                            getElementCount() * getTypeSize());
         }
 
-        void iterate(ResultSet& results) {
+        void iterate(ResultValues& results) {
             glDrawPixels(getWidth(), getHeight(),
                          getFormat(), getType(), &_buffer[0]);
             results[0] += getWidth() * getHeight();

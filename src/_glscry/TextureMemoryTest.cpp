@@ -54,7 +54,7 @@ namespace scry {
         _currentTexture = 0;
     }
 
-    void TextureMemoryTest::iterate(ResultSet& results) {
+    void TextureMemoryTest::iterate(ResultValues& results) {
         const size_t batchSize = 1024;
 
         for (size_t i = 0; i < batchSize; ++i) {

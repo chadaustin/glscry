@@ -61,8 +61,7 @@ def buildSpotTest(i):
     return test
 
 def run(filename, testList, type):
-    results = runTests(testList, 10)
-    line = GraphLine(type, results)
+    line = runTests(type, testList, 10)
     generateGraph(filename, line, 'VertexRate',
                      xlabel='Number of Lights')
     return line

@@ -65,9 +65,9 @@ namespace scry {
     typedef std::vector<ResultDesc> ResultDescList;
 
 
-    typedef std::vector<double> ResultSet;
+    typedef std::vector<double> ResultValues;
 
-    inline void normalize(ResultSet& results, double time) {
+    inline void normalize(ResultValues& results, double time) {
         for (size_t i = 0; i < results.size(); ++i) {
             results[i] /= time;
         }
@@ -124,7 +124,7 @@ namespace scry {
             _actionList.push_back(action);
         }
 
-        ResultSet run(float runFor);
+        ResultValues run(float runFor);
     
 
         // Overridden methods.
@@ -133,7 +133,7 @@ namespace scry {
         virtual ResultDescList getResultDescs() = 0;
 
         virtual void setup()    { }
-        virtual void iterate(ResultSet& results) = 0;
+        virtual void iterate(ResultValues& results) = 0;
         virtual void teardown() { }
 
     private:

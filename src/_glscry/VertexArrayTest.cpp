@@ -52,7 +52,7 @@ namespace scry {
         }
     }
 
-    void VertexArrayTest::iterate(ResultSet& results) {
+    void VertexArrayTest::iterate(ResultValues& results) {
         GeometryPtr geometry = getGeometry();
         if (ArrayPtr i = geometry->indices) {
             glDrawElements(geometry->getPrimitiveType(),

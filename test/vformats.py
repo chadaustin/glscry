@@ -45,8 +45,7 @@ def run(file, test, name):
         test("VCNT", geo_vcnt)]
 
     print "Writing data to %s" % file
-    results = runTests(tests, 10)
-    line = GraphLine(name, results)
+    line = runTests(name, tests, 10)
     generateGraph(file, line, 'VertexRate')
     return line
 

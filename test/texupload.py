@@ -24,6 +24,5 @@ test7.setType(GL_INT)
 test8 = TextureUploadTest("float")
 test8.setType(GL_FLOAT)
 
-results = runTests([test1, test2, test3, test4, test5, test6, test7, test8], 1)
-line = GraphLine('Texture Upload', results)
+line = runTests('Texture Upload', [test1, test2, test3, test4, test5, test6, test7, test8], 1)
 generateGraph('texupload', line, 'ByteRate', xlabel='Texture Format')

@@ -51,7 +51,7 @@ namespace scry {
         }
 
         void setup();
-        void iterate(ResultSet& results);
+        void iterate(ResultValues& results);
         void teardown();
 
     private:

@@ -36,7 +36,7 @@ namespace scry {
         void setCopyType(GLenum copyType) { _copyType = copyType; }
         GLenum getCopyType() const        { return _copyType; }
 
-        void iterate(ResultSet& results) {
+        void iterate(ResultValues& results) {
             glCopyPixels(0, 0, getWidth(), getHeight(), getCopyType());
             results[0] += getWidth() * getHeight();
         }

@@ -55,7 +55,7 @@ namespace scry {
         glLockArraysEXT(0, getVertexArraySize());
     }
 
-    void CompiledVertexArrayTest::iterate(ResultSet& results) {
+    void CompiledVertexArrayTest::iterate(ResultValues& results) {
         GeometryPtr geometry = getGeometry();
         if (ArrayPtr i = geometry->indices) {
             glDrawElements(geometry->getPrimitiveType(),

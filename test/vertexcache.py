@@ -25,8 +25,7 @@ def run(filename, testtype, name):
         test = testtype(str(i), geo)
         testList.append(test)
 
-    results = runTests(testList, 5)
-    line = GraphLine(name, results)
+    line = runTests(name, testList, 5)
     generateGraph(filename, line, 'VertexRate', xlabel='Referenced Indices')
     return line
 
