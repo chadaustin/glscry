@@ -39,9 +39,6 @@ namespace scry {
         void setVertices(ArrayPtr array) { _vertices = array; }
         ArrayPtr getVertices() const     { return _vertices; }
 
-        // Fills the buffer with 'count' triangles.
-        //virtual void generate(std::vector<Triangle>& buffer, size_t count) const = 0;
-
     private:
         GLenum _primitiveType;
         ArrayPtr _vertices;
