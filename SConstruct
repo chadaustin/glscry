@@ -49,6 +49,7 @@ sources = Split("""
     glew.c
     GLUtility.cpp
     Range.cpp
+    Run.cpp
     Timer.cpp
 
     Geometry.cpp

@@ -4,7 +4,7 @@
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/python.hpp>
-#include "Base.h"
+#include "Utility.h"
 
 
 namespace scry {

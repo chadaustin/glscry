@@ -4,40 +4,39 @@
 
 #include <algorithm>
 #include <map>
-#include "Base.h"
 #include "LokiTypeInfo.h"
 #include "State.h"
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
 
-class StateSet {
-public:
-    void setState(State* state) {
-        _states[typeid(*state)] = state;
-    }
-
-    void apply() {
-        for (StateMapIter i = _states.begin(); i != _states.end(); ++i) {
-            i->second->apply();
+    class StateSet {
+    public:
+        void setState(State* state) {
+            _states[typeid(*state)] = state;
         }
-    }
 
-    void reset() {
-        for (StateMapIter i = _states.begin(); i != _states.end(); ++i) {
-            i->second->reset();
+        void apply() {
+            for (StateMapIter i = _states.begin(); i != _states.end(); ++i) {
+                i->second->apply();
+            }
         }
-    }
 
-private:
-    typedef std::map<TypeInfo, StatePtr> StateMap;
-    typedef StateMap::iterator StateMapIter;
-    StateMap _states;
-};
+        void reset() {
+            for (StateMapIter i = _states.begin(); i != _states.end(); ++i) {
+                i->second->reset();
+            }
+        }
+
+    private:
+        typedef std::map<TypeInfo, StatePtr> StateMap;
+        typedef StateMap::iterator StateMapIter;
+        StateMap _states;
+    };
 
 
-SCRY_END_NAMESPACE
+}
 
 
 #endif

@@ -6,30 +6,29 @@
 #include "GLUtility.h"
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
-class DisplayListTest : public GeometryTest {
-protected:
-    ~DisplayListTest() { }
+    class DisplayListTest : public GeometryTest {
+    protected:
+        ~DisplayListTest() { }
 
-public:
-    static void bind();
+    public:
+        static void bind();
 
-    DisplayListTest(const char* name, GeometryPtr geo)
-    : GeometryTest(name, geo) {
-    }
+        DisplayListTest(const char* name, GeometryPtr geo)
+        : GeometryTest(name, geo) {
+        }
 
-    void setup();
-    void iterate(ResultSet& results);
-    void teardown();
+        void setup();
+        void iterate(ResultSet& results);
+        void teardown();
 
-private:
-    GLuint _list;
-};
-SCRY_REF_PTR(DisplayListTest);
+    private:
+        GLuint _list;
+    };
+    SCRY_REF_PTR(DisplayListTest);
 
-
-SCRY_END_NAMESPACE
+}
 
 
 #endif

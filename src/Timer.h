@@ -3,23 +3,22 @@
 
 
 #include <SDL.h>
-#include "Base.h"
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
-class Timer {
-public:
-    Timer();
+    class Timer {
+    public:
+        Timer();
 
-    /// Returns time since creation.
-    float elapsed() const;
+        /// Returns time since creation.
+        float elapsed() const;
 
-private:
-    Uint32 _last;
-};
+    private:
+        Uint32 _last;
+    };
 
-SCRY_END_NAMESPACE
+}
 
 
 #endif

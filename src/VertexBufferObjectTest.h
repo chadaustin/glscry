@@ -6,34 +6,33 @@
 #include "GLUtility.h"
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
-class VertexBufferObjectTest : public GeometryTest {
-protected:
-    ~VertexBufferObjectTest() { }
+    class VertexBufferObjectTest : public GeometryTest {
+    protected:
+        ~VertexBufferObjectTest() { }
 
-public:
-    static void bind();
+    public:
+        static void bind();
 
-    VertexBufferObjectTest(const char* name, GeometryPtr geo)
-    : GeometryTest(name, geo) {
-    }
+        VertexBufferObjectTest(const char* name, GeometryPtr geo)
+        : GeometryTest(name, geo) {
+        }
 
-    bool supported() const {
-        return GLEW_ARB_vertex_buffer_object != 0;
-    }
+        bool supported() const {
+            return GLEW_ARB_vertex_buffer_object != 0;
+        }
 
-    void setup();
-    void iterate(ResultSet& results);
-    void teardown();
+        void setup();
+        void iterate(ResultSet& results);
+        void teardown();
 
-private:
-    std::vector<GLuint> _buffers;
-};
-SCRY_REF_PTR(VertexBufferObjectTest);
+    private:
+        std::vector<GLuint> _buffers;
+    };
+    SCRY_REF_PTR(VertexBufferObjectTest);
 
-
-SCRY_END_NAMESPACE
+}
 
 
 #endif

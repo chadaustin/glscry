@@ -6,30 +6,30 @@
 #include "GLUtility.h"
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
-class CompiledVertexArrayTest : public GeometryTest {
-protected:
-    ~CompiledVertexArrayTest() { }
+    class CompiledVertexArrayTest : public GeometryTest {
+    protected:
+        ~CompiledVertexArrayTest() { }
 
-public:
-    static void bind();
+    public:
+        static void bind();
 
-    CompiledVertexArrayTest(const char* name, GeometryPtr geo)
-    : GeometryTest(name, geo) {
-    }
+        CompiledVertexArrayTest(const char* name, GeometryPtr geo)
+        : GeometryTest(name, geo) {
+        }
 
-    bool supported() const {
-        return GLEW_EXT_compiled_vertex_array != 0;
-    }
+        bool supported() const {
+            return GLEW_EXT_compiled_vertex_array != 0;
+        }
 
-    void setup();
-    void iterate(ResultSet& results);
-    void teardown();
-};
-SCRY_REF_PTR(CompiledVertexArrayTest);
+        void setup();
+        void iterate(ResultSet& results);
+        void teardown();
+    };
+    SCRY_REF_PTR(CompiledVertexArrayTest);
 
-SCRY_END_NAMESPACE
+}
 
 
 #endif

@@ -4,7 +4,6 @@
 
 #include <string>
 #include "glew.h"
-#include "Base.h"
 #include "Context.h"
 #include "RefCounted.h"
 #include "StateSet.h"
@@ -29,103 +28,98 @@
     }
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
-
-struct ResultDesc {
-    ResultDesc(const std::string& name_, const std::string units_) {
-        name  = name_;
-        units = units_;
-    }
-
-    std::string name;
-    std::string units;
-};
-
-
-class ResultSet {
-public:
-    typedef double T;
-
-    ResultSet(size_t size) {
-        _results.resize(size);
-    }
-
-    size_t size() const {
-        return _results.size();
-    }
-
-    T& operator[](size_t i) {
-        SCRY_ASSERT(i < size());
-        return _results[i];
-    }
-
-    const T& operator[](size_t i) const {
-        SCRY_ASSERT(i < size());
-        return _results[i];
-    }
-
-    void normalize(T time) {
-        for (size_t i = 0; i < size(); ++i) {
-            _results[i] /= time;
+    struct ResultDesc {
+        ResultDesc(const std::string& name_, const std::string units_) {
+            name  = name_;
+            units = units_;
         }
-    }
 
-private:
-    std::vector<T> _results;
-};
+        std::string name;
+        std::string units;
+    };
 
 
-class Test : public RefCounted {
-protected:
-    ~Test() { }
+    class ResultSet {
+    public:
+        typedef double T;
 
-public:
-    static void bind();
+        ResultSet(size_t size) {
+            _results.resize(size);
+        }
 
-    // Public interface.
+        size_t size() const {
+            return _results.size();
+        }
 
-    Test(const char* name) {
-        _name = name;
-    }
+        T& operator[](size_t i) {
+            SCRY_ASSERT(i < size());
+            return _results[i];
+        }
 
-    const char* getName() const {
-        return _name.c_str();
-    }
+        const T& operator[](size_t i) const {
+            SCRY_ASSERT(i < size());
+            return _results[i];
+        }
 
-    StateSet& getStateSet() {
-        return _stateSet;
-    }
+        void normalize(T time) {
+            for (size_t i = 0; i < size(); ++i) {
+                _results[i] /= time;
+            }
+        }
 
-    void setState(State* state) {
-        getStateSet().setState(state);
-    }
+    private:
+        std::vector<T> _results;
+    };
 
-    ResultSet run(float runFor);
+
+    class Test : public RefCounted {
+    protected:
+        ~Test() { }
+
+    public:
+        static void bind();
+
+        // Public interface.
+
+        Test(const char* name) {
+            _name = name;
+        }
+
+        const char* getName() const {
+            return _name.c_str();
+        }
+
+        StateSet& getStateSet() {
+            return _stateSet;
+        }
+
+        void setState(State* state) {
+            getStateSet().setState(state);
+        }
+
+        ResultSet run(float runFor);
     
 
-    // Overridden methods.
+        // Overridden methods.
 
-    //virtual const char* getClassName() const = 0;
+        virtual bool isSupported() const { return true; }
+        virtual void getResultDescs(std::vector<ResultDesc>& descs) = 0;
+        virtual void setProperty(const std::string& name, size_t value) { }
 
-    virtual bool isSupported() const { return true; }
+        virtual void setup()    { }
+        virtual void iterate(ResultSet& results) = 0;
+        virtual void teardown() { }
 
-    virtual void getResultDescs(std::vector<ResultDesc>& descs) = 0;
-
-    virtual void setProperty(const std::string& name, size_t value) { }
-
-    virtual void setup()    { }
-    virtual void iterate(ResultSet& results) = 0;
-    virtual void teardown() { }
-
-private:
-    std::string _name;
-    StateSet _stateSet;
-};
-SCRY_REF_PTR(Test);
+    private:
+        std::string _name;
+        StateSet _stateSet;
+    };
+    SCRY_REF_PTR(Test);
 
 
-SCRY_END_NAMESPACE
+}
 
 
 #endif

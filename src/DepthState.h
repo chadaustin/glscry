@@ -6,28 +6,26 @@
 #include "State.h"
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
+    class DepthState : public State {
+    protected:
+        ~DepthState() { }
 
-class DepthState : public State {
-protected:
-    ~DepthState() { }
+    public:
+        static void bind();
 
-public:
-    static void bind();
+        void apply() {
+            glEnable(GL_DEPTH_TEST);
+        }
 
-    void apply() {
-        glEnable(GL_DEPTH_TEST);
-    }
+        void reset() {
+            glDisable(GL_DEPTH_TEST);
+        }
+    };
+    SCRY_REF_PTR(DepthState);
 
-    void reset() {
-        glDisable(GL_DEPTH_TEST);
-    }
-};
-SCRY_REF_PTR(DepthState);
-
-
-SCRY_END_NAMESPACE
+}
 
 
 #endif

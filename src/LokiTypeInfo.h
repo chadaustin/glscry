@@ -19,9 +19,8 @@
 #define SCRY_TYPE_INFO_H
 
 #include <typeinfo>
-#include "Base.h"
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
 /// Purpose: offer a first-class, comparable wrapper over std::type_info
 class TypeInfo {
@@ -81,7 +80,7 @@ inline bool operator<=(const TypeInfo& lhs, const TypeInfo& rhs)
 inline bool operator>=(const TypeInfo& lhs, const TypeInfo& rhs)
 { return !(lhs < rhs); }
     
-SCRY_END_NAMESPACE
+}
 
 
 #endif

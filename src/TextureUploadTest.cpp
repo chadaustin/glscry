@@ -3,19 +3,18 @@
 using namespace boost::python;
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
+    void TextureUploadTest::bind() {
+        class_< TextureUploadTest, TextureUploadTestPtr, bases<Test>,
+                boost::noncopyable >("TextureUploadTest", no_init)
+                .def(init<const char*>())
+                .def("setWidth", &TextureUploadTest::setWidth)
+                .def("setHeight", &TextureUploadTest::setHeight)
+                .def("setType", &TextureUploadTest::setType)
+                ;
 
-void TextureUploadTest::bind() {
-    class_< TextureUploadTest, TextureUploadTestPtr, bases<Test>,
-            boost::noncopyable >("TextureUploadTest", no_init)
-        .def(init<const char*>())
-        .def("setWidth", &TextureUploadTest::setWidth)
-        .def("setHeight", &TextureUploadTest::setHeight)
-        .def("setType", &TextureUploadTest::setType);
+        implicitly_convertible<TextureUploadTestPtr, TestPtr>();
+    }
 
-    implicitly_convertible<TextureUploadTestPtr, TestPtr>();
 }
-
-
-SCRY_END_NAMESPACE
