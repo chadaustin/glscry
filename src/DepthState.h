@@ -2,7 +2,7 @@
 #define SCRY_DEPTH_STATE_H
 
 
-#include "glew.h"
+#include "OpenGL.h"
 #include "State.h"
 
 

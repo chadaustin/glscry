@@ -16,12 +16,18 @@ genFrontToBack.vertices = defineArray(Array_f, 3, quad, (0, 0, -1))
 genBackToFront = Geometry(GL_QUADS)
 genBackToFront.vertices = defineArray(Array_f, 3, quad, (0, 0, 1))
 
+depthState = DepthState()
+colorBufferState = ColorBufferState()
+colorBufferState.setWriteMask(False, False, False, False)
+
 test1 = ImmediateTest("FrontToBack", genFrontToBack)
-test1.setState(DepthState())
+test1.setState(depthState)
+test1.setState(colorBufferState)
 test1.addAction(ClearAction())
 
 test2 = ImmediateTest("BackToFront", genBackToFront)
-test2.setState(DepthState())
+test2.setState(depthState)
+test2.setState(colorBufferState)
 test2.addAction(ClearAction())
 
 runTests("hierz.data", [test1, test2], 10, "VertexRate")

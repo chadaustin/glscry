@@ -8,6 +8,7 @@
 #include "Context.h"
 #include "Run.h"
 
+#include "ColorBufferState.h"
 #include "DepthState.h"
 #include "LightState.h"
 
@@ -99,6 +100,7 @@ BOOST_PYTHON_MODULE(_glscry) {
 
     // States.
     State::bind();
+    ColorBufferState::bind();
     DepthState::bind();
     LightState::bind();
 
