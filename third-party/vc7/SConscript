@@ -1,3 +1,2 @@
 Import('*')
-env.Install(TargetDirectory.Dir('bin'), 'Python/bin/python.exe')
 env.Install(TargetDirectory.Dir('lib'), 'SDL/lib/SDL.dll')
