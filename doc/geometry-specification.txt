@@ -1,0 +1,73 @@
+Geometry Specification
+Chad Austin
+2005-03-04
+
+
+GLScry does not support loading geometry data from files.  Instead, it
+allows specification of geometry data through templates.  This should
+allow enough customization for most tests that you'd want to do.  Some
+examples will better illustrate this:
+
+First, you need to create a Geometry object:
+
+    geo = Geometry()
+
+The geometry object has several fields, representing the different
+geometry attributes:
+
+     geo.indices    # integer indices into vertex arrays
+
+     geo.vertices   # positions
+     geo.colors
+     geo.normals
+     geo.texcoords  # list of texture coordinate arrays
+                    # set texcoords[0] if you're not multitexturing
+
+The only one you need to set is vertices.  The others are optional.
+To initialize them, you use an Array object.  An Array has five
+pieces: the type of the data elements, the vector size, a list of
+initial values, a list of repeating values, and a list of offsets.
+Use the function 'defineArray' to create an Array object, like such:
+
+    repeat = [(0, 0, 0), (0, 1, 0), (1, 1, 0)]
+    offset = [(0, 0, 1), (0, 0, 1), (0, 0, 1)]
+    initial = []
+    geo.vertices = defineArray(Array_f, 3, repeat, offset, initial)
+
+Let's look at the defineArray call in detail.  The Array_f means that
+the array will hold floats.  There are the standard OpenGL suffixes:
+
+    - ub = unsigned byte
+    - b  = signed byte
+    - us = unsigned short
+    - s  = short
+    - ui = unsigned int
+    - i  = int
+    - f  = float
+    - d  = double
+
+The second parameter specifies the size of each vector in the array.
+In this case, it means each vertex consists of three floats.  The last
+three parameters specify the actual data.  'repeat' is repeated to
+fill the size of the array actually needed by the geometry drawing
+method.  (If you're using triangle vertex arrays and you specify a
+batch size of 1024, that's 3072 vertices.  So the vertex arrays will
+be filled with the 'repeat' list, repeated as many times as
+necessary.)
+
+The 'offset' list, if specified, is used to modify the
+geometry in a consistent manner.  In the above case, it adds 1 to the
+Z component to each successive vector.
+
+Finally, the 'initial' list is used to specify some array data before
+repeating starts.  This can be useful for things like triangle strips
+where you need two initial vertices to seed the strip.
+
+There is one more topic that might be slightly confusing.  As
+mentioned above, the final size of the vertex array is usually based
+on the batch size given to the geometry renderer.  This is true unless
+indices are specified.  If this is the case, the index array is
+expanded to the size required by the batch size.  The rest of the
+arrays are expanded such that no index is larger than the size of the
+arrays.  So if your index array consists of repeating zeroes [0, 0, 0,
+...], the other vertex arrays will have size 1.
