@@ -5,6 +5,7 @@ import string
 import sys
 from glob import glob
 import getopt
+import socket
 
 
 def usage():
@@ -46,12 +47,16 @@ def main():
         tests.extend(glob('test/*.py'))
     tests = map(os.path.abspath, tests)
 
-    # Create data directory if it does not exist and switch to it.
-    try:
-        os.mkdir('data')
-    except OSError:
-        pass
-    os.chdir('data')
+    # Create directory if it does not exist and switch to it.
+    def enterdir(dir):
+        try:
+            os.mkdir(dir)
+        except OSError:
+            pass
+        os.chdir(dir)
+
+    enterdir('data')
+    enterdir(socket.gethostname())
 
     if not tests:
         print "No tests specified.  Specify a test explicitly or use -a."
