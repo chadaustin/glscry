@@ -54,7 +54,7 @@ def main(argv=sys.argv):
 
 
     scriptDir = getScriptDirectory()
-    moduleDir = os.path.join(scriptDir, '.')
+    moduleDir = os.path.join(scriptDir, 'src')
 
     # Modify PYTHONPATH
     pythonpath = os.environ.get('PYTHONPATH')
@@ -76,7 +76,7 @@ def main(argv=sys.argv):
         sys.exit(1)
 
     # Create data directory if it does not exist and switch to it so
-    # the tests output their files to it.
+    # the tests output their files there.
     hostname = socket.gethostname()
     datadir = os.path.join(scriptDir, 'data', hostname)
     try:
