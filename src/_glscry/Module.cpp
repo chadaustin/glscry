@@ -49,10 +49,6 @@ void exportGMTL();
 
 
 BOOST_PYTHON_MODULE(_glscry) {
-
-    breakIfDebugging();
-
-
     // Disable any warnings about converters being registered multiple times.
     object warnings(( handle<>( PyImport_ImportModule("warnings") ) ));
     warnings.attr("filterwarnings")("ignore");

@@ -17,7 +17,7 @@ genBackToFront = Geometry(GL_QUADS)
 genBackToFront.vertices = defineArray(Array_f, 3, quad, (0, 0, 1) * 4)
 
 depthState = DepthState()
-depthState.depthTest = True
+depthState.enableDepthTest = True
 colorBufferState = ColorBufferState()
 colorBufferState.setWriteMask(False, False, False, False)
 

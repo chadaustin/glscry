@@ -100,7 +100,7 @@ namespace scry {
 
         buffer.data.resize(vertexCount * array->getSize() *
                            array->getTypeSize());
-        array->build(buffer.data_ptr(), vertexCount);
+        array->build(buffer.data_ptr(), vertexCount * array->getSize());
 
         buffer.pump = getter(array->getTypeConstant(), array->getSize());
         if (!buffer.pump) {

@@ -30,7 +30,7 @@ namespace scry {
     public:
         virtual size_t getSize() const = 0;
         virtual GLenum getTypeConstant() const = 0;
-        virtual void build(void* buffer, size_t vertexCount) const = 0;
+        virtual void build(void* buffer, size_t elementCount) const = 0;
         virtual GLuint getUInt(const void* buffer, size_t offset) const = 0;
         virtual GLdouble getDouble(const void* buffer, size_t offset) const = 0;
 
@@ -59,18 +59,19 @@ namespace scry {
             return GLTypeConstant<Type>::Result;
         }
 
-        void build(void* buffer, size_t vertexCount) const {
+        void build(void* buffer, size_t elementCount) const {
             Type* array = static_cast<Type*>(buffer);
             size_t i = 0;
 
             // Fill with initial values.
-            while (i < initial.size() && i < vertexCount) {
-                array[i++] = initial[i];
+            while (i < initial.size() && i < elementCount) {
+                Type t = initial[i];
+                array[i++] = t;
             }
 
             // Now repeat.
             size_t repeat_i = 0;
-            while (i < vertexCount) {
+            while (i < elementCount) {
                 if (repeat.empty()) {
                     array[i] = Type();
                 } else {
