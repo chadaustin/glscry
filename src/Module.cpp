@@ -36,7 +36,9 @@ void exportGMTL();
 
 
 BOOST_PYTHON_MODULE(_glscry) {
-//    __asm int 3
+    // Disable any warnings about converters being registered multiple times.
+    object warnings(( handle<>( PyImport_ImportModule("warnings") ) ));
+    warnings.attr("filterwarnings")("ignore");
 
     initContext();
 
@@ -82,4 +84,6 @@ BOOST_PYTHON_MODULE(_glscry) {
     VertexArrayTest::bind();
     CompiledVertexArrayTest::bind();
     VertexBufferObjectTest::bind();
+
+    warnings.attr("resetwarnings")();
 }

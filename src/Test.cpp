@@ -41,14 +41,14 @@ namespace scry {
             .def(vector_indexing_suite<ResultDescList>())
             ;
 
-        class_<ResultSet>("ResultSet", no_init)
+        class_<ResultSet>("ResultSet")
             .def(vector_indexing_suite<ResultSet>())
             .def("normalize", &normalize)
             ;
 
         typedef Test C;
         class_<C, TestPtr, noncopyable>("Test", no_init)
-            .def("getName",        &C::getName)
+            .add_property("name",  &C::getName)
             .def("setTransform",   &C::setTransform)
             .add_property("fullStateSwitch",
                           &C::getFullStateSwitch, &C::setFullStateSwitch)

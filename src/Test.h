@@ -11,11 +11,6 @@
 #include "Types.h"
 
 
-#define SCRY_DEFINE_TEST_NAME(name)             \
-    static const char* getClassName() {         \
-        return name;                            \
-    }
-
 #define SCRY_BEGIN_RESULT_DESCS()                                       \
     static ResultDescList getClassResultDescs() {                       \
         ResultDescList rv;                                              \

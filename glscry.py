@@ -108,29 +108,27 @@ def uniquePowerRange(low, high, power):
     list = [int(power ** k) for k in range(int(low), int(high + 1))]
     return make_unique(list)
 
-def runTests(filename, testList, runFor, measure):
-    print "\nGenerating data for %s" % filename
-
-    of = open(filename, 'w')
-    writeID(of)
-
+def runTests(testList, runFor):
+    resultList = []
+    
     for t in testList:
         betweenTests()
 
         if t.isSupported():
+            print "\nRunning test '%s'" % t.name
+
             results = t.run(runFor)
-            output(of, t, results, measure)
-            of.write('\n')
+
+            for r, d in zip(results, t.getResultDescs()):
+                print "  %s = %s %s" % (d.name, r, d.units)
+            
+            resultList += [results]
         else:
-            pass # output a zero?
+            results = ResultSet()
+            results[:] = [0] * len(t.getResultDescs())
+            resultList += [results]
 
-    if testList:
-        test = testList[0]
-        descs = test.getResultDescs()
-        desc = descs[0]
-
-        generateBarGraph(filename, testList,
-                         desc.name + " in " + desc.units)
+    return resultList
 
 def runTestsRange(filename, testList, runFor, depVar, indVar, range):
     print "\nGenerating data for %s" % filename
@@ -160,9 +158,37 @@ def runTestsRange(filename, testList, runFor, depVar, indVar, range):
                           desc.name + " in " + desc.units,
                           indVar, range)
 
-def generateBarGraph(datafile, testList, resultUnits):
+def generateBarGraph(datafile, testList, resultList, measured, xlabel=None):
+    print "\nWriting data file: %s" % datafile
+
+    resultUnits = None
+
+    of = open(datafile, 'w')
+    writeID(of)
+    for t, r in zip(testList, resultList):
+        descs = t.getResultDescs()
+        assert len(descs) == len(r)
+
+        resultIndex = -1;
+        for i in range(len(descs)):
+            d = descs[i]
+            if d.name == measured:
+                resultIndex = i
+                if resultUnits:
+                    assert d.units == resultUnits
+                else:
+                    resultUnits = d.units
+                break
+
+        if resultIndex == -1:
+            raise IndexError, 'Test has no such result'
+        result = r[resultIndex]
+
+        print >> of, result
+
+    
     script = datafile + '.sh'
-    print "\nGenerating gnuplot script: %s" % script
+    print "Generating graph script: %s" % script
     plot = open(script, 'w')
 
     print >> plot, '#!/bin/sh'
@@ -173,11 +199,13 @@ def generateBarGraph(datafile, testList, resultUnits):
     print >> plot, 'set title "%s"' % getTitle()
     print >> plot, 'set xrange [-0.5:%s]' % (len(testList) - 0.5)
     print >> plot, 'set yrange [0:*]'
+    if xlabel:
+        print >> plot, 'set xlabel "%s"' % xlabel
     print >> plot, 'set ylabel "%s"' % resultUnits
     print >> plot, 'set xtics (',
     for i in range(len(testList)):
         t = testList[i]
-        print >> plot, '"%s" %s' % (t.getName(), i),
+        print >> plot, '"%s" %s' % (t.name, i),
         if i + 1 < len(testList):
             print >> plot, ', ',
     print >> plot, ')'

@@ -11,4 +11,7 @@ read = ReadPixelTest("Read")
 read.format = GL_DEPTH_COMPONENT
 read.type   = GL_FLOAT
 
-runTests("zaccess.data", [copy, draw, read], 5, "PixelRate")
+# runTests("zaccess.data", [copy, draw, read], 5, "PixelRate")
+testList = [copy, draw, read]
+results = runTests(testList, 5)
+generateBarGraph("zaccess.data", testList, results, "PixelRate")
