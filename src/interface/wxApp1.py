@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-#App:BoaApp
+#Boa:App:BoaApp
 
 from wxPython.wx import *
 
 import wxFrame1
 
-modules ={'wxFrame1': [1, 'Main frame of Application', u'wxFrame1.py']}
+modules ={'wxFrame1': [1, 'Main frame of Application', 'none://wxFrame1.py']}
 
 class BoaApp(wxApp):
     def OnInit(self):
