@@ -40,34 +40,34 @@ class wxFrame1(wxFrame):
         self.boxSizer1.Add = (self.panel3, 1, wxEXPAND)
     def _init_ctrls(self, prnt):
         wxFrame.__init__(self, id=wxID_WXFRAME1, name='', parent=prnt,
-              pos=wxPoint(-4, -4), size=wxSize(1032, 746),
+              pos=wxPoint(-4, -4), size=wxSize(800, 600),
               style=wxDEFAULT_FRAME_STYLE, title='wxFrame1')
         self._init_utils()
-        self.SetClientSize(wxSize(1024, 712))
+        self.SetClientSize(wxSize(800, 600))
         self.SetMenuBar(self.menuBar1)
 
         self.notebook1 = wxNotebook(id=wxID_WXFRAME1NOTEBOOK1, name='notebook1',
-              parent=self, pos=wxPoint(0, 0), size=wxSize(288, 496), style=0)
+              parent=self, pos=wxPoint(0, 0), size=wxSize(288, 600), style=0)
 
         self.panel1 = wxPanel(id=wxID_WXFRAME1PANEL1, name='panel1',
-              parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(280, 470),
+              parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(280, 600),
               style=wxTAB_TRAVERSAL)
 
         self.panel2 = wxPanel(id=wxID_WXFRAME1PANEL2, name='panel2',
-              parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(280, 470),
+              parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(280, 600),
               style=wxTAB_TRAVERSAL)
 
         self.panel3 = wxPanel(id=wxID_WXFRAME1PANEL3, name='panel3',
-              parent=self, pos=wxPoint(288, 0), size=wxSize(392, 496),
+              parent=self, pos=wxPoint(288, 0), size=wxSize(520, 600),
               style=wxTAB_TRAVERSAL)
 
         self.treeListCtrl1 = wxTreeListCtrl(id=wxID_WXFRAME1TREELISTCTRL1,
               name='treeListCtrl1', parent=self.panel1, pos=wxPoint(8, 8),
-              size=wxSize(256, 440), style=wxTR_HAS_BUTTONS)
+              size=wxSize(256, 475), style=wxTR_HAS_BUTTONS)
 
         self.button1 = wxButton(id=wxID_WXFRAME1BUTTON1, label='button1',
-              name='button1', parent=self.panel1, pos=wxPoint(216, 448),
-              size=wxSize(56, 15), style=0)
+              name='button1', parent=self.panel1, pos=wxPoint(200, 500),
+              size=wxSize(65, 25), style=0)
 
         self._init_coll_notebook1_Pages(self.notebook1)
 
