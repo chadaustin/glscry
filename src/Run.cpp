@@ -86,6 +86,28 @@ void runTestsRange(const std::string& filename, std::vector<TestPtr> testList,
         }
         of << std::endl;
     }
+
+    std::ofstream plot((filename + ".sh").c_str());
+    if (!plot) {
+        return;
+    }
+
+    plot << "#!/bin/sh" << std::endl
+         << std::endl
+         << "cat <<EOF | gnuplot" << std::endl
+         << "set terminal png" << std::endl
+         << "set output \"" << filename << ".png\"" << std::endl
+         << "plot \\" << std::endl;
+    for (size_t i = 0; i < testList.size(); ++i) {
+        plot << "  \"" << filename << "\" using 0:" << (i + 1) << " title \""
+             << testList[i]->getName() << "\" with lines";
+        if (i + 1 < testList.size()) {
+            plot << ",\\";
+        }
+        plot << std::endl;
+    }
+    plot << "EOF" << std::endl;
+    
 }
 
 }
