@@ -366,13 +366,17 @@ class wxFrame1(wxFrame):
             choice = 0
         size = len(file['Test']['GraphLines'][0]['ResultSet'])
         count = 0
+        graph("plot '-' title 'test'\n")
         while count < size:
             name = file['Test']['GraphLines'][0]['ResultSet'][count]['Name']
             result = file['Test']['GraphLines'][0]['ResultSet'][count]['Results'][choice]['Value']
             # graph it
             print name
             print result
+            graph("%s %f\n" % (name, result))
             count = count + 1
-        graph.reset()
+        graph("e\n")
+        raw_input("press return to continue...\n")
+        #graph.reset()
 
 
