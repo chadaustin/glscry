@@ -9,10 +9,11 @@ def flatten(list):
             r.append(a)
     return r
 
-def defineArray(size, repeat, offset = []):
+def defineArray(size, repeat, offset=[], initial=[]):
     array = Arrayf(size)
-    array.repeat[:] = flatten(repeat)
-    array.offset[:] = flatten(offset)
+    array.repeat[:]  = flatten(repeat)
+    array.offset[:]  = flatten(offset)
+    array.initial[:] = flatten(initial)
     return array
 
 def Zeroes():
