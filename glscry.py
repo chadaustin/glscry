@@ -9,7 +9,7 @@ def flatten(list):
             r.append(a)
     return r
 
-def defineArray(arraytype, size, repeat, offset=[], initial=[]):
+def defineArray(arraytype, size, repeat=[], offset=[], initial=[]):
     array = arraytype(size)
     array.repeat[:]  = flatten(repeat)
     array.offset[:]  = flatten(offset)

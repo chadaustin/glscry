@@ -1,5 +1,16 @@
 from glscry import *
+from random import randint
 
-list = [ IndexedGeometryTest("Test", Zeroes()) ]
-runTestsRange("vcache.data", list, 10, "VertexRate",
-              "BatchSize", PowerRange(1, 16))
+# zeroes should be fine.
+v = defineArray(Array_f, 2)
+
+testList = []
+for i in [2 ** j for j in range(0, 12)]:
+    repeat = [randint(0, i-1) for j in range(4096)] # hard-coded default batch size...  bad
+        
+    indices = defineArray(Array_ui, 1, repeat)
+    
+    geo = buildGeometry(GL_TRIANGLES, v=v, i=indices)
+    testList.append(VertexArrayTest(str(i), geo))
+
+runTests("vcache.data", testList, 10, "VertexRate")

@@ -37,6 +37,7 @@ namespace scry {
         if (ArrayPtr v = geometry->vertices) {
             defineBuffer(_vertices, v, getVertexArraySize(), "vertices", getVertexPump);
 
+            // @todo: THIS IS WRONG WHEN USING INDEXED GEOMETRY
             _screenCoverage = calculateCoverage(
                 geometry->getPrimitiveType(),
                 v->getTypeConstant(),

@@ -81,7 +81,6 @@ sources = Split("""
     VertexArrayTest.cpp
     CompiledVertexArrayTest.cpp
     VertexBufferObjectTest.cpp
-    IndexedGeometryTest.cpp
 """)
 
 gmtlPythonSources = Split("""

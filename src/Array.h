@@ -57,8 +57,12 @@ namespace scry {
             // Now repeat.
             size_t repeat_i = 0;
             while (i < vertexCount) {
-                array[i] = repeat[repeat_i % repeat.size()];
-
+                if (repeat.empty()) {
+                    array[i] = Type();
+                } else {
+                    array[i] = repeat[repeat_i % repeat.size()];
+                }
+                    
                 // Add in the offset.
                 if (!offset.empty()) {
                     size_t offset_i = repeat_i % offset.size();
