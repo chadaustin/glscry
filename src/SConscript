@@ -1,0 +1,50 @@
+Import('*')
+
+sources = Split("""
+    Module.cpp
+    OpenGL.cpp
+
+    Action.cpp
+    Context.cpp
+    Coverage.cpp
+    glew.c
+    GLUtility.cpp
+    Timer.cpp
+
+    Array.cpp
+    Geometry.cpp
+
+    StateSet.cpp
+    State.cpp
+    BlendState.cpp
+    ColorBufferState.cpp
+    DepthState.cpp
+    LightState.cpp
+    MaterialState.cpp
+    TextureState.cpp
+
+    Test.cpp
+
+    TextureUploadTest.cpp
+    TextureMemoryTest.cpp
+
+    PixelTransferTest.cpp
+    CopyPixelTest.cpp
+    DrawPixelTest.cpp
+    ReadPixelTest.cpp
+
+    GeometryTest.cpp
+    ImmediateTest.cpp
+    DisplayListTest.cpp
+    VertexArrayTest.cpp
+    CompiledVertexArrayTest.cpp
+    VertexBufferObjectTest.cpp
+""")
+
+modulename = env.subst('_glscry$SHLIBSUFFIX')
+env = env.Copy()
+env.Append(LIBPATH=['gmtl-python'], LIBS=['gmtl-python'])
+module = env.SharedLibrary(Dir('..').File(modulename), sources)
+
+SConscript(dirs=['gmtl-python'])
+Return('module')
