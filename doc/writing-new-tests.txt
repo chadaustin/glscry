@@ -1,0 +1,56 @@
+How to Write New Tests
+Chad Austin
+2005-03-03
+
+GLScry tests consist of two components.  First, there is a C++ object
+that derives from glscry::Test and is responsible for the heavy
+lifting and low-level OpenGL calls to measure some aspect of
+performance.  Each Test returns a set of results, depending on what
+the test does.  For example, geometry test results include vertex
+rate, batch rate, data rate, and fill rate.  There are several
+existing Test objects upon which you can build performance
+measurements.  Look in the *Test.h source files in src/_glscry/ for
+details.
+
+These C++ objects are only part of the equation, however.  You also
+need a Python script to drive the low level instrumentation, collate
+data, and generate a graph.  This particular aspect of GLScry isn't
+documented that well at the moment, but there are several examples to
+look at.  test/example.py walks you through a very simple comparison
+of drawing with immediate mode versus vertex arrays.  Test/pixel
+transfer about five is another good example.
+
+In short, a Python test script has three pieces: first it needs to set
+up the test objects; then it runs the tests and collect data; finally
+generate graphs from that data.  (Eventually the last step will be
+done using a graphical user interface independent of the data
+collection step.)
+
+Setting up the test objects depends on what kind of test object you're
+using.  Here is where knowledge of the underlying C++ classes comes in
+handy.
+
+There are two main ways to run the tests: the runTests function, and
+the runTestRange function.  The first takes a list of test objects and
+runs them, storing all of the results in an object called a GraphLine,
+which can then be inserted into a graph.  runTestRange takes a single
+test object, the name of a test attribute, and a range over which to
+vary that attribute.  It also returns a GraphLine.  For the sake of
+completeness, there is also runTestsRange, which is just like
+runTestRange except that it takes a list of tests and returns a list
+of GraphLines.
+
+Finally, the measured data must be turned into a graph.  The
+generateGraph function is responsible for this.  It takes a filename
+(without the extension), a GraphLine or a list of them, the name of
+the test result to measure, and then some optional parameters.  You
+can look in glscry.py to see exactly how they work.
+
+To summarize, if you want to add a new test, I would first like to see
+if any of the existing Test objects will satisfy your needs.  If not,
+see if it would be possible or easy to modify an existing one to have
+extra parameters or measure another result.  Otherwise, you can
+implement your own Test, export it into Python via Module.cpp and call
+it from a Python test script.
+
+Happy hacking!
