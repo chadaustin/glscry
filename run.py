@@ -53,7 +53,7 @@ def main(argv=sys.argv):
             allTests = True
 
 
-    scriptDir = getScriptDirectory()
+    scriptDir = getScriptDirectory(argv)
     moduleDir = os.path.join(scriptDir, 'lib')
     sys.path.append(moduleDir)
 

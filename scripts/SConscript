@@ -1,3 +1,0 @@
-Import('*')
-if env['PLATFORM'] == 'win32':
-    SConscript(dirs=['batch'])

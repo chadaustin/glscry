@@ -1,5 +1,5 @@
 GLScry - OpenGL Performance Analysis Tool
-Copyright (C) 2004  Iowa State University
+Copyright (C) 2004-2005 Iowa State University
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

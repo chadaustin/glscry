@@ -15,10 +15,12 @@ msvcp71 = os.path.join(os.environ['WINDIR'], 'system32', 'msvcp71.dll')
 tests = glob('test/*.py')
 
 setup(options=options,
-      console=['run.py'],
-      data_files=[('', ['scripts/batch/RunAllTests.bat',
-                        'COPYRIGHT.txt',
+      console=['run.py',
+               'scripts/win32-dist/RunGnuplot.py'],
+      data_files=[('', ['COPYRIGHT.txt',
                         'README.txt',
+                        'scripts/win32-dist/RunAllTests.bat',
+                        'third-party/vc7/gnuplot/bin/wgnuplot.exe',
                         msvcr71]),
                   ('lib', ['lib/SDL.dll',
                            'lib/glscry.py',
