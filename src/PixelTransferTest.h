@@ -37,27 +37,12 @@ namespace scry {
         GLenum getType() const        { return _type; }
 
     protected:
-        size_t getElementCount() const {
-            switch (_format.get()) {
-                case GL_COLOR_INDEX:     return 1;
-                case GL_STENCIL_INDEX:   return 1;
-                case GL_DEPTH_COMPONENT: return 1;
-                case GL_RED:             return 1;
-                case GL_GREEN:           return 1;
-                case GL_BLUE:            return 1;
-                case GL_ALPHA:           return 1;
-                case GL_RGB:             return 3;
-                case GL_BGR:             return 3;
-                case GL_RGBA:            return 4;
-                case GL_BGRA:            return 4;
-                case GL_LUMINANCE:       return 1;
-                case GL_LUMINANCE_ALPHA: return 2;
-                default: SCRY_ASSERT(false && "Invalid format"); return 0;
-            }
-        }
-
         size_t getTypeSize() const {
             return scry::getTypeSize(_type);
+        }
+        
+        size_t getElementCount() const {
+            return scry::getElementCount(_format);
         }
 
     private:

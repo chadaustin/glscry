@@ -38,10 +38,15 @@ geo_vct.vertices  = v
 geo_vct.colors    = c
 geo_vct.texcoords = tc
 
+texState = TextureState()
+texState.texture = Texture()
+
 type = ImmediateTest
 test1 = type("Flat", geo_v)
 test2 = type("Gouraud", geo_vc)
 test3 = type("Tex", geo_vt)
+test3.setState(texState)
 test4 = type("ColoredTex", geo_vct)
+test4.setState(texState)
 
 runTests('fillrate.data', [test1, test2, test3, test4], 1, "FillRate")
