@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # [Begin Copyright Header]
-# 
+#
 # GLScry - OpenGL Performance Analysis Tool
 # Copyright (C) 2004-2005  Iowa State University
-# 
+#
 # This software is licensed under the terms of the GNU Lesser Public
 # License, version 2.1, as published by the Free Software Foundation.
 # See the file COPYRIGHT.txt for details.
-# 
+#
 # Authors:
 #   Chad Austin <aegisk@iastate.edu>
 #   Dirk Reiners <dreiners@iastate.edu>
-# 
+#
 # [End Copyright Header]
 
 import os
@@ -60,7 +60,9 @@ def main(argv=sys.argv):
     # Get test list.
     tests = map(os.path.abspath, args)
     if allTests:
-        tests += glob(os.path.join(scriptDir, 'test', '*.py'))
+        globbed = glob(os.path.join(scriptDir, 'test', '*.py'))
+        globbed.sort()
+        tests += globbed
 
     if not tests:
         print "No tests specified.  Specify a test explicitly or use -a."
@@ -79,7 +81,7 @@ def main(argv=sys.argv):
     os.chdir(datadir)
 
     print 'Data directory:', datadir
-    
+
     print '\nQueuing tests for execution:'
     for t in tests:
         print "  " + t

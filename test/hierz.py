@@ -10,11 +10,13 @@ lr = (w-o-o, h-o-o, 0)
 ll = (o,     h-o-o, 0)
 quad = [ul, ur, lr, ll]
 
-genFrontToBack = Geometry(GL_QUADS)
-genFrontToBack.vertices = defineArray(Array_f, 3, quad, (0, 0, -1) * 4)
+genFrontToBack = buildGeometry(
+    (GL_QUADS, 1024),
+    v=defineArray(Array_f, 3, quad, (0, 0, -1) * 4))
 
-genBackToFront = Geometry(GL_QUADS)
-genBackToFront.vertices = defineArray(Array_f, 3, quad, (0, 0, 1) * 4)
+genBackToFront = buildGeometry(
+    (GL_QUADS, 1024),
+    v=defineArray(Array_f, 3, quad, (0, 0, 1) * 4))
 
 depthState = DepthState()
 depthState.enableDepthTest = True

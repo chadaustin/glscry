@@ -22,18 +22,13 @@ v  = defineArray(Array_f, 2, [ul, ll, lr, ur])
 c  = defineArray(Array_f, 3, [r, g, b, w])
 tc = defineArray(Array_f, 2, [ul_tc, ll_tc, lr_tc, ur_tc])
 
-geo_v = Geometry(GL_QUADS)
-geo_v.vertices = v
-
-geo_vc = Geometry(GL_QUADS)
-geo_vc.vertices = v
-geo_vc.colors   = c
+geo_v = buildGeometry((GL_QUADS, 1024), v=v)
+geo_vc = buildGeometry((GL_QUADS, 1024), v=v, c=c)
 
 type = VertexArrayTest
 
 def buildTextureTest(textureCount):
-    geo_vt = Geometry(GL_QUADS)
-    geo_vt.vertices  = v
+    geo_vt = buildGeometry((GL_QUADS, 1024), v=v)
 
     ts = TextureState()
     for i in range(textureCount):

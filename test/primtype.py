@@ -9,9 +9,7 @@ lr = (5+w, 5+h)
 ur = (5+w, 5)
 
 def defineGeometry(type, v):
-    g = Geometry(type)
-    g.vertices = v
-    return g
+    return buildGeometry((type, 1024), v=v)
 
 test = CompiledVertexArrayTest
 tests = [
