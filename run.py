@@ -9,4 +9,11 @@ else:
     pythonpath = os.getcwd()
 os.environ['PYTHONPATH'] = pythonpath
 
-os.system(sys.executable + ' ' + string.join(sys.argv[1:]))
+tests = map(os.path.abspath, sys.argv[1:])
+try:
+    os.mkdir('data')
+except OSError:
+    pass
+os.chdir('data')
+    
+os.system(sys.executable + ' ' + string.join(tests))

@@ -44,4 +44,4 @@ test2 = type("Gouraud", geo_vc)
 test3 = type("Tex", geo_vt)
 test4 = type("ColoredTex", geo_vct)
 
-runTests('fillrate.py', [test1, test2, test3, test4], 1, "FillRate")
+runTests('fillrate.data', [test1, test2, test3, test4], 1, "FillRate")
