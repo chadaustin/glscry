@@ -15,4 +15,4 @@ test2 = VertexArrayTest("VertexArray", geometry)
 testList = [test1, test2]
 
 exampleResultList = runTests('Example Graph Line', testList, runFor)
-generateGraph("example", exampleResultList, "VertexRate", xunits='X Units')
+generateGraph("example", exampleResultList, "VertexRate", xlabel='X Units')

@@ -2,7 +2,7 @@ from glscry import *
 
 v=defineArray(Array_f, 3, (5, 5, 0) + (5, 6, 0) + (6, 6, 0))
 c=defineArray(Array_f, 3, (1))
-n=defineArray(Array_f, 3, (1, 0 0))
+n=defineArray(Array_f, 3, (1, 0, 0))
 t=defineArray(Array_f, 2)
 geo = buildGeometry(GL_TRIANGLES, v=v, c=c, n=n, t=t)
 
