@@ -85,7 +85,7 @@ def updateCopyright(header, source):
 
 def usage(argv):
     print """\
-Usage: python %s [Options] HeaderTemplate [Sources]
+Usage: [python] %s [Options] HeaderTemplate [Sources]
 
 Options:
     -h, --help      Show this help text.

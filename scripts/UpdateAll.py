@@ -5,10 +5,13 @@ import sys
 import UpdateCopyright
 
 
+def getScriptDirectory(argv=sys.argv):
+    return os.path.abspath(os.path.dirname(argv[0]))
+    
+
 def main(argv=sys.argv):
     # Change directory to the root of the project.
-    
-    scriptDir = os.path.abspath(os.path.dirname(argv[0]))
+    scriptDir = getScriptDirectory(argv)
     projectDir = os.path.normpath(os.path.join(scriptDir, '..'))
     os.chdir(projectDir)
     
@@ -23,8 +26,8 @@ def main(argv=sys.argv):
 
     sources = [s for s in sources if os.path.basename(s) not in exceptions]
 
-    #import pprint
-    #pprint.PrettyPrinter().pprint(sources)
+    #from pprint import pprint
+    #pprint(sources)
     #print sources
 
     return UpdateCopyright.main(['UpdateCopyright.py', header] + sources)

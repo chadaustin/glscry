@@ -22,61 +22,70 @@ import getopt
 import socket
 
 
-def usage():
+def getScriptDirectory(argv=sys.argv):
+    return os.path.abspath(os.path.dirname(argv[0]))
+
+
+def usage(argv):
     print """\
-Usage: python run.py [OPTIONS] [TESTS]
+Usage: [python] run.py [OPTIONS] [TESTS]
 
 Options:
     -a, --all       Run all tests.
     -h, --help      Show this help text.
 """
 
-def main():
+
+def main(argv=sys.argv):
     # Parse options.
     try:
-        options, args = getopt.getopt(sys.argv[1:], 'a', ['help', 'all'])
+        options, args = getopt.getopt(argv[1:], 'a', ['help', 'all'])
     except getopt.GetoptError:
-        usage()
+        usage(argv)
         sys.exit(1)
 
     allTests = False
     for o, a in options:
         if o in ('-h', '--help'):
-            usage()
+            usage(argv)
             sys.exit(0)
         elif o in ('-a', '--all'):
             allTests = True
 
+
+    scriptDir = getScriptDirectory()
+    moduleDir = os.path.join(scriptDir, '.')
+
     # Modify PYTHONPATH
     pythonpath = os.environ.get('PYTHONPATH')
     if pythonpath:
-        pythonpath = pythonpath + ':' + os.getcwd()
+        pythonpath += ':' + moduleDir
     else:
-        pythonpath = os.getcwd()
+        pythonpath = moduleDir
     os.environ['PYTHONPATH'] = pythonpath
 
     # Get test list.
-    tests = args
+    tests = map(os.path.abspath, args)
     if allTests:
-        tests.extend(glob('test/*.py'))
-    tests = map(os.path.abspath, tests)
-
-    # Create directory if it does not exist and switch to it.
-    def enterdir(dir):
-        try:
-            os.mkdir(dir)
-        except OSError:
-            pass
-        os.chdir(dir)
-
-    enterdir('data')
-    enterdir(socket.gethostname())
+        tests += glob(os.path.join(scriptDir, 'test', '*.py'))
 
     if not tests:
         print "No tests specified.  Specify a test explicitly or use -a."
         print
-        usage()
+        usage(argv)
         sys.exit(1)
+
+    # Create data directory if it does not exist and switch to it so
+    # the tests output their files to it.
+    hostname = socket.gethostname()
+    datadir = os.path.join(scriptDir, 'data', hostname)
+    try:
+        os.makedirs(datadir)
+    except OSError:
+        pass
+    os.chdir(datadir)
+
+    print 'Data directory:', datadir
 
     for t in tests:
         print
@@ -85,4 +94,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)
