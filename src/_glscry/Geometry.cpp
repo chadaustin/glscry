@@ -27,17 +27,22 @@ namespace scry {
 
         class_<Geometry, GeometryPtr, boost::noncopyable>
             ("Geometry", no_init)
-            .def(init<GLenum>())
-            .def_readwrite("indices",   &Geometry::indices)
-            .def_readwrite("vertices",  &Geometry::vertices)
-            .def_readwrite("colors",    &Geometry::colors)
-            .def_readwrite("normals",   &Geometry::normals)
-            .def_readwrite("texcoords", &Geometry::texcoords)
+            .def(init<GLenum, size_t>())
+            .add_property("primitiveType", &Geometry::getPrimitiveType)
+            .add_property("batchSize",
+                          &Geometry::getBatchSize,
+                          &Geometry::setBatchSize)
+            .def_readwrite("indices",      &Geometry::indices)
+            .def_readwrite("vertices",     &Geometry::vertices)
+            .def_readwrite("colors",       &Geometry::colors)
+            .def_readwrite("normals",      &Geometry::normals)
+            .def_readwrite("texcoords",    &Geometry::texcoords)
             ;
     }
 
-    Geometry::Geometry(GLenum primitiveType) {
+    Geometry::Geometry(GLenum primitiveType, size_t batchSize) {
         _primitiveType = primitiveType;
+        _batchSize = batchSize;
 
         if (GLEW_ARB_multitexture) {
             GLint textureCount;

@@ -4,7 +4,7 @@ v=defineArray(Array_f, 3, (5, 5, 0) + (5, 6, 0) + (6, 6, 0))
 c=defineArray(Array_f, 3, (1, 1, 1))
 n=defineArray(Array_f, 3, (1, 0, 0))
 t=defineArray(Array_f, 2)
-geo = buildGeometry(GL_TRIANGLES, v=v, c=c, n=n, t=t)
+geo = buildGeometry((GL_TRIANGLES, 1024), v=v, c=c, n=n, t=t)
 
 def run(filename, storageMode, name):
     testList = []

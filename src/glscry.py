@@ -37,8 +37,9 @@ def defineArray(arraytype, size, repeat=[], offset=[], initial=[]):
     return array
 
 
-def buildGeometry(primtype, v=None, c=None, n=None, t=None, i=None):
-    geo = Geometry(primtype)
+def buildGeometry(typeAndSize, v=None, c=None, n=None, t=None, i=None):
+    primtype, batchSize = typeAndSize
+    geo = Geometry(primtype, batchSize)
     if i: geo.indices   = i
     if v: geo.vertices  = v
     if c: geo.colors    = c

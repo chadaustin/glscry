@@ -8,7 +8,7 @@ repeat_n = (1, 0, 0) + (0, 1, 0) + (0, 0, 1)
 v = defineArray(Array_f, 3, repeat_v)
 n = defineArray(Array_f, 3, repeat_n)
 
-geometry = buildGeometry(GL_TRIANGLES, v=v, n=n)
+geometry = buildGeometry((GL_TRIANGLES, 1024), v=v, n=n)
 
 # Compare the rendering speed of immediate mode vs. vertex arrays.
 test1 = ImmediateTest("Immediate",     geometry)

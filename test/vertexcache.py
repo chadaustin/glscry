@@ -21,7 +21,7 @@ def run(filename, testtype, name):
         
         indices = defineArray(Array_ui, 1, repeat)
     
-        geo = buildGeometry(GL_TRIANGLE_STRIP, v=v, i=indices)
+        geo = buildGeometry((GL_TRIANGLE_STRIP, 1024), v=v, i=indices)
         test = testtype(str(i), geo)
         testList.append(test)
 

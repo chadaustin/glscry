@@ -31,10 +31,18 @@ namespace scry {
     public:
         static void bind();
 
-        Geometry(GLenum primitiveType);
+        Geometry(GLenum primitiveType, size_t batchSize);
 
         GLenum getPrimitiveType() const {
             return _primitiveType;
+        }
+
+        size_t getBatchSize() const {
+            return _batchSize;
+        }
+
+        void setBatchSize(size_t batchSize) {
+            _batchSize = batchSize;
         }
 
         typedef std::vector<ArrayPtr> ArrayPtrList;
@@ -55,8 +63,11 @@ namespace scry {
         ArrayPtrList texcoords;
 
     private:
-        size_t _maxTextureUnits;
         GLenum _primitiveType;
+        size_t _batchSize;
+
+        // Queried on creation.
+        size_t _maxTextureUnits;
     };
     SCRY_REF_PTR(Geometry);
 

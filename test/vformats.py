@@ -23,7 +23,7 @@ c = defineArray(Array_f, 3, [r, g, b, w])
 n = defineArray(Array_f, 3, [r, g, b, w])
 t = defineArray(Array_f, 2, [ul_tc, ll_tc, lr_tc, ur_tc])
 
-fmt = GL_TRIANGLES
+fmt = (GL_TRIANGLES, 1024)
 geo_v    = buildGeometry(fmt, v=v)
 geo_vc   = buildGeometry(fmt, v=v, c=c)
 geo_vn   = buildGeometry(fmt, v=v, n=n)

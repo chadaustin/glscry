@@ -50,8 +50,13 @@ namespace scry {
         GeometryTest(const char* name, GeometryPtr geo);
         //GeometryTest(const char* name, std::vector<GeometryPtr> geos);
 
-        void   setBatchSize(size_t size) { _batchSize = size; }
-        size_t getBatchSize() const      { return _batchSize; }
+        size_t getBatchSize() const {
+            return getGeometry()->getBatchSize();
+        }
+
+        void setBatchSize(size_t size) {
+            getGeometry()->setBatchSize(size);
+        }
 
         void setup();
 
@@ -98,7 +103,6 @@ namespace scry {
             Buffer& buffer, ArrayPtr array, size_t vertexCount,
             const char* name, const PumpFactory& pumpFactory);
 
-        Inited<size_t, 4096> _batchSize;
         Zeroed<Uint64> _screenCoverage;
 
         /// Size of vertex arrays when using indexed geometry.
