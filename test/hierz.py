@@ -24,5 +24,4 @@ test2 = ImmediateTest("BackToFront", genBackToFront)
 test2.setState(DepthState())
 test2.addAction(ClearAction())
 
-runTestsRange("heir_z.data", [test1, test2], 10, "VertexRate",
-         "BatchSize", LinearRange(2 ** 12, 2 ** 12))
+runTests("hierz.data", [test1, test2], 10, "VertexRate")
