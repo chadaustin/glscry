@@ -146,6 +146,9 @@ namespace scry {
                     getStride(geometry->normals) +
                     getStride(geometry->texcoords);
 
+                SCRY_ASSERT(totalStride * getVertexArraySize() == totalSize,
+                            "Incorrect buffer size or stride.");
+
                 GLuint handle;
                 glGenBuffersARB(1, &handle);
                 glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);

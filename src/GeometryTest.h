@@ -100,7 +100,7 @@ namespace scry {
         Zeroed<size_t> _screenCoverage;
 
         /// Size of vertex arrays when using indexed geometry.
-        Zeroed<size_t> _vertexArraySize;
+        Zeroed<size_t> _vertexArraySize;  // In 'datatype's
 
         GeometryPtr _geometry;
 
