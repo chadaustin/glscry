@@ -37,7 +37,7 @@ def getFormatter(filename):
 
 
 def writeLines(lines, filename):
-    tmp_handle, tmp_path = tempfile.mkstemp(text=True)
+    tmp_handle, tmp_path = tempfile.mkstemp()
     tmp_file = os.fdopen(tmp_handle, 'w')
     for line in lines:
         print >> tmp_file, line
