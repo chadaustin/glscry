@@ -1,0 +1,21 @@
+- A Result is a scalar with an associated name and units.
+
+- A ResultSet is a list of Result objects and a name for the execution
+  of that particular test.
+
+- A Test runs some operation for an amount of time and returns a
+  ResultSet.
+
+- A GraphLine contains a title for the line and a list of ResultSet
+  objects.
+
+- A TestResult contains a test description, a system description, and a
+  list of GraphLines.
+
+- Tests* are Python scripts that use Benchmarks to build a TestResult,
+  storing it in a file.
+
+- Tests* can then generate graphs from the TestResult.
+
+* Tests - Python tests are not to be confused (I know...) with the
+  kind of Test that just measures a ResultSet.
