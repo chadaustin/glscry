@@ -33,13 +33,26 @@ namespace scry {
             _lights[index].ambient = ambient;
         }
 
+        void setDiffuse(size_t index, const Vec4f& diffuse) {
+            SCRY_ASSERT(index < _lights.size());
+            _lights[index].diffuse = diffuse;
+        }
+
+        void setSpecular(size_t index, const Vec4f& specular) {
+            SCRY_ASSERT(index < _lights.size());
+            _lights[index].specular = specular;
+        }
+
         void apply() {
             glEnable(GL_LIGHTING);
             for (size_t i = 0; i < _lights.size(); ++i) {
                 Light& l = _lights[i];
                 if (l.use) {
                     glEnable(GL_LIGHT0 + i);
-                    glLightfv(GL_LIGHT0 + i, GL_AMBIENT, l.ambient.getData());
+                    glLightfv(GL_LIGHT0 + i, GL_AMBIENT,  l.ambient.getData());
+                    glLightfv(GL_LIGHT0 + i, GL_DIFFUSE,  l.diffuse.getData());
+                    glLightfv(GL_LIGHT0 + i, GL_SPECULAR, l.specular.getData());
+                    glLightfv(GL_LIGHT0 + i, GL_POSITION, l.position.getData());
                 }
             }
         }
@@ -53,13 +66,11 @@ namespace scry {
 
     private:
         struct Light {
-            Light() {
-                use = false;
-                ambient = Vec4f(0, 0, 0, 1);
-            }
-
-            bool use;
+            Inited<bool, false> use;
             Vec4f ambient;
+            Vec4f diffuse;
+            Vec4f specular;
+            Vec4f position;
         };
 
         std::vector<Light> _lights;
