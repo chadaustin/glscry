@@ -30,12 +30,22 @@ namespace scry {
         static void bind();
 
         ImmediateTest(const char* name, GeometryPtr geo)
-        : GeometryTest(name, geo) {
+        : GeometryTest(name, geo)
+        , useList(false) {
         }
 
         void setup();
         void iterate(ResultValues& results);
         void teardown();
+
+        bool useList;
+
+    private:
+        void doSetup();
+        void doIterate();
+        void doTeardown();
+
+        GLuint _list;       
     };
     SCRY_REF_PTR(ImmediateTest);
 

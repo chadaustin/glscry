@@ -37,7 +37,6 @@ sources = Split("""
 
     GeometryTest.cpp
     ImmediateTest.cpp
-    DisplayListTest.cpp
     VertexArrayTest.cpp
     VertexBufferObjectTest.cpp
 """)

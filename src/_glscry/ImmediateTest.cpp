@@ -20,16 +20,54 @@ using namespace boost::python;
 namespace scry {
 
     void ImmediateTest::bind() {
-        class_<ImmediateTest, ImmediateTestPtr, bases<GeometryTest>,
-            boost::noncopyable>("ImmediateTest", no_init)
-            .def(init<const char*, GeometryPtr>());
+        typedef ImmediateTest C;
+        typedef ImmediateTestPtr CPtr;
+        class_<C, CPtr, bases<GeometryTest>, boost::noncopyable>
+            ("ImmediateTest", no_init)
+            .def(init<const char*, GeometryPtr>())
+            .def_readwrite("useList", &C::useList)
+            ;
 
-        implicitly_convertible<ImmediateTestPtr, GeometryTestPtr>();
+        implicitly_convertible<CPtr, GeometryTestPtr>();
     }
 
     void ImmediateTest::setup() {
         GeometryTest::setup();
 
+        doSetup();
+
+        if (useList) {
+            _list = glGenLists(1);
+            glNewList(_list, GL_COMPILE);
+
+            doIterate();
+
+            glEndList();
+        }
+    }
+
+    void ImmediateTest::iterate(ResultValues& results) {
+        if (useList) {
+            glCallList(_list);
+        } else {
+            doIterate();
+        }
+
+        results[0] += getVertexCountPerBatch();
+        results[1] += getBatchSize();
+        results[2] += getScreenCoverage();
+        results[3] += 1;        
+    }
+
+    void ImmediateTest::teardown() {
+        if (useList) {
+            glDeleteLists(_list, 1);
+        }
+
+        doTeardown();
+    }
+
+    void ImmediateTest::doSetup() {
         GeometryPtr geometry = getGeometry();
         if (ArrayPtr i = geometry->indices) {
             if (i->getSize() != 1) {
@@ -40,7 +78,7 @@ namespace scry {
         }
     }
 
-    void ImmediateTest::iterate(ResultValues& results) {
+    void ImmediateTest::doIterate() {
         GeometryPtr geometry = getGeometry();
         if (geometry->indices) {
             BufferIterator i(getIndices());
@@ -61,14 +99,9 @@ namespace scry {
             }
             glEnd();
         }
-
-        results[0] += getVertexCountPerBatch();
-        results[1] += getBatchSize();
-        results[2] += getScreenCoverage();
-        results[3] += 1;
     }
 
-    void ImmediateTest::teardown() {
+    void ImmediateTest::doTeardown() {
         disableArrays();
     }
 

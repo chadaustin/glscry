@@ -122,6 +122,12 @@ def uniquePowerRange(low, high, power):
     return make_unique(list)
 
 
+def DisplayListTest(name, geo):
+    test = ImmediateTest(name, geo)
+    test.useList = True
+    return test
+
+
 def CompiledVertexArrayTest(name, geo):
     test = VertexArrayTest(name, geo)
     test.compiled = True

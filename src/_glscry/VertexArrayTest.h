@@ -30,8 +30,8 @@ namespace scry {
         static void bind();
 
         VertexArrayTest(const char* name, GeometryPtr geo)
-        : GeometryTest(name, geo) {
-            compiled = false;
+        : GeometryTest(name, geo)
+        , compiled(false) {
         }
 
         bool isSupported() const {

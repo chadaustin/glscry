@@ -28,7 +28,6 @@
 #include "Geometry.h"
 
 #include "ImmediateTest.h"
-#include "DisplayListTest.h"
 #include "VertexArrayTest.h"
 #include "VertexBufferObjectTest.h"
 
@@ -98,7 +97,6 @@ BOOST_PYTHON_MODULE(_glscry) {
 
     GeometryTest::bind();
     ImmediateTest::bind();
-    DisplayListTest::bind();
     VertexArrayTest::bind();
     VertexBufferObjectTest::bind();
 
