@@ -54,7 +54,7 @@ def main(argv=sys.argv):
 
 
     scriptDir = getScriptDirectory()
-    moduleDir = os.path.join(scriptDir, 'src')
+    moduleDir = os.path.join(scriptDir, 'stage', 'lib')
     sys.path.append(moduleDir)
 
     # Get test list.

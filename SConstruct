@@ -3,11 +3,11 @@ import os
 SConsignFile()
 #CacheDir('cache')
 
-platform = DefaultEnvironment()['PLATFORM']
 
 
 # Options
 
+platform = DefaultEnvironment()['PLATFORM']
 defaultBoostIncludes = '/usr/local/include/boost-1_31'
 defaultBoostLibs     = '/usr/local/lib'
 if platform == 'win32':
@@ -21,7 +21,6 @@ opts.AddOptions(
     PathOption('boostLibs', 'Directory containing boost library files',
                defaultBoostLibs),
     BoolOption('nowarn', 'Disable warnings', 0))
-
 
 # Base Environment
 
@@ -69,8 +68,15 @@ Export('BuildData')
 
 
 # SConscripts
-  
-SConscript(dirs=['src'])
+
+TargetDirectory = Dir('stage')
+BuildDirectory = Dir(os.path.join('build', env['PLATFORM']))
+Export('TargetDirectory')
+
+Default(TargetDirectory)
+
+for dir in ['src', 'third-party']:
+    SConscript(dirs=[dir], build_dir=BuildDirectory.Dir(dir), duplicate=0)
 
 
 # MSVS Project

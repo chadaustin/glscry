@@ -1,1 +1,5 @@
+Import('*')
+
+env.Install(TargetDirectory.Dir('lib'), 'glscry.py')
+
 SConscript(dirs=['_glscry'])

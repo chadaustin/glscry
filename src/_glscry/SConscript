@@ -100,12 +100,14 @@ if env['PLATFORM'] == 'win32':
 
 BuildData['NativeSources'] = map(File, sources + headers)
 
-
-modulename = env.subst('_glscry$SHLIBSUFFIX')
 env = env.Copy()
 env.Append(LIBPATH=['gmtl-python'], LIBS=['gmtl-python'])
 
-module = env.SharedLibrary(Dir('..').File(modulename), sources)
+modulename = File(env.subst('_glscry$SHLIBSUFFIX'))
+module = env.SharedLibrary(modulename, sources)
 BuildData['NativeModule'] = module
+
+# Don't install all of the generated files, just the native module.
+env.Install(TargetDirectory.Dir('lib'), modulename)
 
 SConscript(dirs=['gmtl-python'])
