@@ -36,6 +36,7 @@ namespace scry {
 
         size_t getTypeSize() const;
     };
+    typedef boost::intrusive_ptr<ArrayInterface> ArrayPtr;
 
 
     template<typename T>
@@ -106,7 +107,6 @@ namespace scry {
     private:
         size_t _size;
     };
-    typedef boost::intrusive_ptr<ArrayInterface> ArrayPtr;
 
 
     void bindArrayTypes();

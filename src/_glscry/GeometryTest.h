@@ -28,10 +28,11 @@ namespace scry {
 
     public:
         SCRY_BEGIN_RESULT_DESCS()
-            SCRY_RESULT_DESC("VertexRate", "vertex/s")
+            SCRY_RESULT_DESC("VertexRate",    "vertex/s")
             SCRY_RESULT_DESC("PrimitiveRate", "prim/s")
-            SCRY_RESULT_DESC("FillRate", "pixel/s")
-            SCRY_RESULT_DESC("BatchRate", "batch/s")
+            SCRY_RESULT_DESC("FillRate",      "pixel/s")
+            SCRY_RESULT_DESC("BatchRate",     "batch/s")
+            SCRY_RESULT_DESC("DataRate",      "byte/s")
         SCRY_END_RESULT_DESCS()
 
         static void bind();
@@ -88,65 +89,9 @@ namespace scry {
             }
         }
 
-        void fillBufferIteratorList(BufferIteratorList& bi) {
-            tryAddBuffer(bi, getColors());
-            tryAddBuffer(bi, getNormals());
-            for (size_t i = 0; i < getTexCoordsCount(); ++i) {
-                tryAddBuffer(bi, getTexCoords(i));
-            }
-            // Vertices go last.
-            tryAddBuffer(bi, getVertices());
-        }
-
-        void enableArrays() const {
-            GeometryPtr geometry = getGeometry();
-
-            if (ArrayPtr v = geometry->vertices) {
-                glEnableClientState(GL_VERTEX_ARRAY);
-                glVertexPointer(v, getVertices().data_ptr());
-            }
-
-            if (ArrayPtr c = geometry->colors) {
-                glEnableClientState(GL_COLOR_ARRAY);
-                glColorPointer(c, getColors().data_ptr());
-            }
-
-            if (ArrayPtr n = geometry->normals) {
-                SCRY_ASSERT(n->getSize() == 3);
-                glEnableClientState(GL_NORMAL_ARRAY);
-                glNormalPointer(n, getNormals().data_ptr());
-            }
-
-            for (size_t ti = 0; ti < geometry->texcoords.size(); ++ti) {
-                if (ArrayPtr t = geometry->texcoords[ti]) {
-                    if (ti >= 1) {
-                        glClientActiveTextureARB(GL_TEXTURE0 + ti);
-                    }
-                    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                    glTexCoordPointer(t, getTexCoords(ti).data_ptr());
-                    if (ti >= 1) {
-                        glClientActiveTextureARB(GL_TEXTURE0);
-                    }
-                }
-            }
-        }
-
-        void disableArrays() const {
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_COLOR_ARRAY);
-            glDisableClientState(GL_NORMAL_ARRAY);
-
-            GeometryPtr geometry = getGeometry();
-            for (size_t ti = 0; ti < geometry->texcoords.size(); ++ti) {
-                if (ti >= 1) {
-                    glClientActiveTextureARB(GL_TEXTURE0 + ti);
-                }
-                glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-                if (ti >= 1) {
-                    glClientActiveTextureARB(GL_TEXTURE0);
-                }
-            }
-        }
+        void fillBufferIteratorList(BufferIteratorList& bi) const;
+        void enableArrays() const;
+        void disableArrays() const;
 
         GeometryPtr getGeometry() const {
             return _geometry;
@@ -155,11 +100,19 @@ namespace scry {
         size_t getVertexCountPerBatch() const;
 
         size_t getVertexArraySize() {
-            if (getGeometry()->indices) {
-                return _vertexArraySize;
-            } else {
-                return getVertexCountPerBatch();
-            }
+            return getGeometry()->indices
+                ? size_t(_vertexArraySize)
+                : getVertexCountPerBatch();
+        }
+
+        size_t getArrayVertexSize(const ArrayPtr& a) {
+            return a
+                ? a->getSize() * a->getTypeSize()
+                : 0;
+        }
+
+        size_t getVertexDataSize() {
+            return _vertexDataSize;
         }
 
         Uint64 getScreenCoverage() const {
@@ -183,6 +136,8 @@ namespace scry {
 
         /// Size of vertex arrays when using indexed geometry.
         Zeroed<size_t> _vertexArraySize;  // In 'datatype's
+
+        Zeroed<size_t> _vertexDataSize;
 
         GeometryPtr _geometry;
 

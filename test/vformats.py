@@ -46,7 +46,8 @@ def run(file, test, name):
 
     print "Writing data to %s" % file
     line = runTests(name, tests, 10)
-    generateGraph(file, line, 'VertexRate')
+    generateGraph(file + '_vertexrate', line, 'VertexRate')
+    generateGraph(file + '_datarate',   line, 'DataRate')
     return line
 
 line1 = run('vformats_imm', ImmediateTest,           'Immediate')

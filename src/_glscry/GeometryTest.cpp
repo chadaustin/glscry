@@ -84,6 +84,78 @@ namespace scry {
                          os.str().c_str(),
                          TexCoordPumpFactory(GL_TEXTURE0 + i));
         }
+
+
+        _vertexDataSize = 0;
+        _vertexDataSize += getArrayVertexSize(geometry->vertices);
+        _vertexDataSize += getArrayVertexSize(geometry->colors);
+        _vertexDataSize += getArrayVertexSize(geometry->normals);
+        for (size_t ti = 0; ti < geometry->texcoords.size(); ++ti) {
+            _vertexDataSize += getArrayVertexSize(geometry->texcoords[ti]);
+        }
+    }
+
+
+    void GeometryTest::fillBufferIteratorList(BufferIteratorList& bi) const {
+        tryAddBuffer(bi, getColors());
+        tryAddBuffer(bi, getNormals());
+        for (size_t i = 0; i < getTexCoordsCount(); ++i) {
+            tryAddBuffer(bi, getTexCoords(i));
+        }
+        // Vertices go last.
+        tryAddBuffer(bi, getVertices());
+    }
+
+
+    void GeometryTest::enableArrays() const {
+        GeometryPtr geometry = getGeometry();
+
+        if (ArrayPtr v = geometry->vertices) {
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(v, getVertices().data_ptr());
+        }
+
+        if (ArrayPtr c = geometry->colors) {
+            glEnableClientState(GL_COLOR_ARRAY);
+            glColorPointer(c, getColors().data_ptr());
+        }
+
+        if (ArrayPtr n = geometry->normals) {
+            SCRY_ASSERT(n->getSize() == 3);
+            glEnableClientState(GL_NORMAL_ARRAY);
+            glNormalPointer(n, getNormals().data_ptr());
+        }
+
+        for (size_t ti = 0; ti < geometry->texcoords.size(); ++ti) {
+            if (ArrayPtr t = geometry->texcoords[ti]) {
+                if (ti >= 1) {
+                    glClientActiveTextureARB(GL_TEXTURE0 + ti);
+                }
+                glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+                glTexCoordPointer(t, getTexCoords(ti).data_ptr());
+                if (ti >= 1) {
+                    glClientActiveTextureARB(GL_TEXTURE0);
+                }
+            }
+        }
+    }
+
+
+    void GeometryTest::disableArrays() const {
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
+
+        GeometryPtr geometry = getGeometry();
+        for (size_t ti = 0; ti < geometry->texcoords.size(); ++ti) {
+            if (ti >= 1) {
+                glClientActiveTextureARB(GL_TEXTURE0 + ti);
+            }
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+            if (ti >= 1) {
+                glClientActiveTextureARB(GL_TEXTURE0);
+            }
+        }
     }
 
 

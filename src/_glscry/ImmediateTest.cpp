@@ -56,7 +56,8 @@ namespace scry {
         results[0] += getVertexCountPerBatch();
         results[1] += getBatchSize();
         results[2] += getScreenCoverage();
-        results[3] += 1;        
+        results[3] += 1;
+        results[4] += getVertexCountPerBatch() * getVertexDataSize();
     }
 
     void ImmediateTest::teardown() {
