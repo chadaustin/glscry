@@ -1,6 +1,7 @@
 #Boa:Frame:wxFrame1
 
 from wxPython.wx import *
+import os
 
 def create(parent):
     return wxFrame1(parent)
@@ -10,22 +11,24 @@ def create(parent):
  wxID_WXFRAME1TEXTCTRL1, wxID_WXFRAME1TREECTRL1, wxID_WXFRAME1WINDOW1, 
 ] = map(lambda _init_ctrls: wxNewId(), range(9))
 
-[wxID_WXFRAME1MENU1ITEMS0, wxID_WXFRAME1MENU1ITEMS1, wxID_WXFRAME1MENU1ITEMS2, 
- wxID_WXFRAME1MENU1ITEMS3, wxID_WXFRAME1MENU1ITEMS4, 
+[wxID_WXFRAME1MENU1ID_EXIT, wxID_WXFRAME1MENU1ID_NEW, 
+ wxID_WXFRAME1MENU1ID_OPEN, wxID_WXFRAME1MENU1ID_SAVE, 
+ wxID_WXFRAME1MENU1ID_SAVEAS, 
 ] = map(lambda _init_coll_menu1_Items: wxNewId(), range(5))
 
-[wxID_WXFRAME1MENU4ITEMS0, wxID_WXFRAME1MENU4ITEMS1, 
+[wxID_WXFRAME1MENU4ID_ABOUT, wxID_WXFRAME1MENU4ID_HELP, 
 ] = map(lambda _init_coll_menu4_Items: wxNewId(), range(2))
 
 [wxID_WXFRAME1MENU2ITEMS0] = map(lambda _init_coll_menu2_Items: wxNewId(), range(1))
 
-[wxID_WXFRAME1MENU3ITEMS0] = map(lambda _init_coll_menu3_Items: wxNewId(), range(1))
+[wxID_WXFRAME1MENU3ID_PROP] = map(lambda _init_coll_menu3_Items: wxNewId(), range(1))
 
 class wxFrame1(wxFrame):
+    
     def _init_coll_menu3_Items(self, parent):
         # generated method, don't edit
 
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU3ITEMS0,
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU3ID_PROP,
               item=u'Properties', kind=wxITEM_NORMAL)
 
     def _init_coll_menu2_Items(self, parent):
@@ -37,29 +40,33 @@ class wxFrame1(wxFrame):
     def _init_coll_menu1_Items(self, parent):
         # generated method, don't edit
 
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS0, item=u'New',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ID_NEW, item=u'New',
               kind=wxITEM_NORMAL)
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS1, item=u'Open',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ID_OPEN, item=u'Open',
               kind=wxITEM_NORMAL)
         parent.AppendSeparator()
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS2, item=u'Save',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ID_SAVE, item=u'Save',
               kind=wxITEM_NORMAL)
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS3,
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ID_SAVEAS,
               item=u'Save As', kind=wxITEM_NORMAL)
         parent.AppendSeparator()
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS4, item=u'Exit',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ID_EXIT, item=u'Exit',
               kind=wxITEM_NORMAL)
-        EVT_MENU(self, wxID_WXFRAME1MENU1ITEMS0, self.OnMenu1Items0Menu)
+        EVT_MENU(self, wxID_WXFRAME1MENU1ID_NEW, self.OnMenu1Items0Menu)
+        EVT_MENU(self, wxID_WXFRAME1MENU1ID_SAVE, self.OnMenu1Id_saveMenu)
+        EVT_MENU(self, wxID_WXFRAME1MENU1ID_SAVEAS, self.OnMenu1Id_saveasMenu)
+        EVT_MENU(self, wxID_WXFRAME1MENU1ID_EXIT, self.OnMenu1Id_exitMenu)
 
     def _init_coll_menu4_Items(self, parent):
         # generated method, don't edit
 
-        parent.Append(helpString=u'', id=wxID_WXFRAME1MENU4ITEMS0,
+        parent.Append(helpString=u'', id=wxID_WXFRAME1MENU4ID_ABOUT,
               item=u'About', kind=wxITEM_NORMAL)
         parent.AppendSeparator()
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU4ITEMS1, item=u'Help',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU4ID_HELP, item=u'Help',
               kind=wxITEM_NORMAL)
-        EVT_MENU(self, wxID_WXFRAME1MENU4ITEMS1, self.OnMenu4Items1Menu)
+        EVT_MENU(self, wxID_WXFRAME1MENU4ID_HELP, self.OnMenu4Items1Menu)
+        EVT_MENU(self, wxID_WXFRAME1MENU4ID_ABOUT, self.OnMenu4Items0Menu)
 
     def _init_coll_menuBar1_Menus(self, parent):
         # generated method, don't edit
@@ -81,7 +88,7 @@ class wxFrame1(wxFrame):
         # generated method, don't edit
         self.menuBar1 = wxMenuBar()
 
-        self.menu1 = wxMenu(title='')
+        self.menu1 = wxMenu(title=u'')
 
         self.menu2 = wxMenu(title='')
 
@@ -99,7 +106,7 @@ class wxFrame1(wxFrame):
         # generated method, don't edit
         wxFrame.__init__(self, id=wxID_WXFRAME1, name='', parent=prnt,
               pos=wxPoint(-4, -4), size=wxSize(1032, 746),
-              style=wxDEFAULT_FRAME_STYLE, title='wxFrame1')
+              style=wxDEFAULT_FRAME_STYLE, title='work_in_progress')
         self._init_utils()
         self.SetClientSize(wxSize(1024, 712))
         self.SetMenuBar(self.menuBar1)
@@ -136,7 +143,8 @@ class wxFrame1(wxFrame):
 
         self._init_coll_notebook1_Pages(self.notebook1)
 
-    def __init__(self, parent):
+    def __init__(self, parent,filename='work_in_progress'):
+        self.dirname=""
         self._init_ctrls(parent)
 
     def OnMenu1Items0Menu(self, event):
@@ -144,3 +152,23 @@ class wxFrame1(wxFrame):
 
     def OnMenu4Items1Menu(self, event):
         event.Skip()
+    
+    def OnMenu4Items0Menu(self, event):
+        d= wxMessageDialog( self, " \twork_in_progress \n"
+                            " \tV. 2.16.05"," About work_in_progress", wxOK)  # Create a message dialog box
+        d.ShowModal() # Shows it
+        d.Destroy() # finally destroy it when finished.    
+
+    def OnMenu1Id_saveMenu(self, event):
+        f=open(os.path.join(self.dirname,self.filename),"w")
+        f.write(self.control.GetValue())
+        f.close()
+    def OnMenu1Id_saveasMenu(self, event):
+        dlg = wxFileDialog(self, "Choose a file", self.dirname, self.filename,"*.*", wxSAVE)
+        if dlg.ShowModal() == wxID_OK:
+            self.filename=dlg.GetFilename()
+            self.dirname=dlg.GetDirectory()
+            self.OnSave(e)
+        dlg.Destroy()    
+    def OnMenu1Id_exitMenu(self, event):
+        self.Close(true)
