@@ -6,43 +6,24 @@
 #include "GLUtility.h"
 
 
-SCRY_BEGIN_NAMESPACE
+namespace scry {
 
+    class ImmediateTest : public GeometryTest {
+    protected:
+        ~ImmediateTest() { }
 
-class ImmediateTest : public GeometryTest {
-protected:
-    ~ImmediateTest() { }
+    public:
+        static void bind();
 
-public:
-    static void bind();
-
-    ImmediateTest(const char* name, GeometryPtr geo)
-    : GeometryTest(name, geo) {
-    }
-
-    void iterate(ResultSet& results) {
-        GeometryPtr geometry = getGeometry();
-
-        const void* v_data = getVertexBuffer();
-        Pump v_pump = getVertexPump();
-
-        const void* c_data = getColorBuffer();
-        Pump c_pump = getColorPump();
-
-        glBegin(geometry->getPrimitiveType());
-        for (size_t i = 0; i < getVertexCount(); ++i) {
-            if (v_pump) v_data = v_pump(v_data);
-            if (c_pump) c_data = c_pump(c_data);
+        ImmediateTest(const char* name, GeometryPtr geo)
+        : GeometryTest(name, geo) {
         }
-        glEnd();
-        
-        results[0] += getVertexCount();
-        results[1] += getBatchSize();
-        results[2] += getScreenCoverage();
-    }
-};
-SCRY_REF_PTR(ImmediateTest);
 
-SCRY_END_NAMESPACE
+        void iterate(ResultSet& results);
+    };
+    SCRY_REF_PTR(ImmediateTest);
+
+}
+
 
 #endif

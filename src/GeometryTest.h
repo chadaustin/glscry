@@ -39,41 +39,7 @@ public:
         }
     }
 
-    void setup() {
-        _screenCoverage = 0;
-        _vertexPump = 0;
-        _colorPump = 0;
-
-        GeometryPtr geometry = getGeometry();
-
-        if (ArrayPtr v = geometry->vertices) {
-            _vertexBuffer.resize(getVertexCount() * v->getSize() *
-                                 v->getTypeSize());
-            v->build(&_vertexBuffer[0], getVertexCount());
-
-            _vertexPump = scry::getVertexPump(
-                v->getTypeConstant(), v->getSize());
-
-            _screenCoverage = calculateCoverage(
-                geometry->getPrimitiveType(),
-                v->getTypeConstant(),
-                v->getSize(),
-                getVertexCount(),
-                &_vertexBuffer[0]);
-        }
-
-        if (ArrayPtr c = geometry->colors) {
-            _colorBuffer.resize(getVertexCount() * c->getSize() *
-                                 c->getTypeSize());
-            c->build(&_colorBuffer[0], getVertexCount());
-
-            _colorPump = scry::getColorPump(
-                c->getTypeConstant(), c->getSize());
-        }
-    }
-
-    void teardown() {
-    }
+    void setup();
 
 protected:
     GeometryPtr getGeometry() const {
@@ -106,6 +72,9 @@ protected:
     const void* getColorBuffer() const { return &_colorBuffer[0]; }
     Pump getColorPump()          const { return _colorPump; }
 
+    const void* getNormalBuffer() const { return &_normalBuffer[0]; }
+    Pump getNormalPump()          const { return _normalPump; }
+
 private:
     Inited<size_t, 4096> _batchSize;
     Zeroed<size_t> _screenCoverage;
@@ -117,6 +86,9 @@ private:
 
     std::vector<GLubyte> _colorBuffer;
     Zeroed<Pump> _colorPump;
+
+    std::vector<GLubyte> _normalBuffer;
+    Zeroed<Pump> _normalPump;
 };
 SCRY_REF_PTR(GeometryTest);
 
