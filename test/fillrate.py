@@ -40,6 +40,8 @@ geo_vct.texcoords = tc
 
 texState = TextureState()
 texState.texture = Texture()
+texState.texture.minFilter = GL_NEAREST
+texState.texture.magFilter = GL_NEAREST
 
 type = ImmediateTest
 test1 = type("Flat", geo_v)

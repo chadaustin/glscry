@@ -34,19 +34,19 @@ namespace scry {
 
         // Texture object properties.
         float _minFilter;
-        float _maxFilter;
+        float _magFilter;
         float _minLOD;
         float _maxLOD;
-        float _baseLevel;
-        float _maxLevel;
+        int   _baseLevel;
+        int   _maxLevel;
         float _wrapS;
         float _wrapT;
         float _wrapR;
-        Vec3f _borderColor;
+        Vec4f _borderColor;
         float _priority;
 
-        std::vector<GLubyte>             _data;
-        GLuint                           _handle;
+        std::vector<GLubyte> _data;
+        GLuint               _handle;
     };
     SCRY_REF_PTR(Texture);
 
