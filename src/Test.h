@@ -17,62 +17,46 @@
     }
 
 #define SCRY_BEGIN_RESULT_DESCS()                                       \
-    static void getClassResultDescs(std::vector<ResultDesc>& descs) {
+    static ResultDescList getClassResultDescs() {                       \
+        ResultDescList rv;                                              \
 
-#define SCRY_RESULT_DESC(name, units)                   \
-    descs.push_back(ResultDesc((name), (units)));
+#define SCRY_RESULT_DESC(name, units)           \
+    rv.push_back(ResultDesc((name), (units)));
 
-#define SCRY_END_RESULT_DESCS()                                 \
-    }                                                           \
-    void getResultDescs(std::vector<ResultDesc>& descs) {       \
-        getClassResultDescs(descs);                             \
+#define SCRY_END_RESULT_DESCS()                                   \
+        return rv;                                                \
+    }                                                             \
+    ResultDescList getResultDescs() {                             \
+        return getClassResultDescs();                             \
     }
 
 
 namespace scry {
 
     struct ResultDesc {
-        ResultDesc(const std::string& name_, const std::string units_) {
-            name  = name_;
-            units = units_;
+        ResultDesc(const std::string& name_, const std::string units_)
+        : name(name_)
+        , units(units_) {
+        }
+
+        bool operator==(const ResultDesc& rhs) const {
+            return name == rhs.name && units == rhs.units;
         }
 
         std::string name;
         std::string units;
     };
 
+    typedef std::vector<ResultDesc> ResultDescList;
 
-    class ResultSet {
-    public:
-        typedef double T;
 
-        ResultSet(size_t size) {
-            _results.resize(size);
+    typedef std::vector<double> ResultSet;
+
+    inline void normalize(ResultSet& results, double time) {
+        for (size_t i = 0; i < results.size(); ++i) {
+            results[i] /= time;
         }
-
-        size_t size() const {
-            return _results.size();
-        }
-
-        T& operator[](size_t i) {
-            SCRY_ASSERT(i < size());
-            return _results[i];
-        }
-
-        const T& operator[](size_t i) const {
-            SCRY_ASSERT(i < size());
-            return _results[i];
-        }
-
-        void normalize(T time) {
-            for (size_t i = 0; i < size(); ++i) {
-                _results[i] /= time;
-            }
-        }
-
-    private:
-        std::vector<T> _results;
-    };
+    }
 
 
     class Test : public RefCounted {
@@ -128,7 +112,7 @@ namespace scry {
         // Overridden methods.
 
         virtual bool isSupported() const { return true; }
-        virtual void getResultDescs(std::vector<ResultDesc>& descs) = 0;
+        virtual ResultDescList getResultDescs() = 0;
         virtual void setProperty(const std::string& name, size_t value) { }
 
         virtual void setup()    { }

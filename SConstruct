@@ -51,13 +51,13 @@ if env.subst('$CC') == 'gcc':
 
 sources = Split("""
     Module.cpp
+    OpenGL.cpp
 
     Action.cpp
     Context.cpp
+    Coverage.cpp
     glew.c
     GLUtility.cpp
-    Range.cpp
-    Run.cpp
     Timer.cpp
 
     Array.cpp

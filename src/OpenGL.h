@@ -5,4 +5,9 @@
 #include "glew.h"
 
 
+namespace scry {
+    void bindOpenGL();
+}
+
+
 #endif

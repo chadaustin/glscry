@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "Context.h"
+#include "Coverage.h"
 #include "GeometryTest.h"
 using namespace boost::python;
 

@@ -3,9 +3,7 @@
 
 
 #include <string>
-#include <SDL.h>
-#include "glew.h"
-#include "GLUtility.h"
+#include "OpenGL.h"
 
 
 namespace scry {
@@ -16,12 +14,9 @@ namespace scry {
     void throwGLEWError(const std::string& prefix, GLenum error);
     void initContext();
     
-    Uint64 calculateCoverage(
-        GLenum primitiveType,
-        GLenum dataType,
-        size_t size,
-        size_t vertexCount,
-        const void* data);
+    void flip();
+    void betweenTests();
+    void bindContext();
 
 }
 
