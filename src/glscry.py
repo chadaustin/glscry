@@ -223,6 +223,7 @@ def runTest(test, runFor, resultName=None, printedName=None):
                    for value, d in zip(resultSet, test.getResultDescs())]
         return ResultSet(resultName, results)
 
+    GLError = Exception
     try:
         if test.isSupported():
             print "\nRunning test '%s'" % printedName
