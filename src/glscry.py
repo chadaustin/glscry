@@ -1,16 +1,16 @@
 # [Begin Copyright Header]
-# 
+#
 # GLScry - OpenGL Performance Analysis Tool
 # Copyright (C) 2004-2005  Iowa State University
-# 
+#
 # This software is licensed under the terms of the GNU Lesser Public
-# License, version 2.1, as published by the Free Software Foundation.  
+# License, version 2.1, as published by the Free Software Foundation.
 # See the file COPYRIGHT.txt for details.
-# 
+#
 # Authors:
 #   Chad Austin <aegisk@iastate.edu>
 #   Dirk Reiners <dreiners@iastate.edu>
-# 
+#
 # [End Copyright Header]
 import platform
 import pprint
@@ -180,14 +180,14 @@ class ResultSet:
                  graph-like test or a value in a test that varies over a
                  range of parameters.  When a point is plotted on a graph,
                  the name corresponds to the x axis.
-                 
+
     results      List of Result objects.
     """
-    
+
     def __init__(self, name, results):
         assert type(name) is str
         assert type(results) is list
-        
+
         self.name    = name
         self.results = results
 
@@ -196,11 +196,11 @@ class GraphLine:
     """\
     The result of running a list of tests.  Contains a title and a
     list of ResultSet objects.
-    """    
+    """
     def __init__(self, title, resultSetList):
         assert type(title) is str
         assert type(resultSetList) is list
-        
+
         self.title = title
         self.resultSetList = resultSetList
 
@@ -209,9 +209,9 @@ def runTest(test, runFor, resultName=None, printedName=None):
     """\
     Runs a test and returns a ResultSet object.
     """
-    
+
     betweenTests()
-    
+
     if not resultName:
         resultName = test.name
 
@@ -233,7 +233,7 @@ def runTest(test, runFor, resultName=None, printedName=None):
                 print "  %s = %s %s" % (desc.name, value, desc.units)
 
             return makeResultSet(resultSet)
-            
+
     except GLError, e:
         print e.value()
 
@@ -252,7 +252,8 @@ def runTests(lineTitle, testList, runFor):
     return GraphLine(lineTitle, [runTest(t, runFor) for t in testList])
 
 
-def identity(v): return v
+def identity(v):
+    return v
 
 
 def runTestRange(test, runFor, variedProperty, range, coerce=identity):
@@ -268,7 +269,7 @@ def runTestRange(test, runFor, variedProperty, range, coerce=identity):
         resultSet = runTest(test, runFor, str(v),
                             '%s (%s = %s)' % (test.name, variedProperty, v))
         resultSetList.append(resultSet)
-        
+
     return GraphLine(test.name, resultSetList)
 
 
@@ -355,7 +356,7 @@ def _generateActualGraph(filename, graphLineList, measured,
     resultMatrix = [x[0] for x in reduced]
 
     # All result descriptions must be equal.
-    assertEqual([x[1] for x in reduced]) 
+    assertEqual([x[1] for x in reduced])
     resultUnits = reduced[0][1]
 
     if normalizeBy:
@@ -395,7 +396,7 @@ def _generateActualGraph(filename, graphLineList, measured,
     if xunits:
         print >> plot, 'set xlabel "%s"' % xunits
     if normalizeBy:
-        print >> plot, 'set ylabel "Normalized to %s"' % normalizeBy.title
+        print >> plot, 'set ylabel "Normalized to %s"' % normalizeTitle
     else:
         print >> plot, 'set ylabel "%s"' % resultUnits
 
@@ -418,7 +419,7 @@ def generateGraph(filename, graphLineList, measured,
 
     if type(graphLineList) != type([]):
         graphLineList = [graphLineList]
-    
+
 
     # Write to JSON file.
     cpuArray = []
@@ -444,10 +445,10 @@ def generateGraph(filename, graphLineList, measured,
                         "Value": result.value,
                         "Units": result.units }
                        for result in resultSet.results]
-            
+
             data.append({ "Name":    resultSet.name,
                           "Results": results })
-        
+
         linesArray.append({
             'Title': line.title,
             'ResultSet': data})
@@ -467,6 +468,6 @@ def generateGraph(filename, graphLineList, measured,
 
     of = open(filename + '.testresult', 'w')
     pprint.pprint(obj, of)
-    
+
     return _generateActualGraph(filename, graphLineList, measured, xlabel,
                                 graphType, normalizeBy)
