@@ -55,14 +55,7 @@ def main(argv=sys.argv):
 
     scriptDir = getScriptDirectory()
     moduleDir = os.path.join(scriptDir, 'src')
-
-    # Modify PYTHONPATH
-    pythonpath = os.environ.get('PYTHONPATH')
-    if pythonpath:
-        pythonpath += ':' + moduleDir
-    else:
-        pythonpath = moduleDir
-    os.environ['PYTHONPATH'] = pythonpath
+    sys.path.append(moduleDir)
 
     # Get test list.
     tests = map(os.path.abspath, args)
@@ -90,7 +83,7 @@ def main(argv=sys.argv):
     for t in tests:
         print
         print "Running test script '%s'" % t
-        os.system(sys.executable + ' ' + t)
+        exec open(t) in {}
 
 
 if __name__ == '__main__':

@@ -272,7 +272,7 @@ def runTestRange(test, runFor, variedProperty, range, coerce=identity):
     return GraphLine(test.name, resultSetList)
 
 
-def runTestsRange(testList, runFor, variedProperty, range, coerce=None):
+def runTestsRange(testList, runFor, variedProperty, range, coerce=identity):
     """\
     Runs a list of tests with runTestsRange and returns a list of
     GraphLine objects.

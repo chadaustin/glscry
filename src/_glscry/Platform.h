@@ -18,6 +18,7 @@
 
 namespace scry {
 
+    void breakIfDebugging();
     void bindPlatform();
 
 }

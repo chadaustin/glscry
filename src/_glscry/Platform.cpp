@@ -21,6 +21,34 @@ using namespace boost;
 using namespace boost::python;
 
 
+#ifdef WIN32
+
+#include <windows.h>
+
+namespace scry {
+
+    void breakIfDebugging() {
+        if (IsDebuggerPresent()) {
+            DebugBreak();
+        }
+    }
+
+}
+
+#else
+
+namespace scry {
+
+    void breakIfDebugging() {
+    }
+
+}
+
+#endif
+
+
+
+
 namespace scry {
 
     struct Processor {

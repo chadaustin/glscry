@@ -11,10 +11,10 @@ ll = (o,     h-o-o, 0)
 quad = [ul, ur, lr, ll]
 
 genFrontToBack = Geometry(GL_QUADS)
-genFrontToBack.vertices = defineArray(Array_f, 3, quad, (0, 0, -1))
+genFrontToBack.vertices = defineArray(Array_f, 3, quad, (0, 0, -1) * 4)
 
 genBackToFront = Geometry(GL_QUADS)
-genBackToFront.vertices = defineArray(Array_f, 3, quad, (0, 0, 1))
+genBackToFront.vertices = defineArray(Array_f, 3, quad, (0, 0, 1) * 4)
 
 depthState = DepthState()
 depthState.depthTest = True
@@ -35,5 +35,5 @@ test2 = ImmediateTest('Back to Front', genBackToFront)
 test2.addStateSet(stateSet)
 test2.addAction(clearAction)
 
-results = runTests('Render Order', [test1, test2], 10)
+results = runTests('Render Order', [test1, test2], 1)
 generateGraph("hierz", results, "VertexRate")
