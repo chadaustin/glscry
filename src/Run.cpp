@@ -35,7 +35,7 @@ namespace scry {
              << std::endl
              << "cat <<EOF | gnuplot\n"
              << "set terminal png size 1000\n"
-             << "set output \"" << datafile << ".png\\n"
+             << "set output \"" << datafile << ".png\"\n"
              << "set title \"" << getTitle() << "\"\n"
              << "set xrange [-0.5:" << testList.size() - 0.5f << "]\n"
              << "set yrange [0:*]\n"
