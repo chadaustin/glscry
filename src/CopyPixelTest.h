@@ -2,6 +2,7 @@
 #define SCRY_COPY_PIXEL_TEST_H
 
 
+#include "OpenGL.h"
 #include "PixelTransferTest.h"
 
 

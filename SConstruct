@@ -50,7 +50,8 @@ if env.subst('$CC') == 'gcc':
 
 sources = Split("""
     Module.cpp
-    
+
+    Action.cpp
     Context.cpp
     glew.c
     GLUtility.cpp

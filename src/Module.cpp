@@ -102,6 +102,10 @@ BOOST_PYTHON_MODULE(_glscry) {
     DepthState::bind();
     LightState::bind();
 
+    // Actions.
+    Action::bind();
+    ClearAction::bind();
+
     // Geometry generators.
 
     bindArrayTypes();

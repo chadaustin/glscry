@@ -29,7 +29,9 @@ namespace scry {
 
     void Test::bind() {
         class_<Test, TestPtr, noncopyable>("Test", no_init)
-            .def("setState", &Test::setState);
+            .def("setState", &Test::setState)
+            .def("addAction", &Test::addAction)
+            ;
     }
 
 
@@ -46,6 +48,9 @@ namespace scry {
 
         Timer timer;
         while (timer.elapsed() < runFor) {
+            for (size_t i = 0; i < _actionList.size(); ++i) {
+                _actionList[i]->execute();
+            }
             iterate(results);
             pumpMessages();
         }

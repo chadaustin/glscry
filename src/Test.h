@@ -4,7 +4,7 @@
 
 #include <string>
 #include <vector>
-#include "glew.h"
+#include "Action.h"
 #include "RefCounted.h"
 #include "StateSet.h"
 #include "Timer.h"
@@ -99,6 +99,10 @@ namespace scry {
             getStateSet().setState(state);
         }
 
+        void addAction(ActionPtr action) {
+            _actionList.push_back(action);
+        }
+
         ResultSet run(float runFor);
     
 
@@ -115,6 +119,7 @@ namespace scry {
     private:
         std::string _name;
         StateSet _stateSet;
+        std::vector<ActionPtr> _actionList;
     };
     SCRY_REF_PTR(Test);
 

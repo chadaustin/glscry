@@ -2,6 +2,7 @@
 #define SCRY_TEXTURE_UPLOAD_TEST_H
 
 
+#include "OpenGL.h"
 #include "Test.h"
 
 

@@ -2,24 +2,27 @@ from glscry import *
 
 w = 1024
 h = 768
+o = 1 # offset
 
-ul = (0, 0, 0)
-ur = (w, 0, 0)
-lr = (w, h, 0)
-ll = (0, h, 0)
+ul = (o,     o,     0)
+ur = (w-o-o, o,     0)
+lr = (w-o-o, h-o-o, 0)
+ll = (o,     h-o-o, 0)
 quad = [ul, ur, lr, ll]
 
 genFrontToBack = Geometry(GL_QUADS)
-genFrontToBack.vertices = defineArray(Array_f, 3, quad, 4 * (0, 0, 1))
+genFrontToBack.vertices = defineArray(Array_f, 3, quad, (0, 0, -1))
 
 genBackToFront = Geometry(GL_QUADS)
-genBackToFront.vertices = defineArray(Array_f, 3, quad, 4 * (0, 0, -1))
+genBackToFront.vertices = defineArray(Array_f, 3, quad, (0, 0, 1))
 
-test1 = VertexArrayTest("FrontToBack", genFrontToBack)
+test1 = ImmediateTest("FrontToBack", genFrontToBack)
 test1.setState(DepthState())
+test1.addAction(ClearAction())
 
-test2 = VertexArrayTest("BackToFront", genBackToFront)
+test2 = ImmediateTest("BackToFront", genBackToFront)
 test2.setState(DepthState())
+test2.addAction(ClearAction())
 
 runTestsRange("heir_z.data", [test1, test2], 10, "VertexRate",
          "BatchSize", LinearRange(2 ** 12, 2 ** 12))
