@@ -6,6 +6,7 @@ geo = buildGeometry(GL_TRIANGLES,
 
 def buildDirectionTest(i):
     state = LightState()
+    state.enableLighting = True
     for j in range(len(state.lights)):
         light = state.lights[j]
         light.enable  = j < i
@@ -20,6 +21,7 @@ def buildDirectionTest(i):
 
 def buildPositionTest(i):
     state = LightState()
+    state.enableLighting = True
     for j in range(len(state.lights)):
         light = state.lights[j]
         light.enable  = j < i
@@ -34,6 +36,7 @@ def buildPositionTest(i):
 
 def buildSpotTest(i):
     state = LightState()
+    state.enableLighting = True
     for j in range(len(state.lights)):
         light = state.lights[j]
         light.enable  = j < i

@@ -1,4 +1,5 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include "GLUtility.h"
 #include "LightState.h"
 using namespace boost::python;
 
@@ -6,11 +7,13 @@ using namespace boost::python;
 namespace scry {
 
     void LightState::bind() {
-        scope s = class_<LightState, LightStatePtr, bases<State>,
-                         boost::noncopyable>
+        typedef LightState C;
+
+        scope s = class_<C, LightStatePtr, bases<State>, boost::noncopyable>
             ("LightState", no_init)
             .def(init<>())
-            .def_readwrite("lights", &LightState::lights)
+            .add_property("enableLighting", &C::getLightingEnabled, &C::setLightingEnabled)
+            .def_readwrite("lights", &C::lights)
             ;
 
         class_<Light>("Light")
@@ -47,36 +50,36 @@ namespace scry {
         light0.specular = Vec4f(1, 1, 1, 1);
     }
 
-    void LightState::apply() {
-        glEnable(GL_LIGHTING);
+    const State& LightState::getDefault() const {
+        static StatePtr state = new LightState;
+        return *state;
+    }
+
+    void LightState::switchTo(const State& to) const {
+        const LightState& ls = checked_cast_ref<const LightState&>(to);
+
+        SCRY_ASSERT(lights.size() == ls.lights.size());
+        
+        if (_enabled != ls._enabled) {
+            glSetEnabled(GL_LIGHTING, ls._enabled);
+        }
         for (size_t i = 0; i < lights.size(); ++i) {
-            lights[i].apply(GL_LIGHT0 + i);
+            lights[i].switchTo(GL_LIGHT0 + i, ls.lights[i]);
         }
     }
 
-    void LightState::reset() {
-        for (size_t i = 0; i < lights.size(); ++i) {
-            glDisable(GL_LIGHT0 + i);
-        }
-        glDisable(GL_LIGHTING);
-    }
-
-    void LightState::Light::apply(GLenum light) {
-        if (enable) {
-            glEnable (light);
-            glLightfv(light, GL_AMBIENT,               ambient.getData());
-            glLightfv(light, GL_DIFFUSE,               diffuse.getData());
-            glLightfv(light, GL_SPECULAR,              specular.getData());
-            glLightfv(light, GL_POSITION,              position.getData());
-            glLightfv(light, GL_SPOT_DIRECTION,        spotDirection.getData());
-            glLightf (light, GL_SPOT_EXPONENT,         spotExponent);
-            glLightf (light, GL_SPOT_CUTOFF,           spotCutoff);
-            glLightf (light, GL_CONSTANT_ATTENUATION,  constantAttenuation);
-            glLightf (light, GL_LINEAR_ATTENUATION,    linearAttenuation);
-            glLightf (light, GL_QUADRATIC_ATTENUATION, quadraticAttenuation);
-        } else {
-            glDisable(light);
-        }
+    void LightState::Light::switchTo(GLenum light, const Light& to) const {
+        if (enable != to.enable)                             glSetEnabled(light, to.enable);
+        if (ambient != to.ambient)                           glLightfv(light, GL_AMBIENT,               to.ambient.getData());
+        if (diffuse != to.diffuse)                           glLightfv(light, GL_DIFFUSE,               to.diffuse.getData());
+        if (specular != to.specular)                         glLightfv(light, GL_SPECULAR,              to.specular.getData());
+        if (position != to.position)                         glLightfv(light, GL_POSITION,              to.position.getData());
+        if (spotDirection != to.spotDirection)               glLightfv(light, GL_SPOT_DIRECTION,        to.spotDirection.getData());
+        if (spotExponent != to.spotExponent)                 glLightf (light, GL_SPOT_EXPONENT,         to.spotExponent);
+        if (spotCutoff != to.spotCutoff)                     glLightf (light, GL_SPOT_CUTOFF,           to.spotCutoff);
+        if (constantAttenuation != to.constantAttenuation)   glLightf (light, GL_CONSTANT_ATTENUATION,  to.constantAttenuation);
+        if (linearAttenuation != to.linearAttenuation)       glLightf (light, GL_LINEAR_ATTENUATION,    to.linearAttenuation);
+        if (quadraticAttenuation != to.quadraticAttenuation) glLightf (light, GL_QUADRATIC_ATTENUATION, to.quadraticAttenuation);
     }
 
 }

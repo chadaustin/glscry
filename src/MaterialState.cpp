@@ -24,26 +24,25 @@ namespace scry {
             ;
 
         implicitly_convertible<MaterialStatePtr, StatePtr>();
+    }
+    
+    const State& MaterialState::getDefault() const {
+        static StatePtr ptr = new MaterialState;
+        return *ptr;
+    }
+    
+    void MaterialState::switchTo(const State& to) const {
+        const MaterialState& ms = checked_cast_ref<const MaterialState&>(to);
+        front.switchTo(ms.front, GL_FRONT);
+        back .switchTo(ms.back,  GL_BACK);
+    }
 
-    }
-    
-    void MaterialState::apply() {
-        front.apply(GL_FRONT);
-        back.apply(GL_BACK);
-    }
-    
-    void MaterialState::reset() {
-        Material def;
-        def.apply(GL_FRONT);
-        def.apply(GL_BACK);
-    }
-    
-    void MaterialState::Material::apply(GLenum to) {
-        glMaterialfv(to, GL_AMBIENT,   ambient.getData());
-        glMaterialfv(to, GL_DIFFUSE,   diffuse.getData());
-        glMaterialfv(to, GL_SPECULAR,  specular.getData());
-        glMaterialfv(to, GL_EMISSION,  emission.getData());
-        glMaterialf (to, GL_SHININESS, shininess);
+    void MaterialState::Material::switchTo(const Material& m, GLenum face) const {
+        if (ambient   != m.ambient)   glMaterialfv(face, GL_AMBIENT,   ambient.getData());
+        if (diffuse   != m.diffuse)   glMaterialfv(face, GL_DIFFUSE,   diffuse.getData());
+        if (specular  != m.specular)  glMaterialfv(face, GL_SPECULAR,  specular.getData());
+        if (emission  != m.emission)  glMaterialfv(face, GL_EMISSION,  emission.getData());
+        if (shininess != m.shininess) glMaterialf (face, GL_SHININESS, shininess);
     }
 
 }

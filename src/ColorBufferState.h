@@ -2,7 +2,6 @@
 #define SCRY_COLOR_BUFFER_STATE_H
 
 
-#include "OpenGL.h"
 #include "State.h"
 
 
@@ -14,6 +13,9 @@ namespace scry {
 
     public:
         static void bind();
+
+        const State& getDefault() const;
+        void switchTo(const State& to) const;
 
         ColorBufferState() {
             _writeMask[0] = true;
@@ -27,14 +29,6 @@ namespace scry {
             _writeMask[1] = g;
             _writeMask[2] = b;
             _writeMask[3] = a;
-        }
-
-        void apply() {
-            glColorMask(_writeMask[0], _writeMask[1], _writeMask[2], _writeMask[3]);
-        }
-
-        void reset() {
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         }
 
     protected:

@@ -81,7 +81,7 @@ namespace scry {
             }
         }
 
-        size_t getScreenCoverage() const {
+        Uint64 getScreenCoverage() const {
             return _screenCoverage;
         }
 
@@ -97,7 +97,7 @@ namespace scry {
             const char* name, PumpGetter getter);
 
         Inited<size_t, 4096> _batchSize;
-        Zeroed<size_t> _screenCoverage;
+        Zeroed<Uint64> _screenCoverage;
 
         /// Size of vertex arrays when using indexed geometry.
         Zeroed<size_t> _vertexArraySize;  // In 'datatype's

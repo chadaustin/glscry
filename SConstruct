@@ -5,13 +5,17 @@ SConsignFile()
 platform = DefaultEnvironment()['PLATFORM']
 
 defaultBoostIncludes = '/usr/local/include/boost-1_31'
+defaultBoostLibs     = '/usr/local/lib'
 if platform == 'win32':
     defaultBoostIncludes = Dir('#/third-party/vc7/include')
+    defaultBoostLibs     = Dir('#/third-party-vc7/lib')
 
 opts = Options('options.cache')
 opts.AddOptions(
     PathOption('boostIncludes', 'Directory containing boost header files',
                defaultBoostIncludes),
+    PathOption('boostLibs', 'Directory containing boost library files',
+               defaultBoostLibs),
     BoolOption('nowarn', 'Disable warnings', 0))
 
 env = Environment(
@@ -63,6 +67,7 @@ sources = Split("""
     Array.cpp
     Geometry.cpp
 
+    StateSet.cpp
     State.cpp
     ColorBufferState.cpp
     DepthState.cpp

@@ -155,7 +155,8 @@ def generateBarGraph(datafile, testList, resultUnits):
     print >> plot, 'set yrange [0:*]'
     print >> plot, 'set ylabel "%s"' % resultUnits
     print >> plot, 'set xtics (',
-    for i, t in enumerate(testList):
+    for i in range(len(testList)):
+        t = testList[i]
         print >> plot, '"%s" %s' % (t.getName(), i),
         if i + 1 < len(testList):
             print >> plot, ', ',
@@ -180,14 +181,16 @@ def generateLineGraph(datafile, testList, resultUnits, indVar, range):
     print >> plot, 'set xlabel "%s"' % indVar
     print >> plot, 'set ylabel "%s"' % resultUnits
     print >> plot, 'set xtics (',
-    for i, t in enumerate(testList):
+    for i in range(len(testList)):
+        t = testList[i]
         print >> plot, '"%s" %s' % (t.getName(), i),
         if i + 1 < len(testList):
             print >> plot, ', ',
     print >> plot, ')'
 
     print >> plot, 'plot \\'
-    for i, t in enumerate(testList):
+    for i in range(len(testList)):
+        t = testList[i]
         print >> plot, '  "%s" using 0:%d title "%s" with lines' % (datafile, i + 1, t.getName()),
         if i + 1 < len(testList):
             print >> plot, ',\\',
@@ -201,7 +204,8 @@ def output(file, test, results, depVar, indVar = None, indValue = None):
     assert len(descs) == len(results)
 
     resultIndex = -1;
-    for i, d in enumerate(descs):
+    for i in range(len(descs)):
+        d = descs[i]
         if d.name == depVar:
             resultIndex = i
             break

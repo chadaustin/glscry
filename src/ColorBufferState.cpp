@@ -1,5 +1,7 @@
 #include <boost/python.hpp>
 #include "ColorBufferState.h"
+#include "OpenGL.h"
+#include "Utility.h"
 using namespace boost::python;
 
 
@@ -13,6 +15,23 @@ namespace scry {
             ;
 
         implicitly_convertible<ColorBufferStatePtr, StatePtr>();
+    }
+
+    const State& ColorBufferState::getDefault() const {
+        StatePtr state = new ColorBufferState;
+        return *state;
+    }
+
+    void ColorBufferState::switchTo(const State& to) const {
+        const ColorBufferState& cbs = checked_cast_ref<const ColorBufferState&>(to);
+        if (_writeMask[0] != cbs._writeMask[0] ||
+            _writeMask[1] != cbs._writeMask[1] ||
+            _writeMask[2] != cbs._writeMask[2] ||
+            _writeMask[3] != cbs._writeMask[3]
+        ) {
+            const bool* wm = cbs._writeMask;
+            glColorMask(wm[0], wm[1], wm[2], wm[3]);
+        }
     }
 
 }

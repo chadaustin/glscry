@@ -19,12 +19,15 @@ namespace scry {
 
         Texture();
 
-        void apply();
+        GLuint getHandle() const {
+            return _handle;
+        }
 
     private:
         void update();
 
         // Texture image properties.
+        // Default texture is one Mibibyte.
         Inited<size_t, 512>              _width;
         Inited<size_t, 512>              _height;
         Inited<GLint, 4>                 _internalFormat;
@@ -58,10 +61,8 @@ namespace scry {
     public:
         static void bind();
 
-        TextureState() { }
-
-        void apply();
-        void reset();
+        const State& getDefault() const;
+        void switchTo(const State& to) const;
 
         void setTexture(TexturePtr texture) { _texture = texture; }
         TexturePtr getTexture() const       { return _texture; }

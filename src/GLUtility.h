@@ -11,6 +11,10 @@
 
 namespace scry {
 
+    inline void glSetEnabled(GLenum cap, bool enabled) {
+        (enabled ? glEnable : glDisable)(cap);
+    }
+
 
     /**
      * GLTypeConstant maps Type to the GLenum for that type: float ->

@@ -14,8 +14,8 @@ namespace scry {
     public:
         static void bind();
 
-        virtual void apply() = 0;
-        virtual void reset() = 0;
+        virtual const State& getDefault() const = 0;
+        virtual void switchTo(const State& to) const = 0;
     };
     SCRY_REF_PTR(State);
 

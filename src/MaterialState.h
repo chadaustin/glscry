@@ -12,13 +12,13 @@ namespace scry {
     class MaterialState : public State {
     protected:
         ~MaterialState() { }
-    
+
     public:
         static void bind();
-        
-        void apply();
-        void reset();
-        
+
+        const State& getDefault() const;
+        void switchTo(const State& to) const;
+
         struct Material {
             Material()
             : ambient(0.2f, 0.2f, 0.2f, 1.0f)
@@ -27,8 +27,8 @@ namespace scry {
             , emission(0, 0, 0, 1)
             , shininess(0) {
             }
-            
-            void apply(GLenum to);
+
+            void switchTo(const Material& m, GLenum face) const;
             
             Vec4f ambient;
             Vec4f diffuse;

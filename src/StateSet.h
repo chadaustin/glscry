@@ -10,31 +10,21 @@
 
 namespace scry {
 
-
     class StateSet {
     public:
         void setState(State* state) {
             _states[typeid(*state)] = state;
         }
-
-        void apply() {
-            for (StateMapIter i = _states.begin(); i != _states.end(); ++i) {
-                i->second->apply();
-            }
-        }
-
-        void reset() {
-            for (StateMapIter i = _states.begin(); i != _states.end(); ++i) {
-                i->second->reset();
-            }
-        }
+        
+        void switchTo(const StateSet& to) const;
 
     private:
         typedef std::map<TypeInfo, StatePtr> StateMap;
-        typedef StateMap::iterator StateMapIter;
+        typedef StateMap::const_iterator StateMapCIter;
         StateMap _states;
     };
 
+    void setCurrentStateSet(const StateSet& next);
 
 }
 

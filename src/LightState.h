@@ -19,8 +19,15 @@ namespace scry {
 
         LightState();
 
-        void apply();
-        void reset();
+        const State& getDefault() const;
+        void switchTo(const State& to) const;
+        
+        bool getLightingEnabled() const {
+            return _enabled;
+        }
+        void setLightingEnabled(bool enabled) {
+            _enabled = enabled;
+        }
 
         struct Light {
             // Defaults for lights 1..n.  light0 is initialized separately.
@@ -37,9 +44,9 @@ namespace scry {
             , linearAttenuation(0)
             , quadraticAttenuation(0) {
             }
-            
-            void apply(GLenum light);
-            
+
+            void switchTo(GLenum light, const Light& to) const;
+
             bool operator==(const Light& rhs) const {
                 return enable == rhs.enable &&
                        ambient == rhs.ambient &&
@@ -53,7 +60,7 @@ namespace scry {
                        linearAttenuation == rhs.linearAttenuation &&
                        quadraticAttenuation == rhs.quadraticAttenuation;
             }
-        
+
             bool enable;
             Vec4f ambient;
             Vec4f diffuse;
@@ -68,6 +75,9 @@ namespace scry {
         };
 
         std::vector<Light> lights;
+
+    private:
+        Inited<bool, false> _enabled;
     };
     SCRY_REF_PTR(LightState);
 

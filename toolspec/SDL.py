@@ -11,6 +11,8 @@ def generate(env):
         env.Append(LIBS=['SDL', 'SDLmain'])
     else:
         env.ParseConfig('sdl-config --cflags --libs')
+        if env['PLATFORM'] == 'irix':
+            env.Append(CPPDEFINES=['SDL_HAS_64BIT_TYPE=long long'])
 
 def exists(env):
     return env.WhereIs('sdl-config')

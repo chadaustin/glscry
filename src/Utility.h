@@ -2,6 +2,9 @@
 #define SCRY_UTILITY_H
 
 
+#include <stdexcept>
+
+
 namespace scry {
 
     /**
@@ -11,8 +14,8 @@ namespace scry {
      * to remember to use this than those two.  ;)
      */
     template<typename T, T initVal = 0>
-        class Inited {
-        public:
+    class Inited {
+    public:
         Inited() : _value(initVal) { }
         Inited(const T& t) : _value(t) { }
 
@@ -25,7 +28,7 @@ namespace scry {
         T& get()       { return _value; }
         const T& get() const { return _value; }
 
-        private:
+    private:
         T _value;
     };
 
@@ -35,26 +38,32 @@ namespace scry {
      * can't be used as template parameters.
      */
     template<typename T>
-        class Zeroed {
+    class Zeroed {
     public:
         Zeroed() : _value(0) { }
-            Zeroed(const T& t) : _value(t) { }
+        Zeroed(const T& t) : _value(t) { }
 
-                operator       T&()       { return get(); }
-                operator const T&() const { return get(); }
+        operator       T&()       { return get(); }
+        operator const T&() const { return get(); }
 
-                T& operator->()             { return get(); }
-                const T& operator->() const { return get(); }
+        T& operator->()             { return get(); }
+        const T& operator->() const { return get(); }
 
-                T* operator&()       { return &_value; }
-                const T* operator&() const { return &_value; }
+        T* operator&()       { return &_value; }
+        const T* operator&() const { return &_value; }
 
-                T& get()             { return _value; }
-                const T& get() const { return _value; }
+        T& get()             { return _value; }
+        const T& get() const { return _value; }
 
     private:
-                T _value;
+        T _value;
     };
+
+
+#define SCRY_ASSERT(expr)                               \
+    if (!(expr)) {                                      \
+        throw std::runtime_error("Assertion: " #expr);  \
+    }
 
 
     template<typename T>
@@ -63,10 +72,41 @@ namespace scry {
     }
 
 
-#define SCRY_ASSERT(expr)                               \
-    if (!(expr)) {                                      \
-        throw std::runtime_error("Assertion: " #expr);  \
+    template<typename T, typename U>
+    bool check_type(U* u) {
+        return (!u || dynamic_cast<T>(u) ? true : false);
     }
+
+    template<typename T, typename U>
+    bool check_type_ref(U& u) {
+        try {
+            dynamic_cast<T>(u);
+            return true;
+        }
+        catch (const std::bad_cast&) {
+        }
+        return false;
+    }
+
+    /**
+     * Same as static_cast, except does some type checking in debug
+     * builds.
+     * @{
+     */
+    template<typename T, typename U>
+    T checked_cast(U* u) {
+        SCRY_ASSERT((check_type<T, U>(u)));
+        return static_cast<T>(u);
+    }
+
+    template<typename T, typename U>
+    T checked_cast_ref(U& u) {
+        SCRY_ASSERT((check_type_ref<T, U>(u)));
+        return static_cast<T>(u);
+    }
+    /**
+     * @}
+     */
 
 }
 

@@ -7,6 +7,9 @@ using namespace boost::python;
 namespace scry {
 
     void Texture::bind() {
+
+        /// @todo Need to call update whenever a parameter is set!
+
         typedef Texture C;
         class_<C, TexturePtr, boost::noncopyable>("Texture", no_init)
             .def(init<>())
@@ -44,10 +47,6 @@ namespace scry {
         glDeleteTextures(1, &_handle);
     }
 
-    void Texture::apply() {
-        glBindTexture(GL_TEXTURE_2D, _handle);
-    }
-    
     GLubyte randbyte() {
         return rand() % 256;
     }
@@ -97,18 +96,23 @@ namespace scry {
             ;
     }
 
-    void TextureState::apply() {
-        if (_texture) {
-            glEnable(GL_TEXTURE_2D);
-            _texture->apply();
-        } else {
-            reset();
-        }
+    const State& TextureState::getDefault() const {
+        StatePtr state = new TextureState;
+        return *state;
     }
 
-    void TextureState::reset() {
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glDisable(GL_TEXTURE_2D);
+    void TextureState::switchTo(const State& state) const {
+        const TextureState& ts = checked_cast_ref<const TextureState&>(state);
+        if (_texture != ts._texture) {
+            if (ts._texture) {
+                /// @todo With shaders, you don't need to glEnable the texture.
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, ts._texture->getHandle());
+            } else {
+                glDisable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
+        }
     }
 
 }

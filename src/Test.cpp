@@ -13,7 +13,7 @@ namespace scry {
         Test* _test;
     public:
         RunSentry(Test* test): _test(test) {
-            _test->getStateSet().apply();
+            setCurrentStateSet(_test->getStateSet());
             glPushMatrix();
             glLoadMatrixf(_test->getTransform().getData());
             _test->setup();
@@ -22,7 +22,6 @@ namespace scry {
             try {
                 _test->teardown();
                 glPopMatrix();
-                _test->getStateSet().reset();
             }
             catch (const std::exception& /*e*/) {
                 // nothing

@@ -2,7 +2,6 @@
 #define SCRY_DEPTH_STATE_H
 
 
-#include "OpenGL.h"
 #include "State.h"
 
 
@@ -15,13 +14,19 @@ namespace scry {
     public:
         static void bind();
 
-        void apply() {
-            glEnable(GL_DEPTH_TEST);
+        const State& getDefault() const;
+        void switchTo(const State& to) const;
+
+        bool getDepthTest() const {
+            return _enableDepthTest;
         }
 
-        void reset() {
-            glDisable(GL_DEPTH_TEST);
+        void setDepthTest(bool depthTest) {
+            _enableDepthTest = depthTest;
         }
+
+    private:
+        Inited<bool, false> _enableDepthTest;
     };
     SCRY_REF_PTR(DepthState);
 
