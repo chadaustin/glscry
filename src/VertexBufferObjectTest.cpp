@@ -70,10 +70,6 @@ namespace scry {
             } break;
 
             case ONE_BUFFER: {
-                GLuint handle;
-                glGenBuffersARB(1, &handle);
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
-
                 const size_t totalSize =
                     getVertices().data.size() +
                     getColors().data.size() +
@@ -105,36 +101,40 @@ namespace scry {
 
                 SCRY_ASSERT(out == start + totalSize &&
                             "We didn't write the same amount of data we said we would.");
+                GLuint handle;
+                glGenBuffersARB(1, &handle);
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
                 glBufferDataARB(GL_ARRAY_BUFFER_ARB, totalSize, start, _bufferType);
                 _buffers.push_back(handle);
 
+                out = start;
                 if (ArrayPtr v = geometry->vertices) {
                     glEnableClientState(GL_VERTEX_ARRAY);
                     glVertexPointer(v->getSize(), v->getTypeConstant(), 0, getBufferOffset(out - start));
+                    out += getVertices().data.size();
                 }
 
                 if (ArrayPtr c = geometry->colors) {
                     glEnableClientState(GL_COLOR_ARRAY);
                     glColorPointer(c->getSize(), c->getTypeConstant(), 0, getBufferOffset(out - start));
+                    out += getColors().data.size();
                 }
 
                 if (ArrayPtr n = geometry->normals) {
                     glEnableClientState(GL_NORMAL_ARRAY);
                     assert(n->getSize() == 3);
                     glNormalPointer(n->getTypeConstant(), 0, getBufferOffset(out - start));
+                    out += getNormals().data.size();
                 }
 
                 if (ArrayPtr t = geometry->texcoords) {
                     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
                     glTexCoordPointer(t->getSize(), t->getTypeConstant(), 0, getBufferOffset(out - start));
+                    out += getTexCoords().data.size();
                 }
             } break;
 
             case ONE_BUFFER_INTERLEAVED: {
-                GLuint handle;
-                glGenBuffersARB(1, &handle);
-                glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
-
                 const size_t totalSize =
                     getVertices().data.size() +
                     getColors().data.size() +
@@ -146,6 +146,9 @@ namespace scry {
                     getStride(geometry->normals) +
                     getStride(geometry->texcoords);
 
+                GLuint handle;
+                glGenBuffersARB(1, &handle);
+                glBindBufferARB(GL_ARRAY_BUFFER_ARB, handle);
                 std::vector<GLubyte> buffer(totalSize);
                 GLubyte* start = &buffer[0];
                 GLubyte* out = start;
@@ -252,6 +255,7 @@ namespace scry {
         for (size_t i = 0; i < _buffers.size(); ++i) {
             glDeleteBuffersARB(1, &_buffers[i]);
         }
+        _buffers.clear();
     }
 
     GLuint VertexBufferObjectTest::createVBO(const Buffer& buffer, GLenum target) {

@@ -22,7 +22,7 @@ def run(filename, storageMode):
         test.setBufferType(globals()['GL_' + a + '_ARB'])
         test.setStorageMode(storageMode)
         testList.append(test)
-        
+
     runTests(filename, testList, 10, "VertexRate")
 
 run("vbo_separate",    VertexBufferObjectTest.StorageMode.SEPARATE_BUFFERS)
