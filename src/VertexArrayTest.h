@@ -15,8 +15,8 @@ protected:
 public:
     static void bind();
 
-    VertexArrayTest(const char* name, GeometryGeneratorPtr gen)
-    : GeometryTest(name, gen) {
+    VertexArrayTest(const char* name, GeometryPtr geo)
+    : GeometryTest(name, geo) {
     }
 
     const char* name() const {
@@ -24,20 +24,36 @@ public:
     }
 
     void setup() {
-        const std::vector<Triangle>& buffer = getTriangleBuffer();
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(buffer);
+        GeometryPtr geometry = getGeometry();
+
+        _vertexCount = 0;
+
+        if (ArrayPtr v = geometry->vertices) {
+            glEnableClientState(GL_VERTEX_ARRAY);
+
+            _vertexBuffer.resize(getVertexCount() * v->getSize() *
+                                 v->getTypeSize());
+            v->build(&_vertexBuffer[0], getVertexCount());
+           
+            glVertexPointer(v->getSize(), v->getTypeConstant(),
+                            0, &_vertexBuffer[0]);
+
+            _vertexCount = getVertexCount();
+        }
     }
 
     void iterate(ResultSet& results) {
-        const std::vector<Triangle>& buffer = getTriangleBuffer();
-        glDrawArrays(GL_TRIANGLES, 0, buffer.size() * 3);
-        results[0] += buffer.size();
+        glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
+        results[0] += _vertexCount;
     }
 
     void teardown() {
         glDisableClientState(GL_VERTEX_ARRAY);
     }
+
+private:
+    Zeroed<size_t> _vertexCount;
+    std::vector<GLubyte> _vertexBuffer;
 };
 SCRY_REF_PTR(VertexArrayTest);
 

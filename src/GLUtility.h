@@ -14,10 +14,12 @@ inline void glVertex(const gmtl::Vec3f& v) {
 }
 
 
+#if 0
 template<typename T>
 void glVertexPointer(const std::vector<T>& array) {
     ::glVertexPointer(T::Size, T::TypeConstant, 0, &array[0]);
 }
+#endif
 
 SCRY_END_NAMESPACE
 

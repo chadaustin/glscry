@@ -16,8 +16,8 @@ protected:
 public:
     static void bind();
 
-    ImmediateTest(const char* name, GeometryGeneratorPtr gen)
-    : GeometryTest(name, gen) {
+    ImmediateTest(const char* name, GeometryPtr geo)
+    : GeometryTest(name, geo) {
     }
 
     const char* name() const {
@@ -25,6 +25,7 @@ public:
     }
 
     void iterate(ResultSet& results) {
+/*
         const std::vector<Triangle>& buffer = getTriangleBuffer();
 
         glBegin(GL_TRIANGLES);
@@ -36,6 +37,7 @@ public:
         glEnd();
 
         results[0] += buffer.size();
+*/
     }
 };
 SCRY_REF_PTR(ImmediateTest);

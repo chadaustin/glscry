@@ -3,7 +3,7 @@
 
 
 #include "Base.h"
-#include "GeometryGenerator.h"
+#include "Geometry.h"
 #include "Test.h"
 
 
@@ -15,15 +15,15 @@ protected:
 
 public:
     SCRY_BEGIN_RESULT_DESCS()
-        SCRY_RESULT_DESC("TriangleRate", "tri/s")
+        SCRY_RESULT_DESC("VertexRate", "tri/s")
     SCRY_END_RESULT_DESCS()
 
     static void bind();
 
-    GeometryTest(const char* name, GeometryGeneratorPtr gen)
+    GeometryTest(const char* name, GeometryPtr geo)
     : Test(name) {
-        SCRY_ASSERT(gen);
-        _generator = gen;
+        SCRY_ASSERT(geo);
+        _geometry = geo;
     }
 
     void   setBatchSize(size_t size) { _batchSize = size; }
@@ -38,18 +38,30 @@ public:
     }
 
 protected:
-    const std::vector<Triangle>& getTriangleBuffer() {
-        if (_batchSize != _triangleBuffer.size()) {
-            _generator->generate(_triangleBuffer, _batchSize);
+    GeometryPtr getGeometry() const {
+        return _geometry;
+    }
+
+    size_t getVertexCount() const {
+        switch (_geometry->getPrimitiveType()) {
+            case GL_POINTS:         return getBatchSize() * 1; 
+            case GL_LINES:          return getBatchSize() * 2;
+            case GL_LINE_STRIP:     return getBatchSize() + 1;
+            case GL_LINE_LOOP:      return getBatchSize();
+            case GL_TRIANGLES:      return getBatchSize() * 3;
+            case GL_TRIANGLE_STRIP: return getBatchSize() + 2;
+            case GL_TRIANGLE_FAN:   return getBatchSize() + 2;
+            case GL_QUADS:          return getBatchSize() * 4;
+            case GL_QUAD_STRIP:     return getBatchSize() * 2 + 2;
+            case GL_POLYGON:        return getBatchSize();
+            default:                return 0;
         }
-        return _triangleBuffer;
     }
 
 private:
     Inited<size_t, 4096> _batchSize;
 
-    GeometryGeneratorPtr _generator;
-    std::vector<Triangle> _triangleBuffer;
+    GeometryPtr _geometry;
 };
 SCRY_REF_PTR(GeometryTest);
 

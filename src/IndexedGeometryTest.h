@@ -17,8 +17,8 @@ public:
 
     static const size_t triangleCount = 2048;
 
-    IndexedGeometryTest(const char* name, GeometryGeneratorPtr gen)
-    : GeometryTest(name, gen) {
+    IndexedGeometryTest(const char* name, GeometryPtr geo)
+    : GeometryTest(name, geo) {
     }
 
     const char* name() const {
@@ -30,6 +30,7 @@ public:
     }
 
     void setup() {
+#if 0
         const std::vector<Triangle>& buffer = getTriangleBuffer();
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(buffer);
@@ -39,6 +40,7 @@ public:
         for (size_t i = 0; i < triangleCount; ++i) {
             _indices[i] = rand() % (buffer.size() * 3);
         }
+#endif
     }
 
     void iterate(ResultSet& results) {

@@ -35,6 +35,17 @@ void bindOpenGL() {
     DEF(GL_INT);
     DEF(GL_UNSIGNED_INT);
     DEF(GL_FLOAT);
+
+    DEF(GL_POINTS);
+    DEF(GL_LINES);
+    DEF(GL_LINE_STRIP);
+    DEF(GL_LINE_LOOP);
+    DEF(GL_TRIANGLES);
+    DEF(GL_TRIANGLE_STRIP);
+    DEF(GL_TRIANGLE_FAN);
+    DEF(GL_QUADS);
+    DEF(GL_QUAD_STRIP);
+    DEF(GL_POLYGON);
 }
 
 
@@ -85,10 +96,8 @@ BOOST_PYTHON_MODULE(_glscry) {
 
     // Geometry generators.
 
+    Array::bind();
     Geometry::bind();
-    GeometryGenerator::bind();
-    Zeroes::bind();
-    SmallTriangles::bind();
 
     // Tests.
 

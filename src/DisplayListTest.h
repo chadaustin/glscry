@@ -15,8 +15,8 @@ protected:
 public:
     static void bind();
 
-    DisplayListTest(const char* name, GeometryGeneratorPtr gen)
-    : GeometryTest(name, gen) {
+    DisplayListTest(const char* name, GeometryPtr geo)
+    : GeometryTest(name, geo) {
     }
 
     const char* name() const {
@@ -24,6 +24,7 @@ public:
     }
 
     void setup() {
+/*
         const std::vector<Triangle>& buffer = getTriangleBuffer();
 
         _list = glGenLists(1);
@@ -36,17 +37,22 @@ public:
         }
         glEnd();
         glEndList();
+*/
     }
 
     void iterate(ResultSet& results) {
+/*
         const std::vector<Triangle>& buffer = getTriangleBuffer();
 
         glCallList(_list);
         results[0] += buffer.size();
+*/
     }
 
     void teardown() {
+#if 0
         glDeleteLists(_list, 1);
+#endif
     }
 
 private:

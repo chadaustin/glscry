@@ -12,17 +12,86 @@
 namespace scry {
 
 
+    template<typename T>
+    struct GLTypeConstant { };
+
+    template<>
+    struct GLTypeConstant<float> {
+        enum { Result = GL_FLOAT };
+    };
+
+    template<>
+    struct GLTypeConstant<double> {
+        enum { Result = GL_DOUBLE };
+    };
+
+
     class Array : public RefCounted {
     protected:
         ~Array() { }
 
     public:
+        typedef float Type;
+        typedef std::vector<Type> List;
+
         static void bind();
 
-        Array();
+        Array(size_t size) {
+            _size = size;
+        }
+
+        size_t getSize() const {
+            return _size;
+        }
+
+        GLenum getTypeConstant() const {
+            return GLTypeConstant<Type>::Result;
+        }
+
+        size_t getTypeSize() const {
+            switch (getTypeConstant()) {
+                case GL_BITMAP:         return 0; // ??
+                case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
+                case GL_BYTE:           return sizeof(GLbyte);
+                case GL_UNSIGNED_SHORT: return sizeof(GLushort);
+                case GL_SHORT:          return sizeof(GLshort);
+                case GL_UNSIGNED_INT:   return sizeof(GLuint);
+                case GL_INT:            return sizeof(GLint);
+                case GL_FLOAT:          return sizeof(GLfloat);
+                case GL_DOUBLE:         return sizeof(GLdouble);
+                default:                return 0;
+            }
+        }
+
+        void build(void* buffer, size_t vertexCount) const {
+            Type* array = static_cast<Type*>(buffer);
+            size_t i = 0;
+
+            // Fill with initial values.
+            while (i < initial.size() && i < vertexCount) {
+                array[i++] = initial[i];
+            }
+
+            // Now repeat.
+            size_t repeat_i = 0;
+            while (i < vertexCount) {
+                array[i] = repeat[repeat_i % repeat.size()];
+
+                // Add in the offset.
+                size_t offset_i = repeat_i % offset.size();
+                array[i] += offset[offset_i] * (repeat_i / offset.size());
+
+                ++i;
+                ++repeat_i;
+            }
+        }
+
+        List initial;
+        List repeat;
+        List offset;
 
     private:
-        std::vector<float> _data;    
+        size_t _size;
     };
     SCRY_REF_PTR(Array);
 
@@ -36,12 +105,14 @@ namespace scry {
 
         Geometry(GLenum primitiveType);
 
-        void setVertices(ArrayPtr array) { _vertices = array; }
-        ArrayPtr getVertices() const     { return _vertices; }
+        GLenum getPrimitiveType() const {
+            return _primitiveType;
+        }
+
+        ArrayPtr vertices;
 
     private:
         GLenum _primitiveType;
-        ArrayPtr _vertices;
     };
     SCRY_REF_PTR(Geometry);
 

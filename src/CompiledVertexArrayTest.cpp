@@ -8,7 +8,7 @@ namespace scry {
         class_<CompiledVertexArrayTest, CompiledVertexArrayTestPtr,
             bases<GeometryTest>, boost::noncopyable>
             ("CompiledVertexArrayTest", no_init)
-            .def(init<const char*, GeometryGeneratorPtr>());
+            .def(init<const char*, GeometryPtr>());
 
         implicitly_convertible<CompiledVertexArrayTestPtr, GeometryTestPtr>();
     }

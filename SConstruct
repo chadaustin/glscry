@@ -45,7 +45,6 @@ sources = Split("""
     Timer.cpp
 
     Geometry.cpp
-    GeometryGenerator.cpp
 
     State.cpp
     DepthState.cpp

@@ -15,8 +15,8 @@ protected:
 public:
     static void bind();
 
-    VertexBufferObjectTest(const char* name, GeometryGeneratorPtr gen)
-    : GeometryTest(name, gen) {
+    VertexBufferObjectTest(const char* name, GeometryPtr geo)
+    : GeometryTest(name, geo) {
     }
 
     const char* name() const {
@@ -28,6 +28,7 @@ public:
     }
 
     void setup() {
+#if 0
         const std::vector<Triangle>& vertexArray = getTriangleBuffer();
 
         glGenBuffersARB(1, &_buffer);
@@ -44,19 +45,24 @@ public:
         ::glVertexPointer(Triangle::Vector::Size,
                           GLTypeConstant<Triangle::Vector::DataType>::Result,
                           0, NULL);
+#endif
     }
 
     void iterate(ResultSet& results) {
+#if 0
         const std::vector<Triangle>& vertexArray = getTriangleBuffer();
         glDrawArrays(GL_TRIANGLES, 0, vertexArray.size() * 3);
         results[0] += vertexArray.size();
+#endif
     }
 
     void teardown() {
+#if 0
         glDisableClientState(GL_VERTEX_ARRAY);
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
         glDeleteBuffersARB(1, &_buffer);
+#endif
     }
 
 private:
