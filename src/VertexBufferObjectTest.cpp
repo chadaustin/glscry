@@ -6,9 +6,11 @@ namespace scry {
 
     void VertexBufferObjectTest::bind() {
         class_<VertexBufferObjectTest, VertexBufferObjectTestPtr,
-            bases<GeometryTest>, boost::noncopyable>
-            ("VertexBufferObjectTest", no_init)
-            .def(init<const char*, GeometryPtr>());
+                bases<GeometryTest>, boost::noncopyable>
+                ("VertexBufferObjectTest", no_init)
+            .def(init<const char*, GeometryPtr>())
+            .def("setBufferType", &VertexBufferObjectTest::setBufferType)
+            ;
 
         implicitly_convertible<VertexBufferObjectTestPtr, GeometryTestPtr>();
     }
@@ -90,7 +92,7 @@ namespace scry {
             target,
             buffer.data.size(),
             buffer.data_ptr(),
-            GL_STATIC_DRAW_ARB /* This should be settable. */);
+            _bufferType);
         return handle;
     }
 

@@ -19,6 +19,10 @@ namespace scry {
         : GeometryTest(name, geo) {
         }
 
+        void setBufferType(GLenum type) {
+            _bufferType = type;
+        }
+
         bool supported() const {
             return GLEW_ARB_vertex_buffer_object != 0;
         }
@@ -31,6 +35,7 @@ namespace scry {
         GLuint createVBO(const Buffer& buffer,
                          GLenum target = GL_ARRAY_BUFFER_ARB);
 
+        Inited<GLenum, GL_STATIC_DRAW_ARB> _bufferType;
         std::vector<GLuint> _buffers;
     };
     SCRY_REF_PTR(VertexBufferObjectTest);

@@ -34,6 +34,7 @@ using namespace scry;
 void bindOpenGL() {
     #define DEF(name) scope().attr((#name)) = (name)
 
+    // Data types.
     DEF(GL_BYTE);
     DEF(GL_UNSIGNED_BYTE);
     DEF(GL_SHORT);
@@ -42,6 +43,7 @@ void bindOpenGL() {
     DEF(GL_UNSIGNED_INT);
     DEF(GL_FLOAT);
 
+    // Primitive types.
     DEF(GL_POINTS);
     DEF(GL_LINES);
     DEF(GL_LINE_STRIP);
@@ -52,6 +54,17 @@ void bindOpenGL() {
     DEF(GL_QUADS);
     DEF(GL_QUAD_STRIP);
     DEF(GL_POLYGON);
+
+    // VBO types.
+    DEF(GL_STREAM_DRAW_ARB);
+    DEF(GL_STREAM_READ_ARB);
+    DEF(GL_STREAM_COPY_ARB);
+    DEF(GL_STATIC_DRAW_ARB);
+    DEF(GL_STATIC_READ_ARB);
+    DEF(GL_STATIC_COPY_ARB);
+    DEF(GL_DYNAMIC_DRAW_ARB);
+    DEF(GL_DYNAMIC_READ_ARB);
+    DEF(GL_DYNAMIC_COPY_ARB);
 }
 
 
