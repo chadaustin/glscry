@@ -20,7 +20,7 @@ const double NEAR   = -1.0;
 const double FAR    = 1.0;
 
 
-void output(std::ostream& os, Test* test, const ResultSet& results,
+void output(std::ostream& os, TestPtr test, const ResultSet& results,
             const std::string& depVar) {
     std::vector<ResultDesc> descs;
     test->getResultDescs(descs);
@@ -56,7 +56,7 @@ void betweenTests() {
     flip();
 }
 
-void runTests(const std::string& filename, std::vector<Test*> testList,
+void runTests(const std::string& filename, std::vector<TestPtr> testList,
               float runFor, const std::string& depVar) {
     
     std::ofstream of(filename.c_str());
@@ -67,7 +67,7 @@ void runTests(const std::string& filename, std::vector<Test*> testList,
     for (size_t i = 0; i < testList.size(); ++i) {
         betweenTests();
 
-        Test* test = testList[i];
+        TestPtr test = testList[i];
         if (test->supported()) {
             ResultSet results = test->run(runFor);
             output(of, test, results, depVar);
@@ -76,12 +76,10 @@ void runTests(const std::string& filename, std::vector<Test*> testList,
         }
     }
     of << std::endl;
-    
-    std::for_each(testList.begin(), testList.end(), delete_function<Test>);
 }
 
 
-void runTestsRange(const std::string& filename, std::vector<Test*> testList,
+void runTestsRange(const std::string& filename, std::vector<TestPtr> testList,
                    float runFor, const std::string& depVar,
                    const std::string& indVar, Range& range) {
     
@@ -95,7 +93,7 @@ void runTestsRange(const std::string& filename, std::vector<Test*> testList,
         for (size_t i = 0; i < testList.size(); ++i) {
             betweenTests();
 
-            Test* test = testList[i];
+            TestPtr test = testList[i];
             test->setProperty(indVar, indValue);
             if (test->supported()) {
                 ResultSet results = test->run(runFor);
@@ -106,8 +104,6 @@ void runTestsRange(const std::string& filename, std::vector<Test*> testList,
         }
         of << std::endl;
     }
-    
-    std::for_each(testList.begin(), testList.end(), delete_function<Test>);
 }
 
 

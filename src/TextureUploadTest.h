@@ -9,6 +9,9 @@
 SCRY_BEGIN_NAMESPACE
 
 class TextureUploadTest : public Test {
+protected:
+    ~TextureUploadTest() { }
+
 public:
     static void bind();
 
@@ -80,6 +83,8 @@ private:
     // This might need to be aligned in some way.  Keep an eye out.
     std::vector<unsigned char> _buffer;
 };
+SCRY_REF_PTR(TextureUploadTest);
+
 
 SCRY_END_NAMESPACE
 

@@ -6,6 +6,7 @@
 #include "glew.h"
 #include "Base.h"
 #include "Context.h"
+#include "RefCounted.h"
 #include "StateSet.h"
 #include "Timer.h"
 
@@ -70,13 +71,11 @@ private:
 };
 
 
-class Test;
+class Test : public RefCounted {
+protected:
+    ~Test() { }
 
-
-class Test {
 public:
-    virtual ~Test() { }
-
     static void bind();
 
     // Public interface.
@@ -109,6 +108,8 @@ public:
 private:
     StateSet _stateSet;
 };
+SCRY_REF_PTR(Test);
+
 
 SCRY_END_NAMESPACE
 

@@ -10,7 +10,12 @@ SCRY_BEGIN_NAMESPACE
 
 
 class CopyPixelTest : public PixelTransferTest {
+protected:
+    ~CopyPixelTest() { }
+
 public:
+    static void bind();
+
     const char* name() const { return "CopyPixelTest"; }
 
     void iterate(ResultSet& results) {
@@ -20,6 +25,7 @@ public:
         results[0] += width * height;
     }
 };
+SCRY_REF_PTR(CopyPixelTest);
 
 
 SCRY_END_NAMESPACE

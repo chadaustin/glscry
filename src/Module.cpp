@@ -34,9 +34,9 @@ void bindOpenGL() {
 
 void runTests(const std::string& filename, list testList, float runFor,
               const std::string& depVar) {
-    std::vector<Test*> tests;
+    std::vector<TestPtr> tests;
     for (int i = 0; i < len(testList); ++i) {
-        tests.push_back(extract<Test*>(testList[i]));
+        tests.push_back(extract<TestPtr>(testList[i]));
     }
 
     scry::runTests(filename, tests, runFor, depVar);
@@ -51,5 +51,11 @@ BOOST_PYTHON_MODULE(_glscry) {
     def("runTestsRange_", ::runTestsRange);
 
     Test::bind();
+
     TextureUploadTest::bind();
+
+    PixelTransferTest::bind();
+    CopyPixelTest::bind();
+    DrawPixelTest::bind();
+    ReadPixelTest::bind();
 }

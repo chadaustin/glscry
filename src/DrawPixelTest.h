@@ -10,7 +10,12 @@ SCRY_BEGIN_NAMESPACE
 
 
 class DrawPixelTest : public PixelTransferTest {
+protected:
+    ~DrawPixelTest() { }
+
 public:
+    static void bind();
+
     const char* name() const { return "DrawPixelTest"; }
 
     void iterate(ResultSet& results) {
@@ -21,6 +26,7 @@ public:
         results[0] += width * height;
     }
 };
+SCRY_REF_PTR(DrawPixelTest);
 
 
 SCRY_END_NAMESPACE

@@ -39,9 +39,16 @@ modulename = env.subst('_glscry$SHLIBSUFFIX')
 module = env.SharedLibrary(File(modulename), Split("""
     src/Module.cpp
     src/glew.c
-    src/Test.cpp
     src/Timer.cpp
+
+    src/Test.cpp
+
     src/TextureUploadTest.cpp
+
+    src/PixelTransferTest.cpp
+    src/CopyPixelTest.cpp
+    src/DrawPixelTest.cpp
+    src/ReadPixelTest.cpp
 """))
 
 
@@ -50,5 +57,3 @@ if 'MSVSProject' in env['BUILDERS'].keys():
     env.MSVSProject(target='glscry$MSVSPROJECTSUFFIX',
                     variant='Default',
                     buildtarget=module)
-
-SConscript(dirs=['src'])

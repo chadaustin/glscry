@@ -7,10 +7,14 @@ SCRY_BEGIN_NAMESPACE
 
 
 void TextureUploadTest::bind() {
-    class_< TextureUploadTest, bases<Test> >("TextureUploadTest")
+    class_< TextureUploadTest, TextureUploadTestPtr, bases<Test>,
+            boost::noncopyable >("TextureUploadTest", no_init)
+        .def(init<>())
         .def("setWidth", &TextureUploadTest::setWidth)
         .def("setHeight", &TextureUploadTest::setHeight)
         .def("setType", &TextureUploadTest::setType);
+
+    implicitly_convertible<TextureUploadTestPtr, TestPtr>();
 }
 
 

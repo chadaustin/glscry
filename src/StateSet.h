@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    typedef std::map<TypeInfo, State*> StateMap;
+    typedef std::map<TypeInfo, StatePtr> StateMap;
     typedef StateMap::iterator StateMapIter;
     StateMap _states;
 };

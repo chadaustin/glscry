@@ -9,11 +9,17 @@
 SCRY_BEGIN_NAMESPACE
 
 class PixelTransferTest : public Test {
+protected:
+    ~PixelTransferTest() { }
+
 public:
+    static void bind();
+
     SCRY_BEGIN_RESULT_DESCS()
         SCRY_RESULT_DESC("PixelRate", "pixels/sec")
     SCRY_END_RESULT_DESCS()
 };
+SCRY_REF_PTR(PixelTransferTest);
 
 SCRY_END_NAMESPACE
 
