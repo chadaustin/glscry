@@ -17,6 +17,7 @@ namespace scry {
             SCRY_RESULT_DESC("VertexRate", "vertex/s")
             SCRY_RESULT_DESC("PrimitiveRate", "prim/s")
             SCRY_RESULT_DESC("FillRate", "pixel/s")
+            SCRY_RESULT_DESC("BatchRate", "batch/s")
         SCRY_END_RESULT_DESCS()
 
         static void bind();
