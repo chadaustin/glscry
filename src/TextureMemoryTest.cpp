@@ -48,7 +48,8 @@ namespace scry {
             glEnd();
         }
 
-        results[0] += batchSize * 2;
+        results[0] += batchSize * 4;
+        results[1] += batchSize;
     }
 
     void TextureMemoryTest::teardown() {

@@ -14,7 +14,8 @@ namespace scry {
 
     public:
         SCRY_BEGIN_RESULT_DESCS()
-        SCRY_RESULT_DESC("TriangleRate", "tri/s")
+            SCRY_RESULT_DESC("VertexRate", "vertex/s")
+            SCRY_RESULT_DESC("PrimitiveRate", "tri/s")
         SCRY_END_RESULT_DESCS()
 
         static void bind();
