@@ -15,9 +15,8 @@ protected:
 public:
     static void bind();
 
-    VertexArrayTest(GeometryGeneratorPtr gen)
-        : GeometryTest(gen)
-    {
+    VertexArrayTest(const char* name, GeometryGeneratorPtr gen)
+    : GeometryTest(name, gen) {
     }
 
     const char* name() const {

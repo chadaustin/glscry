@@ -16,9 +16,8 @@ protected:
 public:
     static void bind();
 
-    ImmediateTest(GeometryGeneratorPtr gen)
-        : GeometryTest(gen)
-    {
+    ImmediateTest(const char* name, GeometryGeneratorPtr gen)
+    : GeometryTest(name, gen) {
     }
 
     const char* name() const {

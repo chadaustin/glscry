@@ -20,7 +20,8 @@ public:
 
     static void bind();
 
-    GeometryTest(GeometryGeneratorPtr gen) {
+    GeometryTest(const char* name, GeometryGeneratorPtr gen)
+    : Test(name) {
         SCRY_ASSERT(gen);
         _generator = gen;
     }

@@ -7,7 +7,7 @@ namespace scry {
     void ImmediateTest::bind() {
         class_<ImmediateTest, ImmediateTestPtr, bases<GeometryTest>,
             boost::noncopyable>("ImmediateTest", no_init)
-            .def(init<GeometryGeneratorPtr>());
+            .def(init<const char*, GeometryGeneratorPtr>());
 
         implicitly_convertible<ImmediateTestPtr, GeometryTestPtr>();
     }

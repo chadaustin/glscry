@@ -8,7 +8,7 @@ namespace scry {
         class_< IndexedGeometryTest, IndexedGeometryTestPtr,
                 bases<GeometryTest>, boost::noncopyable >
             ("IndexedGeometryTest", no_init)
-            .def(init<GeometryGeneratorPtr>());
+            .def(init<const char*, GeometryGeneratorPtr>());
 
         implicitly_convertible<IndexedGeometryTestPtr, GeometryTestPtr>();
     }

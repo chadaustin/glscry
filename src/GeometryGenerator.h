@@ -45,6 +45,21 @@ namespace scry {
         enum { TypeConstant = GLTypeConstant<Vector::DataType>::Result };
     };
 
+/*
+    class Array : public RefCounted {
+    protected:
+        ~Array() { }
+
+    public:
+        static void bind();
+
+        Array();
+
+    private:
+        std::vector<float> _data;    
+    };
+    SCRY_REF_PTR(Array);
+*/
 
     class GeometryGenerator : public RefCounted {
     protected:
@@ -52,6 +67,11 @@ namespace scry {
 
     public:
         static void bind();
+
+        //GeometryGenerator(GLenum primitiveType);
+
+        //void setPositions(ArrayPtr array);
+
 
         // Fills the buffer with 'count' triangles.
         virtual void generate(std::vector<Triangle>& buffer, size_t count) const = 0;

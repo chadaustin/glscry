@@ -16,6 +16,10 @@ protected:
 public:
     static void bind();
 
+    DrawPixelTest(const char* name)
+    : PixelTransferTest(name) {
+    }
+
     const char* name() const { return "DrawPixelTest"; }
 
     void iterate(ResultSet& results) {

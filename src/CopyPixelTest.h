@@ -16,6 +16,10 @@ protected:
 public:
     static void bind();
 
+    CopyPixelTest(const char* name)
+    : PixelTransferTest(name) {
+    }
+
     const char* name() const { return "CopyPixelTest"; }
 
     void iterate(ResultSet& results) {

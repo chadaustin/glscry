@@ -8,7 +8,7 @@ namespace scry {
         class_<VertexBufferObjectTest, VertexBufferObjectTestPtr,
             bases<GeometryTest>, boost::noncopyable>
             ("VertexBufferObjectTest", no_init)
-            .def(init<GeometryGeneratorPtr>());
+            .def(init<const char*, GeometryGeneratorPtr>());
 
         implicitly_convertible<VertexBufferObjectTestPtr, GeometryTestPtr>();
     }

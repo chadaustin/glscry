@@ -15,9 +15,8 @@ protected:
 public:
     static void bind();
 
-    DisplayListTest(GeometryGeneratorPtr gen)
-        : GeometryTest(gen)
-    {
+    DisplayListTest(const char* name, GeometryGeneratorPtr gen)
+    : GeometryTest(name, gen) {
     }
 
     const char* name() const {

@@ -19,6 +19,10 @@ namespace scry {
 
         static void bind();
 
+        TextureMemoryTest(const char* name)
+        : Test(name) {
+        }
+
         const char* name() const {
             return "TextureMemoryTest";
         }

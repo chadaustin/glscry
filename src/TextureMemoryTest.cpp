@@ -7,7 +7,7 @@ namespace scry {
     void TextureMemoryTest::bind() {
         class_<TextureMemoryTest, TextureMemoryTestPtr, bases<Test>,
                boost::noncopyable>("TextureMemoryTest", no_init)
-            .def(init<>());
+            .def(init<const char*>());
 
         implicitly_convertible<TextureMemoryTestPtr, TestPtr>();
     }

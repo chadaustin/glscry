@@ -11,6 +11,11 @@
 #include "Timer.h"
 
 
+#define SCRY_DEFINE_TEST_NAME(name)             \
+    static const char* getClassName() {         \
+        return name;                            \
+    }
+
 #define SCRY_BEGIN_RESULT_DESCS()                                       \
     static void getClassResultDescs(std::vector<ResultDesc>& descs) {
 
@@ -80,6 +85,14 @@ public:
 
     // Public interface.
 
+    Test(const char* name) {
+        _name = name;
+    }
+
+    const char* getName() const {
+        return _name.c_str();
+    }
+
     StateSet& getStateSet() {
         return _stateSet;
     }
@@ -93,9 +106,9 @@ public:
 
     // Overridden methods.
 
-    virtual const char* name() const = 0;
+    //virtual const char* getClassName() const = 0;
 
-    virtual bool supported() const { return true; }
+    virtual bool isSupported() const { return true; }
 
     virtual void getResultDescs(std::vector<ResultDesc>& descs) = 0;
 
@@ -106,6 +119,7 @@ public:
     virtual void teardown() { }
 
 private:
+    std::string _name;
     StateSet _stateSet;
 };
 SCRY_REF_PTR(Test);

@@ -39,7 +39,7 @@ void output(std::ostream& os, TestPtr test, const ResultSet& results,
     
     os << results[resultIndex] << " ";
 
-    std::cout << "  " << test->name() << ": ";
+    std::cout << "  " << test->getName() << ": ";
 
     std::cout << descs[resultIndex].name << " = "
               << Uint64(results[resultIndex]) << " "
@@ -68,11 +68,11 @@ void runTests(const std::string& filename, std::vector<TestPtr> testList,
         betweenTests();
 
         TestPtr test = testList[i];
-        if (test->supported()) {
+        if (test->isSupported()) {
             ResultSet results = test->run(runFor);
             output(of, test, results, depVar);
         } else {
-            // output a zero
+            // output a zero ?
         }
     }
     of << std::endl;
@@ -95,7 +95,7 @@ void runTestsRange(const std::string& filename, std::vector<TestPtr> testList,
 
             TestPtr test = testList[i];
             test->setProperty(indVar, indValue);
-            if (test->supported()) {
+            if (test->isSupported()) {
                 ResultSet results = test->run(runFor);
                 output(of, test, results, depVar);
             } else {

@@ -17,9 +17,8 @@ public:
 
     static const size_t triangleCount = 2048;
 
-    IndexedGeometryTest(GeometryGeneratorPtr gen)
-        : GeometryTest(gen)
-    {
+    IndexedGeometryTest(const char* name, GeometryGeneratorPtr gen)
+    : GeometryTest(name, gen) {
     }
 
     const char* name() const {

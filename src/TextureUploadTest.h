@@ -15,6 +15,10 @@ protected:
 public:
     static void bind();
 
+    TextureUploadTest(const char* name)
+    : Test(name) {
+    }
+
     int getWidth() const       { return _width;  }
     void setWidth(int width)   { _width = width; }
 

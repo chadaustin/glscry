@@ -15,9 +15,8 @@ protected:
 public:
     static void bind();
 
-    VertexBufferObjectTest(GeometryGeneratorPtr gen)
-        : GeometryTest(gen)
-    {
+    VertexBufferObjectTest(const char* name, GeometryGeneratorPtr gen)
+    : GeometryTest(name, gen) {
     }
 
     const char* name() const {

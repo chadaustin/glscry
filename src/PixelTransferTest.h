@@ -15,6 +15,10 @@ protected:
 public:
     static void bind();
 
+    PixelTransferTest(const char* name)
+    : Test(name) {
+    }
+
     SCRY_BEGIN_RESULT_DESCS()
         SCRY_RESULT_DESC("PixelRate", "pixels/sec")
     SCRY_END_RESULT_DESCS()

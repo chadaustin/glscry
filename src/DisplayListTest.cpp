@@ -7,7 +7,7 @@ namespace scry {
     void DisplayListTest::bind() {
         class_<DisplayListTest, DisplayListTestPtr, bases<GeometryTest>,
             boost::noncopyable>("DisplayListTest", no_init)
-            .def(init<GeometryGeneratorPtr>());
+            .def(init<const char*, GeometryGeneratorPtr>());
 
         implicitly_convertible<DisplayListTestPtr, GeometryTestPtr>();
     }
