@@ -41,6 +41,9 @@ void betweenTests() {
 void runTests(const std::string& filename, std::vector<TestPtr> testList,
               float runFor, const std::string& depVar
 ) {
+    std::cout << std::endl;
+    std::cout << "Generating data for " << filename << std::endl;
+    
     std::ofstream of(filename.c_str());
     if (!of) {
         throw std::runtime_error("Could not open " + filename);
@@ -65,6 +68,9 @@ void runTestsRange(const std::string& filename, std::vector<TestPtr> testList,
                    float runFor, const std::string& depVar,
                    const std::string& indVar, RangePtr range
 ) {
+    std::cout << std::endl;
+    std::cout << "Generating data for " << filename << std::endl;
+    
     std::ofstream of(filename.c_str());
     if (!of) {
         throw std::runtime_error("Could not open " + filename);
@@ -87,11 +93,15 @@ void runTestsRange(const std::string& filename, std::vector<TestPtr> testList,
         of << std::endl;
     }
 
-    std::ofstream plot((filename + ".sh").c_str());
+    std::string script = filename + ".sh";
+    std::ofstream plot(script.c_str());
     if (!plot) {
         return;
     }
 
+    std::cout << std::endl;
+    std::cout << "Generating gnuplot script: " << script << std::endl;
+    
     plot << "#!/bin/sh" << std::endl
          << std::endl
          << "cat <<EOF | gnuplot" << std::endl

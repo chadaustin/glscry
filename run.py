@@ -37,4 +37,5 @@ if not tests:
     print "No tests specified.  Specify a test explicitly or use -a."
     sys.exit(1)
 
-os.system(sys.executable + ' ' + string.join(tests))
+for t in tests:
+    os.system(sys.executable + ' ' + t)
