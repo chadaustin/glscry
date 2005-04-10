@@ -567,34 +567,39 @@ Application of cognitive dimensions framework to programming language.
 
 \section{System Overview}
 
-The Renaissance system is split into two pieces: the language, including its 
-compiler, and the shader management system.
+The Renaissance system is implemented in C++ and split into two pieces: the language, including its 
+compiler, and the shader management API.
 
 <insert diagram>
 
-The Renaissance system parses and validates the shader source code into an 
-intermediate program structure, which is typed checked as much as possible.  
-The program can then set any constant values.  Compilation can be done 
-explicitly or is done automatically when the program is bound.  The generated 
-GPU code is cached so recompilation is not necessary when switching back and 
-forth between shader states.  At this point, uniforms and attributes can be set.  
-These don't invoke recompilation.
+When the program loads a shader, it is parsed, and validated, and type checked
+into an intermediate program structure.  The program can then set the value of
+any constant inputs.  When the program is bound, the program is compiled into code that
+can run on the GPU, optimized for the constant values that have been set.  The generated code is cached
+with the constant values used to create it so recompilation is not necessary when
+switching back and forth between shader states.
+
+Setting uniforms and attributes does not invoke recompilation, since their values do not affect
+the structure of the generated code.
 
 One of the niceties of metaprogramming languages is that the interface between 
-the program and the shader is very convenient, unlike the straight OpenGL API.  
-We can get closer to the convenience of a metaprogramming language by 
-providing custom types native to the host language (C++) that hide the uniform 
-queries and assignments:
+the host program and the shader is very convenient, since it can use native data types and structures.
+Contrast this with the OpenGL shader APIs which require querying and managing uniform indices, and
+use function names with 'warts' to distinguish between setting different uniform types:
+glUniformfv and glUniformiv etc.  (TODO: what are the real names?)  We can get close to the convenience
+of a metaprogramming language by providing custom C++ types that hide the internal data transfers.
 
 \begin{verbatim}
 ren::Bool enableBones(program, "enableBones");
 
 enableBones = true;
+program->bind();
 
+enableBones = false;
 program->bind();
 \end{verbatim}
 
-
+The next two sections define the language and the compiler in more detail.
 
 \section{Language Description}
 
@@ -650,6 +655,12 @@ gl_FragColor = choose ExpensiveCalculation CheapCalculation
 The arguments to choose are only evaluated if necessary; that is, if doExpensive 
 is true, then ExpensiveCalculation will be performed.  Otherwise, 
 CheapCalculation will be performed.
+
+\subsection{Types}
+
+
+
+\subsection{Built-In Functions}
 
 \subsection{Overloading and Swizzling}
 
