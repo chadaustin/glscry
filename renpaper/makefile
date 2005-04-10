@@ -43,6 +43,9 @@ EPSS= $(FIGS:.fig=.eps)
 		bibtex $(@:.dvi=)
 		latex $*.tex || ( rm $@; false; )
 		latex $*.tex || ( rm $@; false; )
+
+.tex.aux:
+		latex $*.tex || ( rm $@; false; )
                 
 #		rsh $(TEXHOST) "source .tex; cd $(TEXDOCS); latex $*.tex;";\
 #		rsh $(TEXHOST) "source .tex; alias";
