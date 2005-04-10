@@ -269,12 +269,19 @@ This paper's primary contributions are the following:
   execution model and frequency inference.
 
 
-\section{Language Description}
+\section{Key Design Decisions}
 
-\subsection{A Brief Introduction to Our Syntax}
+\subsection{Functional Model}
 
-Before we continue with the discussion of the advantages our language 
-provides, let us first introduce the look and feel of the language with an example.
+### DONE
+
+An Introduction to Functional Programming
+
+Renaissance is based on the syntax and semantics of modern, typed,
+pure functional languages, specifically the family consisting of
+Miranda, Clean, and Haskell.  Since we don't expect our audience to be
+familiar with the syntax or semantics of these languages, let us introduce
+the look and feel with an example.
 
 \begin{verbatim}
 pi = 3.1415927
@@ -293,68 +300,62 @@ expression and any arguments.  So, above, "pi" has type 'float'.  square's type 
 type of the arguments.  So 'square 10' has type int and 'square 10.0' has type 
 float.
 
+There are no loops or variable assignments in this language.  Every
+object, once created, cannot be changed.  This is called referential
+transparency, which refers to the fact that if you call the same
+function twice with the same arguments, you will always get the same
+result back.
 
-\subsection{Functional Model}
-
-Modern GPUs have a programming model similar to a stream processor: there is 
+Modern GPUs have a stream programming model: there is 
 a stream or array of data elements (vertices or fragments) and a function is 
-applied across all of them.  This function is often called a kernel.  Since all of the 
+applied across all of them.  This function, in stream programming terminology, is called a kernel.  Since all of the 
 stream elements are independent, the function can be run in parallel without any 
 sort of synchronization or data dependency analysis.  This is largely the reason 
-why graphics processors these days are so efficient.  Existing shading languages 
-have semantic model similar to C; that is, they have the concept of variables that 
-can be modified and read from.  Therefore they have an ordering requirement on 
-individual statements.  Consider the following, C-like code:
+why graphics processors these days are so efficient: performance increases linearly with the number of processors
+available.  Previous shading languages 
+have semantic models similar to C; that is, variables that 
+can be modified and read from.  Further, the order statements are executed is critical.
+Consider the following, C-like code:
 
 \begin{verbatim}
-int a = 2;
+int a = 1;
 
 int foo() {
   a += 2;
 
   // Some code.
-  return 10; 
+  return 10;
 }
 
 int bar() {
   a *= 3;
 
   // Other code.
-  return 15; 
+  return 15;
 }
 
 void main() {
-  int sum = foo() + bar(); 
+  int sum = foo() + bar();
+  // do something with a
 }
 \end{verbatim}
 
+The value of 'a' at the end of main() is either 9 or 5, depending on whether foo() or bar() is called first.
+In general, this restriction complicates the compiler's task of optimization and static analysis.  A functional
+language, on the other hand, is given a lot of freedom to reorder evaluation, because all dependencies
+are explicit and no evaluation has side effects.  For specialized tasks, functional languages have been shown
+to perform much more efficiently than equivalent C code.  [ref: ocaml, clean, sac]
 
-Notice that, in general, the semantics of C are such that the order functions are 
-called is important, as they may have side effects that are order dependent.  
-This, in the case of shading languages, unnecessarily complicates the process of 
-compilation and static analysis.  The high-level shading languages discussed 
-above to a good job of analyzing execution flow and data dependency, so trivial 
-examples such as these would not gain much, if any benefit.  However, shaders 
-are growing in complexity as the hardware and support for effectively unlimited 
-temporary use and instructions.  Eventually we will reach a point where the 
-complexity of the shader seriously prohibits good optimization.  Pure functional 
-languages, on the other hand, have very straightforward and restricted 
-semantics.  In a modern functional language, and there are no mutable variables.  
-Every function takes a set of values and returns another one, nothing else.  If you 
-collect function twice with the same arguments, you always get the same night 
-back.  Also, it does not matter which order you evaluate functions in.  This is 
-called referential transparency, and a greatly improve the ability of both the 
-compiler and programmer to reason about the computation, facilitating efficient 
-generating code.
+As hardware programmability increases in capability and shaders get longer and larger, we believe a functional
+language will scale in both performance and maintainability more than a language based on the imperative model of C.
 
-We believe the concept of referential transparency is a better fit for extreme 
-programming model because it makes explicit that nothing can be modified, just 
-returned.  This eliminates a potential source of confusion: the OpenGL shading 
-language specification has to explicitly note that if you have a global variable and 
-you modify it, that modification is only applicable within one stream element.
+Even ignoring the performance and ``compiler-friendly'' issues, functional languages are a better mental
+model for the humans writing shaders as well.  It makes explicit that an operation on a stream element has no side
+effects beyond the output value.  Other shading languages explicitly document that modifications to
+global variables do not affect the program's operation on other stream elements.
 
 
-\subsection{Simplified Syntax w/ Type Inference}
+\subsection{Frequency and Type Inference}
 
 
 languages based on C's syntax are designed to be easy to parse by a computer, 
@@ -503,9 +504,11 @@ Application of cognitive dimensions framework to programming language.
 
 \section{Key Design Decisions (This title is copied straight from the Cg paper.  Is that bad?)}
 
-Put this section right after the contributions section?
+### Put this section right after the contributions section?
 
-Put the discussion of type and frequency inference here?
+\subsection
+
+### Put the discussion of type and frequency inference here?
 
 \subsection{Single Shader for Both Vertex and Pixel Pipelines}
 
