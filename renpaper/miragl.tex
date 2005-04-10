@@ -652,15 +652,26 @@ cheap
 gl_FragColor = choose ExpensiveCalculation CheapCalculation
 \end{verbatim}
 
-The arguments to choose are only evaluated if necessary; that is, if doExpensive 
+The arguments to <name>choose are only evaluated if necessary; that is, if doExpensive 
 is true, then ExpensiveCalculation will be performed.  Otherwise, 
 CheapCalculation will be performed.
 
 \subsection{Types}
 
+Following the conventions set by GLSL, we provide the following types:
+bool, int, float, and vectors of 2 to 4 elements of each.  (vec2 is a
+vector of two floats, vec3b is a vector of three bools, vec4i is a
+vector of four integers, etc.)  There are also three square, float
+matrix types: mat2, mat3, and mat4.
 
+Arrays have type [t] where t is the type of its elements.  Since shading
+hardware does not yet support variable-length arrays, the length of the array must be specified
+at constant frequency.  In order to access the ith element of an array, treat it as a function,
+calling it with parameter i.
 
 \subsection{Built-In Functions}
+
+Once again, we provide access to all GLSL built-in functions, with the same names, types, overloads.
 
 \subsection{Overloading and Swizzling}
 
