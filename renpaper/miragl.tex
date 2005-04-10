@@ -786,14 +786,32 @@ individual shading calculations, passes, and states
 
 \section{Conclusion}
 
+As programmable graphics hardware becomes more prevalent and
+instruction and memory limitations are lifted and removed, a next
+generation shading language will need to reduce the complexities
+associated with transferring data and calculations from the host
+application all the way down to the pixels on the screen.
 
+This paper describes Renaissance, a shading language for modern
+programmable GPUs that, through the benefits of functional
+programming, enables efficient and clear algorithm specifications
+across multiple stages of the graphics pipeline.  Through a simple
+semantic model and frequency inference, natural composability of
+shading ``concepts'' is possible, which existing languages make
+difficult at best.  Extending this simple concept, we can imagine a
+programmable shading system with configurable state that can be
+flipped on and off, just like the interface to the fixed function
+pipeline.
 
 \section{Acknowledgements}
 
-We would like to thank Conal Elliot for his work on Vertigo; without
-it we would not have gotten nearly as far.  Chad would also like to
-thank Dusty Leary for his infectious love for functional programming
-and many late-night discussions of language design.
+We would like to thank Conal Elliot for his work on Vertigo while at
+Microsoft Research -- without it we would not have gotten far.  Thanks
+also goes to Simon Peyton-Jones at Microsoft Research for his work on
+the Haskell language and for releasing his out-of-print book The
+Implementation of Functional Programming Languages.  Finally, Dusty
+Leary and his infectious love of functional programming greatly influenced the
+design of the language.
 
 
 
