@@ -54,8 +54,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 
 
-\begin{document}
-
 \title{MiraGL : A Functional Shading Language}
 
 
@@ -63,6 +61,8 @@
 Human-Computer Interaction Program\\
 Iowa State University\\
 \{aegisk,dreiners\}@iastate.edu }
+
+\begin{document}
 
 \maketitle
 \begin{abstract}
@@ -506,7 +506,7 @@ Application of cognitive dimensions framework to programming language.
 
 --- Put this section right after the contributions section?
 
-\subsection
+\subsection{}
 
 --- Put the discussion of type and frequency inference here?
 
@@ -530,7 +530,7 @@ maintainability, and optimization.
 To mitigate the potential confusion brought about by this approach, we may allow specification of computational 
 frequency explicitly, as RTSL does.  If a lower frequency is specified for a result than the values it depends on
 (for example, if you claim that a result has a frequency of ``vertex'' but it depends on the fragment-frequency
-gl_FragCoord value), a compile-time error is raised.  Conversely, it might make sense to allow explicitly specifying
+gl\_FragCoord value), a compile-time error is raised.  Conversely, it might make sense to allow explicitly specifying
 a higher frequency than would be inferred so as to force computation to occur later in the pipeline, which could
 be a performance improvement in some cases.
 
