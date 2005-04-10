@@ -461,10 +461,10 @@ uniform [mat4] bones
 attribute vec4 boneIndices
 attribute vec4 weights
 
-v0 = weights.x * (bones[boneIndices.x] * gl_Vertex)
-v1 = weights.y * (bones[boneIndices.y] * gl_Vertex)
-v2 = weights.z * (bones[boneIndices.z] * gl_Vertex)
-v3 = weights.w * (bones[boneIndices.w] * gl_Vertex)
+v0 = weights.x * ((bones boneIndices.x) * gl_Vertex)
+v1 = weights.y * ((bones boneIndices.y) * gl_Vertex)
+v2 = weights.z * ((bones boneIndices.z) * gl_Vertex)
+v3 = weights.w * ((bones boneIndices.w) * gl_Vertex)
 vertex = v0 + v1 + v2 + v3
 gl_Position = gl_ModelViewProjectionMatrix * vertex
 \end{verbatim}
