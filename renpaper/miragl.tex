@@ -1,0 +1,792 @@
+% ---------------------------------------------------------------------------
+% Author guideline and sample document for EG publication using LaTeX2e input
+% D.Fellner, v1.11, Feb 28, 2005
+
+\documentclass{egpubl}
+\usepackage{gh05}
+
+% --- for  Annual CONFERENCE
+% \ConferenceSubmission % uncomment for Conference submission
+% \ConferencePaper      % uncomment for (final) Conference Paper
+% \STAR                 % uncomment for STAR contribution
+% \Tutorial             % uncomment for Tutorial contribution
+% \ShortPresentation    % uncomment for (final) Short Conference Presentation
+%
+% --- for  CGF Journal
+% \JournalSubmission    % uncomment for submission to Computer Graphics Forum
+% \JournalPaper         % uncomment for final version of Journal Paper
+%
+% --- for  EG Workshop Proceedings
+ \WsSubmission    % uncomment for submission to EG Workshop
+% \WsPaper         % uncomment for final version of EG Workshop contribution
+%
+ \electronicVersion % comment if producing the printed version
+
+
+% !! *please* don't change anything above
+% !! unless you REALLY know what you are doing
+% ------------------------------------------------------------------------
+
+% for including postscript figures
+% mind: package option 'draft' will replace PS figure by a filename within a frame
+\ifpdf \usepackage[pdftex]{graphicx} \pdfcompresslevel=9
+\else \usepackage[dvips]{graphicx} \fi
+
+\PrintedOrElectronic
+
+% prepare for electronic version of your document
+\usepackage{t1enc,dfadobe}
+
+\usepackage{egweblnk}
+\usepackage{cite}
+
+% For backwards compatibility to old LaTeX type font selection.
+% Uncomment if your document adheres to LaTeX2e recommendations.
+\let\rm=\rmfamily    \let\sf=\sffamily    \let\tt=\ttfamily
+\let\it=\itshape     \let\sl=\slshape     \let\sc=\scshape
+\let\bf=\bfseries
+
+% end of prologue
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+\providecommand{\LyX}{L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+
+
+\begin{document}
+
+\title{MiraGL : A Functional Shading Language}
+
+
+\author{Chad Austin and Dirk Reiners\\
+Human-Computer Interaction Program\\
+Iowa State University\\
+\{aegisk,dreiners\}@iastate.edu }
+
+\maketitle
+\begin{abstract}
+Abstract here. I usually so this at the end, because I don't know
+what the topic's going to be until then .;)
+
+\CCScat{I.3.7}{Computer Graphics}{Shading}
+
+
+\end{abstract}
+
+\section{Introduction}
+
+[State of shading hardware.  These bracketed notes are just to guide my 
+thoughts, not for inclusion.]
+The trend in real-time computer graphics is towards more general-purpose and 
+unrestricted programmability on the graphics hardware.  With these advances on 
+the silicon, the state-of-the-art of programming languages that run on the 
+hardware is improving as well.
+
+[State of shading languages.]
+In the early days, we saw "pipeline configurability" by multi-texturing and an ever-
+increasing set of specific blend modes between the texture stages.  This allowed 
+for the implementation of some shading algorithms on fixed function hardware.  
+The first steps towards real programmability where assembly languages for 
+register machines that operated on the primitive type of four element float 
+vectors.  This was a great step forward for generalizing graphics hardware, but it 
+had its limitations.  The shading algorithms were not easy to follow and you 
+couldn't easily create building blocks of functionality on which the rest of the 
+shader was built.  The next natural step was a high-level language built on top of 
+the assembly.  These languages often look like C, both in syntax and semantics.  
+There are also metaprogramming languages built on top of a host language.  
+These allow tight integration between the host language and the graphics 
+processor as well as straightforward shader specialization.
+
+With the advent of Cg's interface features, we're just now starting to see support 
+for composable shaders.
+
+We introduce a language based not on C but on modern functional languages 
+with pure semantics.
+
+<find a home for this.  "Hereafter, a program or programs that runs on the GPU is 
+referred to as a shader.">
+
+\section{Related Work}
+
+
+\subsection{Multi-Pass Texture Blending }
+
+Real-time programmable shading appeared in an early form as multi-pass 
+rendering along with multi-texturing blend modes.  The quake three engine for 
+example provided a simple shader scripting language to control the number of 
+passes, texture stages, and rendering state.  This isn't a complete solution for 
+general shading, but it goes a long way towards allowing the implementation of 
+several surface descriptions.  Piercy élan oh et al. discovered that an OpenGL 
+implementation, with some key extensions, can be treated as a general-purpose 
+SIMD computer in their OpenGL Shader work.  OpenGL Shader can support 
+arbitrary shading computation, using multiple rendering passes.
+
+However, the trend for processors has gone towards higher clock speeds on the 
+processor, but slower and higher latency memory access.  This precludes large-
+scale multipass implementations of shading from being viable, due to the very 
+high memory bandwidth requirement.
+
+
+\subsection{RTSL}
+
+Stanford's real time programmable shading system, RTSL, introduced the 
+concept of computational frequency.  They defined four frequencies: constant, 
+primitive group, vertex, and fragment.  Constant computation is done at compile 
+time and not during the processing of geometry.  Primitive group computation is 
+done per batch of geometry.  Vertex and fragment computations are done per 
+vertex, and per fragment, obviously.  RTSL has a retargetable backend that can 
+map vertex computation to either the CPU or to basic programmable vertex 
+hardware.  Fragment computation is mapped to multipass OpenGL, as in 
+OpenGL shader above, or early fragment processing hardware -- NVIDIA's 
+register combiners.  They're shading language did not differentiate between 
+vertex and fragment hardware in the programs themselves.  The compiler was 
+responsible for splitting the work up among the various computational stages.  In 
+many cases, frequency analysis was implicit, but they allow you to explicitly 
+specify where computation is done; for example, to easily compare two lighting 
+algorithms, one per vertex and the other per fragment.
+
+
+\subsection{Assembly Languages (ARBfp, ARBvp, DirectX shader models)}
+
+The next generation of shading languages allowed full programmability at the 
+vertex and pixel levels via assembly languages for a vector based register 
+machine architecture.  Although the instruction sets were limited at first, the 
+languages allowed arbitrary computation per vertex and per fragment.  They also 
+a more efficient than the multi-pass approaches above, because they require 
+much less memory bandwidth.  The disadvantaged, of course, of assembly 
+languages is that they are difficult for people to write and understand, as well as 
+maintain.  Their operation is not immediately clear.  Another disadvantage is that 
+they may not map directly to the underlying hardware.  In this sense, they can be 
+considered virtual assembly languages.
+
+\subsection{Cg, HLSL }
+
+Naturally, the next step beyond an assembly language is a high-level language 
+that compiles to it.  Cg and HLSL were created by NVIDIA and Microsoft, 
+respectively, as C-like, high-level shading languages.  HLSL compiles to the 
+Microsoft-defined vertex and pixel shader assembly architecture, which is loaded 
+into the card at runtime.  Cg, on the other hand, compiles to a variety of back 
+ends and is graphics API neutral.  The most recent NVIDIA cards have support 
+for compiling Cg in the driver itself.
+
+When referring to the language used by both Cg and HLSL, I will call it simply 
+Cg.  For the sake of compatibility with other shading systems, and transparent 
+access to the underlying hardware, Cg does very little work for you.  You are 
+required to specify how data is transferred into the shaders, which attribute 
+channels map to what, (... and other stuff? ...)  Cg also does not do any 
+virtualization of resources, if a feature is not available.  This is not a criticism of 
+Cg, just a description of the design decisions they made.
+
+\subsection{GLSL}
+
+While Cg and HLSL were being developed, 3DLabs and the OpenGL 
+architecture review board were designing a shading language for the future of 
+OpenGL.  The OpenGL shading language, or GL slang, or GLSL, had different 
+goals than Cg and HLSL.  First, it is intended to become part of the OpenGL 
+standard, replacing the assembly languages.  OpenGL implementers must have 
+the shading language compiler in the driver itself, as opposed to an external 
+process.  This means that applications that use the OpenGL shading language 
+benefit from driver upgrades and compiler improvements for free.  It is also a 
+forward thinking language design in that it requires all implementers to support 
+things like conditionals and loops even if they can't do it in hardware.  The only 
+thing that it does not require implementers to virtualize is things like using more 
+texture units than are available, and accessing textures from the vertex shader.
+
+
+\subsection{Sh}
+
+
+Sh isn't exactly a language, per se.  It is a metaprogramming system on top of 
+C++ designed for building shaders.  Sh is implemented through a set of custom 
+C++ objects that build an internal program representation when operations are 
+applied to them.  This program is compiled to an underlying shader that is then 
+run directly on the graphics card.  The advantage of a metaprogramming system 
+such as this is that it has very tight integration with the host language.  If your 
+shader references a global variable, and you assign that global variable outside 
+the definition of the shader, it automatically becomes a uniform.  It also becomes 
+natural to use the host languages features in order to specialize shaders.  For 
+example, if you put an if statement inside a shader, depending on the outcome of 
+the condition, you can generate two different shaders.  The disadvantage of a 
+metaprogramming system is that requires a full C++ compiler to use a shader.  
+Thus, you can't easily pass the shaders along with 3-D models, for example, 
+limiting their usefulness to people who aren't programmers.  That said, there are 
+some uses for shaders where a metaprogramming approach is ideal; such as 
+implementation of custom graphics algorithms.
+
+
+\subsection{Vertigo}
+
+
+Vertigo is a metaprogramming system like Sh, but built on top of Haskell instead 
+of C++.  The interesting aspects of vertigo are that it is a functional language and 
+eases expression rewriting for optimization.  Expression rewriting allows it to do 
+an optimal search of expression space to reduce the amount of computation 
+necessary to evaluate a particular expression.  A compelling example is that of 
+vector normalization.  Vector normalization is a common requirements when 
+writing graphics programs.  When you write eight procedure, you have a choice 
+between accepting a normalized specter, or any vector and then normalizing in 
+yourself.  Since normalization is expensive, you don't want to normalize a vector 
+twice.  However, if you have a functional language you can take advantage of 
+referential transparency and expression rewriting to reduce the expression 
+"normalize (normalize v) -> normalize v".  Once you have this optimization, there 
+is no reason not to normalize a vector, if you need it to be normalized.  [Vertigo] 
+shows how this is done in an elegant and automatic way.  There is a similar 
+example for optimizing the cross product operation into an architecture that 
+allows vector swizzles for free, as GPUs do.
+
+
+\section{Contributions}
+
+Shading languages have traditionally followed the path of languages for general-
+purpose processors, even when they aren't applicable.  Recent versions of Cg 
+introduce a concept of interfaces, which have a syntax and description 
+deceptively similar to interfaces in Java, even though the problem it tries to solve 
+is better addressed by partial evaluation of functional programs.
+
+In this paper we introduce a programming language for real-time graphics 
+hardware that we believe addresses many of the problems in the existing 
+languages, discussed above.  This language draws from existing research in 
+modern pure functional languages, such as Haskell, Miranda, and Clean.  We 
+based our design on functional languages for a variety of reasons.  First, 
+functional languages have a very natural fit for the programming model exposed 
+by graphics hardware.  Second, functional languages are traditionally easier to 
+compile and perform static analysis on then imperative languages with side 
+effects, such as C.  Third, our language is designed to have a minimum of 
+extraneous syntax, making it much easier to learn and read.  We will now discuss 
+these issues in detail.
+
+
+\section{Language Description}
+
+\subsection{A Brief Introduction to Our Syntax}
+
+Before we continue with the discussion of the advantage is our language 
+provides, let us first introduce the look and feel of the language with an example.
+
+\begin{verbatim}
+pi = 3.1415927
+square x = x * x
+circumference r = pi * square r
+\end{verbatim}
+
+The first line defines a name "pi" to have the approximate value of pi.  The 
+second line to find a function called "square" that takes one parameter and 
+returns its square.  The third line defines the circumference, given a radius, to be 
+pi times the square of the radius.  "square r" is the syntax for function application, 
+and it means "apply the function square to the value r".  Notice that the example 
+does not make any types explicit.  Types are inferred based on a definition's 
+expression and any arguments.  So, above, "pi" has type 'float'.  square's type is 
+'t -> t', meaning "a function that takes type t and returns type t", where t is the 
+type of the arguments.  So 'square 10' has type int and 'square 10.0' has type 
+float.
+
+
+\subsection{Functional Model}
+
+Modern GPUs have a programming model similar to a stream processor: there is 
+a stream or array of data elements (vertices or fragments) and a function is 
+applied across all of them.  This function is often called a kernel.  Since all of the 
+stream elements are independent, the function can be run in parallel without any 
+sort of synchronization or data dependency analysis.  This is largely the reason 
+why graphics processors these days are so efficient.  Existing shading languages 
+have semantic model similar to C; that is, they have the concept of variables that 
+can be modified and read from.  Therefore they have an ordering requirement on 
+individual statements.  Consider the following, C-like code:
+
+\begin{verbatim}
+int a = 2;
+
+int foo() {
+  a += 2;
+
+  // Some code.
+  return 10; 
+}
+
+int bar() {
+  a *= 3;
+
+  // Other code.
+  return 15; 
+}
+
+void main() {
+  int sum = foo() + bar(); 
+}
+\end{verbatim}
+
+
+Notice that, in general, the semantics of C are such that the order functions are 
+called is important, as they may have side effects that are order dependent.  
+This, in the case of shading languages, unnecessarily complicates the process of 
+compilation and static analysis.  The high-level shading languages discussed 
+above to a good job of analyzing execution flow and data dependency, so trivial 
+examples such as these would not gain much, if any benefit.  However, shaders 
+are growing in complexity as the hardware and support for effectively unlimited 
+temporary use and instructions.  Eventually we will reach a point where the 
+complexity of the shader seriously prohibits good optimization.  Pure functional 
+languages, on the other hand, have very straightforward and restricted 
+semantics.  In a modern functional language, and there are no mutable variables.  
+Every function takes a set of values and returns another one, nothing else.  If you 
+collect function twice with the same arguments, you always get the same night 
+back.  Also, it does not matter which order you evaluate functions in.  This is 
+called referential transparency, and a greatly improve the ability of both the 
+compiler and programmer to reason about the computation, facilitating efficient 
+generating code.
+
+We believe the concept of referential transparency is a better fit for extreme 
+programming model because it makes explicit that nothing can be modified, just 
+returned.  This eliminates a potential source of confusion: the OpenGL shading 
+language specification has to explicitly note that if you have a global variable and 
+you modify it, that modification is only applicable within one stream element.
+
+
+\subsection{Simplified Syntax w/ Type Inference}
+
+
+languages based on C's syntax are designed to be easy to parse by a computer, 
+with human readability and writability as an afterthought.  They contain a lot of 
+structural syntax, such as semicolons and braces, that can otherwise be implicit, 
+as in the whitespace-sensitive languages Python and Haskell.  They also require 
+tight specifications on variables, even when the expressions typed can be 
+inferred.  Most modern functional languages are statically typed: that is, a name 
+always refers to objects of the same type.  At the same time, automatic type 
+inference allows the compiler to figure out the type of a name without being 
+explicitly told what it is.  Consider the following psuedocode:
+
+\begin{verbatim}
+foo a b = a + bar b
+bar b = b + 2
+result = foo 10 4
+\end{verbatim}
+
+note that no types are explicitly specified.  However, when result is evaluated, foo 
+is called with two integers and returns the sum of the first and bar of the second.  
+The result of this addition is an integer as well, so the value result has type 
+integer.  Consider the definition of a function that normalize is a vector (in 
+Haskell-like syntax):
+
+\begin{verbatim}
+normalize v = v / length v
+\end{verbatim}
+
+The operation of the function is clear even though its component types are not 
+specified.  There is a surprising side effect of this: normalize function actually 
+represents several functions, each of different type.  Given that division by a 
+scalar and a length function operate on multiple types of vectors, normalize itself 
+will work with multiple types of vectors.  This is similar to C++ template functions.
+
+
+\subsection{Frequency Inference}
+
+Existing shading languages make explicit the difference between vertex and 
+fragment programs, as well as processing that must be done on the CPU before 
+it is sent to the graphics card.  In the past, this made sense, because vertex and 
+fragment hardware were sufficiently different.  Some operations were only 
+possible on one or the other.  However, the trend right now used to provide a 
+unified programmable interface to both stages of computation.  In fact, and 
+DirectX 10 proposes a unified shader model.  Even on some of the later 
+generation shading languages, the language itself is equivalent on both vertex 
+and fragment engines.  The OpenGL shading language defines the same 
+operations on both the fragment and vertex processors, but allows the 
+implementation to restrict some operations.  For example, if the hardware does 
+not support it, you are not allowed to read from textures in a vertex program.  For 
+most operations however the limitation is forced to emulate the feature even if it 
+is not supported in hardware.  In light of this trend, I language blurs the distinction 
+between calculations that are specified on the processor, vertex processor, or 
+fragment processor.  In most cases, the compiler can do just as good a job as a 
+human at figuring out which operations need to be gone on which stage.  This 
+simplifies the act of writing a shader.  You don't have to specifically worry about 
+where computation is done.  You just write the shader in the most natural way 
+possible and it gets compiled to the right code.
+
+To implement this, we store a computational frequency (concept from RTS cell 
+shading language) alongside the type of a computation.  Derived computations 
+infer their frequency based on what they depend on.  We'll discuss this more fully 
+in the description of the language.
+
+Another advantage of combined shaders:  easy to share computation in both.
+
+
+\subsection{Composability}
+
+As graphics teams begin to replace the entire fixed function pipeline with their 
+own custom shading algorithms, the restriction that shaders must replace the 
+entire pipeline becomes an increasing problem.  Moreover, it is nontrivial to write 
+two independent pieces of the shading algorithms and combine them into one 
+shader at runtime, even if they are independent in definition.  Some have solved 
+this problem with elaborate preprocessors that combine the pieces into one 
+shader that does not do any redundant computation.  Half-Life 2, for example, 
+builds over 1500 shaders by combining pieces.
+
+As a consequence of the functional programming model and frequency interface, 
+Renaissance naturally supports composition.  Take a look at the following 
+example code:
+
+\begin{verbatim}
+constant bool useLightingModel1
+lightModel1 = ...  # calculations for light model 1
+lightModel2 = ...  # calculations for light model 2
+gl_FragColor = if useLightingModel1 then lightModel1 else 
+lightModel2
+\end{verbatim}
+
+Since the variable useLightingModel1 has constant frequency, it is evaluated at 
+shader compilation time.  Thus, the shader is specialized based on its value, with 
+no extra computation per fragment.
+
+
+\subsection{Full Abstraction Facilities - Higher Order Functions}
+
+
+Consider a vertex program that applies skeletal animation bone transformations 
+to each vertex.  Traditionally, the program looks something like:
+
+\begin{verbatim}
+uniform [mat4] bones
+attribute vec4 boneIndices
+attribute vec4 weights
+
+v0 = weights.x * (bones[boneIndices.x] * gl_Vertex)
+v1 = weights.y * (bones[boneIndices.y] * gl_Vertex)
+v2 = weights.z * (bones[boneIndices.z] * gl_Vertex)
+v3 = weights.w * (bones[boneIndices.w] * gl_Vertex)
+vertex = v0 + v1 + v2 + v3
+gl_Position = gl_ModelViewProjectionMatrix * vertex
+\end{verbatim}
+
+Notice that this program has much duplicated logic and is hard-coded for the 
+number of bones applied to each vertex.  One improvement would be to use a for 
+loop or iteration construct to iterate over the bone references.  This would reduce 
+the duplicated logic, but compilers for these languages do not claim to unroll 
+loops and perform high-level optimizations like these.  Given frequency inference 
+and higher-order-functions, however:
+
+\begin{verbatim}
+constant bool enableBones
+
+uniform [mat4] bones
+attribute vec4 boneIndices
+attribute vec4 weights
+
+skinnedVertex = sum [(weights i) * (bones (boneIndices i)) 
+* gl_Vertex)
+                     for i in (range 0 3)]
+vertex = if enableBones then skinnedVertex else gl_Vertex
+gl_Position = gl_ModelViewProjectionMatrix * vertex
+\end{verbatim}
+
+The syntax [expr for var in list] is called a list comprehension.  A new list is 
+created by evaluating expr on every item in list.  In this case, the new list 
+contains weighted vertices, which must be summed to get the result.  The sum 
+function takes a list and returns the result of adding all its elements.
+
+Using frequency inference and staged computation, this version of the shader 
+provides a simple switch to enable and disable bone application.
+
+Application of cognitive dimensions framework to programming language.
+
+... ???
+
+
+\section{Key Design Decisions}
+
+\subsection{Single Shader for Both Vertex and Pixel Pipelines}
+
+In contrast with the most popular real-time shading languages today, Cg, HLSL, 
+and GLSL, we decided to blur and abstract the difference between vertex 
+shaders and fragment shaders.  One concern is that the different processors 
+support different functionality, and by making the programs separate explicitly, 
+the differences are made clear.  However, DirectX 10 is pushing for a unified 
+processor architecture on both the fragment and pixel sides.  ATI technology has 
+also recently announced that they are unifying their two processors.  With this in 
+mind, we feel the potential confusion caused by executing "one" program on two 
+processors (not counting the CPU) is worth the benefit in readability, 
+maintainability, and optimization.
+
+To mitigate the potential confusion by this approach, we provide a way to 
+explicitly specify the frequency that computation runs at, as types can be made 
+explicit even with the availability of type inference.
+
+
+\subsection{Shaders As Data Files}
+
+Following the example set by Cg and GLSL, it is key that shaders can be treated 
+as data files so that they can travel along with the models whose surfaces they 
+describe.  Requiring a compilation step before the ability to load them into a 
+program increases the amount of time it takes to iterate changes, especially for 
+people who aren't programmers.  For this reason, the approach taken by the 
+metaprogramming shading systems, Sh and Vertigo, is infeasible.  The 
+advantage of being able to use a fully featured general-purpose language for 
+generation of your shaders is offset by the requirement of having a complete C++ 
+or Haskell compiler in order to use your shaders and all.  That said, the basis of 
+functional programming languages, the lambda calculus, has been shown to 
+provide a very high degree of abstraction and notational convenience even with a 
+very simple and naïve implementation.  Therefore, we can provide a high level of 
+abstraction and performance with a minimum of effort, compared to an optimizing 
+C compiler.
+
+
+
+\subsection{Pure, Non-Strict Evaluation Semantics}
+
+...?
+
+
+\section{System Overview}
+
+The Renaissance system is split into two pieces: the language, including its 
+compiler, and the shader management system.
+
+<insert diagram>
+
+The Renaissance system parses and validates the shader source code into an 
+intermediate program structure, which is typed checked as much as possible.  
+The program can then set any constant values.  Compilation can be done 
+explicitly or is done automatically when the program is bound.  The generated 
+GPU code is cached so recompilation is not necessary when switching back and 
+forth between shader states.  At this point, uniforms and attributes can be set.  
+These don't invoke recompilation.
+
+One of the niceties of metaprogramming languages is that the interface between 
+the program and the shader is very convenient, unlike the straight OpenGL API.  
+We can get closer to the convenience of a metaprogramming language by 
+providing custom types native to the host language (C++) that hide the uniform 
+queries and assignments:
+
+\begin{verbatim}
+ren::Bool enableBones(program, "enableBones");
+
+enableBones = true;
+
+program->bind();
+\end{verbatim}
+
+
+
+\section{Language Description}
+
+The syntax and semantics of Renaissance are very similar to the languages 
+Miranda, Haskell, and Clean.
+
+A program consists of two things:  inputs and definitions.  Each is separated by a 
+newline.  (Renaissance is whitespace-sensitive.)
+
+\subsection{Inputs}
+
+There are three types of inputs, one for each of the first three computational 
+frequencies: constants, uniforms, and vertex attributes.  Constant values are 
+taken into account at compile time, uniforms at primitive group time, and 
+attributes per vertex.  Since their type cannot be inferred, it must be made 
+implicit:
+
+\begin{verbatim}
+constant bool enablePerPixelLighting
+uniform mat3 colorMatrix
+attribute float temperature
+\end{verbatim}
+
+\subsection{Definitions}
+
+A definition either specifies a value or a function.
+
+\begin{verbatim}
+value = 2 + 2
+function arg1 arg2 = arg1 / arg2
+\end{verbatim}
+
+'value' is a value of type int and function is a function of type 't * t -> t'.  
+Technically, 'function's return type is not evaluated until it is called with 
+arguments.  In this sense, 'function' actually refers to a template of possible 
+functions which is instantiated at call time, similar to the operation of C++ 
+templates.
+
+Expressions consist of infix operators and function applications.  Precedence of 
+operations is the same as in GLSL, function application having the highest 
+priority.
+
+Evaluation of functions is done lazily, as in Haskell, Miranda, and Clean.  This 
+prevents redundant code generation:
+
+\begin{verbatim}
+constant bool doExpensive
+choose expensive cheap = if doExpensive then expensive else 
+cheap
+gl_FragColor = choose ExpensiveCalculation CheapCalculation
+\end{verbatim}
+
+The arguments to choose are only evaluated if necessary; that is, if doExpensive 
+is true, then ExpensiveCalculation will be performed.  Otherwise, 
+CheapCalculation will be performed.
+
+\subsection{Overloading and Swizzling}
+
+Renaissance supports what is known as ad-hoc polymorphism, or overloading, 
+based on the number and type of arguments.  For example, the expression "vec4 
+1.0" and "vec4 1.0 1.0 1.0 1.0" are equally valid and have the same result.  There 
+is a built-in "length" function which takes any vector of size 1 to 4 and returns its 
+length.  Renaissance defines a special operator "." (from the language Nice) that 
+calls the right hand side with the left hand side as its argument.  This means 
+"length vec" and "vec.length" are equivalent.  This has nice property of allowing 
+vector swizzling (vec.xyz) to be defined entirely within the standard library, 
+although, for performance reasons, it will be special-cased.
+
+\section{System Description}
+
+\subsection{Compiler Backend}
+
+For simplicity of implementation and to leverage the extensive design work that 
+went into the OpenGL Shading Language, we have chosen GLSL as the 
+compiler target.  Also, several functional languages compile to C as it makes a 
+very effective "portable assembly language".  <find a quote?>  Nothing in the 
+language itself prevents other backends from being added in the future, however.
+
+Shaders have special output definitions that are the ones actually responsible for 
+generating code.  For example, if "gl\_Position" is defined, it must have type vec4 
+and frequency of vertex or less.  Its evaluation becomes part of the vertex 
+program.  If it and all other vertex-frequency outputs are not defined, a vertex 
+program is not generated at all and the fixed function pipeline is used.  
+gl\_Position is the only required vertex-frequency output.  gl\_FragColor is the only 
+required fragment-frequency output.  These output variables can also be 
+assigned the special value "undefined", which is equivalent to not giving a 
+definition at all.  This is used in the following situation:
+
+gl\_FragColor = if enablePerPixelShading then getColor else 
+undefined
+
+< factor these in if they haven't been already...
+Design Decisions
+?	Lazy evaluation.  This is a bit of a tricky issue.  You can think of the 
+shader as being executed twice.  Once when the actual code to run on the 
+hardware is generated.  And again when the generated code needs to be 
+run, once per vertex or fragment.  The first "phase" is what enables 
+efficient shader specialization and composition.  Since the graphics 
+hardware itself does not support anything like general-purpose pointers it 
+can't do lazy evaluation or any other modern programming language 
+feature.  But the distinction between the first phase "the compilation 
+phase" and execution phase is purposefully blurred so that the shader is 
+more natural.
+?	Performance and clear code.  As shaders grow, we contended that the C 
+model of programming does not scale to efficient implementation, because 
+of such things as side effects and aliasing (my bad, aliasing isn't actually a 
+problem yet.  but it may be someday.).
+>
+
+Example Program
+
+\begin{verbatim}
+# Uniforms.
+
+uniform vec3 LightPosition
+uniform vec3 BrickColor
+uniform vec3 MortarColor
+uniform vec2 BrickSize
+uniform vec2 BrickPct
+
+# Constants.
+
+SpecularContribution = 0.3
+DiffuseContribution = 1.0 - SpecularContribution
+
+# Transform.
+
+gl_Position = ftransform
+ecPosition = (gl_ModelViewMatrix * gl_Vertex).xyz
+tnorm = normalize (gl_NormalMatrix * gl_Normal)
+
+# Lighting.
+
+lightVec   = normalize (LightPosition - ecPosition)
+reflectVec = reflect (-lightVec) tnorm
+viewVec    = normalize (-ecPosition)
+
+diffuse = max (dot lightVec viewVec) 0.0
+spec = if (diffuse > 0.0) then s else 0.0
+    where s = pow (max (dot reflectVec viewVec) 0.0) 16.0
+LightIntensity = DiffuseContribution * diffuse + 
+                 SpecularContribution * specular
+
+# Brick.
+
+position = gl_Vertex.xy / BrickSize + (vec2 xoffset 0.0)
+    where xoffset = if fract (position.y * 0.5) > 0.5 then 
+0.5 else 0.0
+useBrick = step (fract position) BrickPct
+
+color = mix MortarColor BrickColor amount
+    where amount = useBrick.x * useBrick.y * LightIntensity
+gl_FragColor = color ++ 1.0  # gl_FragColor should have 
+type vec4
+\end{verbatim}
+
+This is the standard OpenGL brick shader translated directly into Renaissance.
+
+\section{Future Work}
+
+expression rewriting
+
+new backends
+
+extension of pure functional language to effects framework, encompassing 
+individual shading calculations, passes, and states
+
+\section{Acknowledgements}
+
+
+
+
+an example for a code insert:
+
+%
+\begin{figure}
+\begin{verse}
+\begin{verbatim}
+
+for (int i = 0; i < 10; ++i)
+cout << i;
+cout << std::endl;
+
+\end{verbatim}
+\end{verse}
+
+\caption{Code Example}
+\end{figure}
+
+
+But that won't let you freely format.
+
+Alternatively you can just verbatimly include external files:
+
+%
+\begin{figure}
+\verbatiminput{testcode.txt}
+
+
+\caption{External Code Example}
+\end{figure}
+
+
+Note that using the browser will result in absolute filenames. Please
+correct them to relative ones.
+
+Including a picture (should be eps):
+
+%
+\begin{figure}
+\includegraphics{sampleFig.eps}
+
+
+\caption{A Picture}
+\end{figure}
+
+
+References are handled using Bib\TeX{}. Take a look at the egbibsample.bib
+file to see how to defines references. The URL-based stuff doesn't
+work in \LyX{}, though, that we'll have to correct later. Usage is
+very simple (Insert->Citation): \cite{Fellner-Helmberg93}
+
+\bibliographystyle{eg-alpha}
+\bibliography{egbibsample}
+
+\end{document}
