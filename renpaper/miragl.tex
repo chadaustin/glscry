@@ -268,14 +268,13 @@ This paper's primary contributions are the following:
 - Natural shader composability that follows naturally from the simple
   execution model and frequency inference.
 
-
-\section{Key Design Decisions}
+\section{Key Design Decisions (This title is copied straight from the Cg paper.  Is that bad?)}
 
 \subsection{Functional Model}
 
 --- DONE
 
-An Introduction to Functional Programming
+An Introduction to Functional Programming (make this a subtitle?)
 
 Renaissance is based on the syntax and semantics of modern, typed,
 pure functional languages, specifically the family consisting of
@@ -357,16 +356,12 @@ global variables do not affect the program's operation on other stream elements.
 
 \subsection{Frequency and Type Inference}
 
+--- It ``smells'' to me like a lot of this should move into the language description.
 
-languages based on C's syntax are designed to be easy to parse by a computer, 
-with human readability and writability as an afterthought.  They contain a lot of 
-structural syntax, such as semicolons and braces, that can otherwise be implicit, 
-as in the whitespace-sensitive languages Python and Haskell.  They also require 
-tight specifications on variables, even when the expressions typed can be 
-inferred.  Most modern functional languages are statically typed: that is, a name 
-always refers to objects of the same type.  At the same time, automatic type 
-inference allows the compiler to figure out the type of a name without being 
-explicitly told what it is.  Consider the following psuedocode:
+Renaissance, as in most pure functional languages, C++, and other shading systems,
+is a statically typed language.  That is, the type of an expression is associated with its name,
+not its value.  However, Renaissance infers the type of an expression from context, so no types
+need be specified explicitly.  Consider:
 
 \begin{verbatim}
 foo a b = a + bar b
@@ -374,29 +369,26 @@ bar b = b + 2
 result = foo 10 4
 \end{verbatim}
 
-note that no types are explicitly specified.  However, when result is evaluated, foo 
-is called with two integers and returns the sum of the first and bar of the second.  
-The result of this addition is an integer as well, so the value result has type 
-integer.  Consider the definition of a function that normalize is a vector (in 
-Haskell-like syntax):
+Notice that no types are explicitly specified.  However, when <var>result is evaluated, <var>foo 
+is called with two integers and returns the sum of the first and <var>bar of the second.  
+The result of this addition is an integer as well, so the value <var>result has type 
+<type>int.  Consider the definition of a function that normalizes a vector:
 
 \begin{verbatim}
 normalize v = v / length v
 \end{verbatim}
 
-The operation of the function is clear even though its component types are not 
-specified.  There is a surprising side effect of this: normalize function actually 
+The operation of the function is clear even though its argument and return types are not 
+specified.  This has a surprising side effect: the <def> normalize function actually 
 represents several functions, each of different type.  Given that division by a 
-scalar and a length function operate on multiple types of vectors, normalize itself 
-will work with multiple types of vectors.  This is similar to C++ template functions.
+scalar and the length function operate on multiple types of vectors, normalize itself 
+will work with any vector.  This is similar to C++ template functions.
 
 
-\subsection{Frequency Inference}
-
-Existing shading languages make explicit the difference between vertex and 
-fragment programs, as well as processing that must be done on the CPU before 
-it is sent to the graphics card.  In the past, this made sense, because vertex and 
-fragment hardware were sufficiently different.  Some operations were only 
+Cg, HLSL, and GLSL make explicit the difference between vertex and 
+fragment programs, as well as the processing that must be done on the CPU before 
+it is sent to the graphics card.  For early programmable hardware, this made sense, because vertex and 
+fragment processors were sufficiently different.  Some operations were only 
 possible on one or the other.  However, the trend right now used to provide a 
 unified programmable interface to both stages of computation.  In fact, and 
 DirectX 10 proposes a unified shader model.  Even on some of the later 
@@ -420,6 +412,72 @@ infer their frequency based on what they depend on.  We'll discuss this more ful
 in the description of the language.
 
 Another advantage of combined shaders:  easy to share computation in both.
+
+
+--- TODO:  this stuff below should go somewhere else
+languages based on C's syntax are designed to be easy to parse by a computer, 
+with human readability and writability as an afterthought.  They contain a lot of 
+structural syntax, such as semicolons and braces, that can otherwise be implicit, 
+as in the whitespace-sensitive languages Python and Haskell.  They also require 
+tight specifications on variables, even when the expressions typed can be 
+inferred.  Most modern functional languages are statically typed: that is, a name 
+always refers to objects of the same type.  At the same time, automatic type 
+inference allows the compiler to figure out the type of a name without being 
+explicitly told what it is.  Consider the following psuedocode:
+
+
+
+
+\subsection{Single Shader for Both Vertex and Pixel Pipelines}
+
+---DONE
+
+In contrast with the most popular real-time shading languages today, Cg, HLSL, 
+and GLSL, we decided to blur the distinction between vertex 
+shaders and fragment shaders.  One concern raised by NVIDIA in the design of Cg is that the different processors 
+support different functionality, and by making the programs explicitly separate,
+the differences are made clear.  [ref]  However, recent trends suggest that the vertex and fragment
+processors will grow closer in functionality, rather than farther apart.  DirectX 10 is pushing for a unified 
+processor architecture for both the vertex and fragment parts of the pipeline.  [ref]  ATI technology has 
+also recently announced that they are unifying their two processors with a scheduling unit that manages the
+load balancing between the two stages of the pipeline.  [ref]  With this in 
+mind, we feel the potential confusion caused by executing "one" program on two 
+potentially-different processors (in addition to the CPU) is worth the benefit in improved shader clarity,
+maintainability, and optimization.
+
+To mitigate the potential confusion brought about by this approach, we may allow specification of computational 
+frequency explicitly, as RTSL does.  If a lower frequency is specified for a result than the values it depends on
+(for example, if you claim that a result has a frequency of ``vertex'' but it depends on the fragment-frequency
+gl\_FragCoord value), a compile-time error is raised.  Conversely, it might make sense to allow explicitly specifying
+a higher frequency than would be inferred so as to force computation to occur later in the pipeline, which could
+be a performance improvement in some cases.
+
+
+\subsection{Shaders As Data Files}
+
+---DONE
+
+Following the example set by Cg and GLSL, it is critical that shaders can be treated 
+as data files so that they can travel along with the models whose surfaces they 
+describe.  Requiring a compilation step before being able to load or use a shader
+greatly increases the amount of time it takes to iterate changes, especially for shader building tools and 
+people who aren't programmers.  For this reason, the approach taken by
+metaprogramming shading systems is infeasible for many uses of shaders, such as in games and
+modeling software.  The 
+convenience of being able to use a fully-featured general-purpose language for 
+generation of your shaders is offset by the requirement of having a complete C++ 
+or Haskell compiler in order to use your shaders at all.  Further, the basis of 
+functional programming languages, the lambda calculus, provides
+a very high degree of abstraction and notational convenience even with a 
+naïve implementation.  Therefore, we can provide many of the important features of other high-level languages,
+such as higher-order functions and specialization, with a minimum of effort.  Also, Vertigo shows that
+an optimizing compiler from a functional language to GPU architectures is relatively straightforward,
+especially compared to an optimizing C compiler.  In short, we believe a 'small' functional language
+with a simple and powerful semantic model can satisfy the needs of shaders just as well as the
+metaprogramming systems, without the requirement of a host environment.
+
+
+
 
 
 \subsection{Composability}
@@ -500,63 +558,6 @@ provides a simple switch to enable and disable bone application.
 Application of cognitive dimensions framework to programming language.
 
 ... ???
-
-
-\section{Key Design Decisions (This title is copied straight from the Cg paper.  Is that bad?)}
-
---- Put this section right after the contributions section?
-
-\subsection{}
-
---- Put the discussion of type and frequency inference here?
-
-\subsection{Single Shader for Both Vertex and Pixel Pipelines}
-
----DONE
-
-In contrast with the most popular real-time shading languages today, Cg, HLSL, 
-and GLSL, we decided to blur the distinction between vertex 
-shaders and fragment shaders.  One concern raised by NVIDIA in the design of Cg is that the different processors 
-support different functionality, and by making the programs explicitly separate,
-the differences are made clear.  [ref]  However, recent trends suggest that the vertex and fragment
-processors will grow closer in functionality, rather than farther apart.  DirectX 10 is pushing for a unified 
-processor architecture for both the vertex and fragment parts of the pipeline.  [ref]  ATI technology has 
-also recently announced that they are unifying their two processors with a scheduling unit that manages the
-load balancing between the two stages of the pipeline.  [ref]  With this in 
-mind, we feel the potential confusion caused by executing "one" program on two 
-potentially-different processors (in addition to the CPU) is worth the benefit in improved shader clarity,
-maintainability, and optimization.
-
-To mitigate the potential confusion brought about by this approach, we may allow specification of computational 
-frequency explicitly, as RTSL does.  If a lower frequency is specified for a result than the values it depends on
-(for example, if you claim that a result has a frequency of ``vertex'' but it depends on the fragment-frequency
-gl\_FragCoord value), a compile-time error is raised.  Conversely, it might make sense to allow explicitly specifying
-a higher frequency than would be inferred so as to force computation to occur later in the pipeline, which could
-be a performance improvement in some cases.
-
-
-\subsection{Shaders As Data Files}
-
----DONE
-
-Following the example set by Cg and GLSL, it is critical that shaders can be treated 
-as data files so that they can travel along with the models whose surfaces they 
-describe.  Requiring a compilation step before being able to load or use a shader
-greatly increases the amount of time it takes to iterate changes, especially for shader building tools and 
-people who aren't programmers.  For this reason, the approach taken by
-metaprogramming shading systems is infeasible for many uses of shaders, such as in games and
-modeling software.  The 
-convenience of being able to use a fully-featured general-purpose language for 
-generation of your shaders is offset by the requirement of having a complete C++ 
-or Haskell compiler in order to use your shaders at all.  Further, the basis of 
-functional programming languages, the lambda calculus, provides
-a very high degree of abstraction and notational convenience even with a 
-naïve implementation.  Therefore, we can provide many of the important features of other high-level languages,
-such as higher-order functions and specialization, with a minimum of effort.  Also, Vertigo shows that
-an optimizing compiler from a functional language to GPU architectures is relatively straightforward,
-especially compared to an optimizing C compiler.  In short, we believe a 'small' functional language
-with a simple and powerful semantic model can satisfy the needs of shaders just as well as the
-metaprogramming systems, without the requirement of a host environment.
 
 
 \subsection{Pure, Non-Strict Evaluation Semantics}
