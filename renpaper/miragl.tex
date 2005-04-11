@@ -74,6 +74,7 @@
 
 \maketitle
 \begin{abstract}
+
 Programmable graphics hardware is growing in capability and flexibility at a rapid pace.
 Existing languages for programming this hardware make it difficult at best to build collections
 of custom graphics algorithms that can be combined as needed.  We present a pure functional
@@ -98,7 +99,7 @@ graphics hardware. But mapping general algorithms to the very limited
 and non-intuitive  operations that were possible in this way remained
 something of a black art, as  witnessed by the many papers that were
 published on mapping specific algorithms to graphics hardware, e.g. 
-\cite{kautz99interactive,heidrich01Shading,kautztowards}. 
+\cite{heidrich01Shading,kautztowards}. 
 
 Offline rendering for animation had been using much more general languages
 for a long time \cite{HanrahanRenderman}, and some attempts were made to map 
@@ -364,7 +365,7 @@ The value of |a| at the end of |main()| is either 9 or 5, depending on whether |
 In general, this restriction complicates the compiler's task of optimization and static analysis.  A functional
 language, on the other hand, is given a lot of freedom to reorder evaluations, because all dependencies
 are explicit and no evaluation has side effects.  For specialized tasks, functional languages have been shown
-to perform much more efficiently than equivalent C code \cite{ocaml,clean,sac}.
+to perform much more efficiently than equivalent C code. % \cite{ocaml,clean,sac}.
 
 As hardware programmability increases in capability and shaders get longer and larger, we believe a functional
 language will scale in both performance and maintainability more than a language based on the imperative model of C.
@@ -486,7 +487,14 @@ compiler, and the shader management API.  For simplicity of implementation and t
 design work that went into the OpenGL Shading Language, we have chosen GLSL as the basis for a large
 portion of our language.
 
-<insert diagram>
+
+%\begin{figure}[htb]
+%  \centering
+%  \includegraphics[width=.9\linewidth]{dia1}
+%  \caption{\label{sysdia}
+%           System Diagram}
+%\end{figure}
+
 
 When the program loads a shader, it is parsed, validated, and type checked
 into an intermediate program structure.  The program can then set the value of
