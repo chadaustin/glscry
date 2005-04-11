@@ -743,7 +743,7 @@ gl_FragColor = if enablePerPixelShading then getColor
 The reason the special value |undefined| is necessary is that let's say we want a shader that can
 switch between per-vertex and per-fragment lighting.  When vertex lighting is enabled, we may not need a
 fragment program at all: the fixed function pipeline may do just fine.  In that case, we want a way to
-define what gl_FragColor is, while providing a switch that specifies whether it should generate an output
+define what |gl_FragColor| is, while providing a switch that specifies whether it should generate an output
 or not.
 
 \begin{figure}[htb]
