@@ -407,7 +407,7 @@ will work with any vector.  This is similar in practice to C++ template function
 Alongside each expression's type, we also maintain a computational
 frequency, a concept from Stanford's RTSL.  There are four frequencies: constant (per compile),
 uniform (per primitive group), vertex (per vertex), and fragment (per fragment).  Built-in shader
-inputs each have a specified frequency.  For example, gl_Vertex has the frequency |vertex|.  gl_FragCoord has
+inputs each have a specified frequency.  For example, |gl_Vertex| has the frequency |vertex|.  |gl_FragCoord| has
 the frequency |fragment|.  If you perform an operation on two expressions that have different frequencies, the
 resulting expression usually has the higher of the two.  One exception is the |if| construct:  if the condition
 has constant frequency, the |if| is evaluated at compile-time, and, if true, the resulting frequency is
