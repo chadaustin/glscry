@@ -486,93 +486,6 @@ metaprogramming systems, without the requirement of a host environment.
 
 
 
-
-
-\subsection{Composability}
-
-As graphics teams begin to replace the entire fixed function pipeline with their 
-own custom shading algorithms, the restriction that shaders must replace the 
-entire pipeline becomes an increasing problem.  Moreover, it is nontrivial to write 
-two independent pieces of the shading algorithms and combine them into one 
-shader at runtime, even if they are independent in definition.  Some have solved 
-this problem with elaborate preprocessors that combine the pieces into one 
-shader that does not do any redundant computation.  Half-Life 2, for example, 
-builds over 1500 shaders by combining pieces.
-
-As a consequence of the functional programming model and frequency interface, 
-Renaissance naturally supports composition.  Take a look at the following 
-example code:
-
-\begin{verbatim}
-constant bool useLightingModel1
-lightModel1 = ...  # calculations for light model 1
-lightModel2 = ...  # calculations for light model 2
-gl_FragColor = if useLightingModel1 then lightModel1 else 
-lightModel2
-\end{verbatim}
-
-Since the variable useLightingModel1 has constant frequency, it is evaluated at 
-shader compilation time.  Thus, the shader is specialized based on its value, with 
-no extra computation per fragment.
-
-
-\subsection{Full Abstraction Facilities - Higher Order Functions}
-
-
-Consider a vertex program that applies skeletal animation bone transformations 
-to each vertex.  Traditionally, the program looks something like:
-
-\begin{verbatim}
-uniform [mat4] bones
-attribute vec4 boneIndices
-attribute vec4 weights
-
-v0 = weights.x * ((bones boneIndices.x) * gl_Vertex)
-v1 = weights.y * ((bones boneIndices.y) * gl_Vertex)
-v2 = weights.z * ((bones boneIndices.z) * gl_Vertex)
-v3 = weights.w * ((bones boneIndices.w) * gl_Vertex)
-vertex = v0 + v1 + v2 + v3
-gl_Position = gl_ModelViewProjectionMatrix * vertex
-\end{verbatim}
-
-Notice that this program has much duplicated logic and is hard-coded for the 
-number of bones applied to each vertex.  One improvement would be to use a for 
-loop or iteration construct to iterate over the bone references.  This would reduce 
-the duplicated logic, but compilers for these languages do not claim to unroll 
-loops and perform high-level optimizations like these.  Given frequency inference 
-and higher-order-functions, however:
-
-\begin{verbatim}
-constant bool enableBones
-
-uniform [mat4] bones
-attribute vec4 boneIndices
-attribute vec4 weights
-
-skinnedVertex = sum [(weights i) * (bones (boneIndices i)) * gl_Vertex)
-                     for i in (range 0 3)]
-vertex = if enableBones then skinnedVertex else gl_Vertex
-gl_Position = gl_ModelViewProjectionMatrix * vertex
-\end{verbatim}
-
-The syntax [expr for var in list] is called a list comprehension.  A new list is 
-created by evaluating expr on every item in list.  In this case, the new list 
-contains weighted vertices, which must be summed to get the result.  The sum 
-function takes a list and returns the result of adding all its elements.
-
-Using frequency inference and staged computation, this version of the shader 
-provides a simple switch to enable and disable bone application.
-
-Application of cognitive dimensions framework to programming language.
-
-... ???
-
-
-\subsection{Pure, Non-Strict Evaluation Semantics}
-
-...?
-
-
 \section{System Overview}
 
 The Renaissance system is implemented in C++ and split into two pieces: the language, including its 
@@ -608,6 +521,7 @@ program->bind();
 \end{verbatim}
 
 The next two sections define the language and the compiler in more detail.
+
 
 \section{Language Description}
 
@@ -664,22 +578,39 @@ The arguments to <name>choose are only evaluated if necessary; that is, if doExp
 is true, then ExpensiveCalculation will be performed.  Otherwise, 
 CheapCalculation will be performed.
 
+
 \subsection{Types}
 
 Following the conventions set by GLSL, we provide the following types:
 bool, int, float, and vectors of 2 to 4 elements of each.  (vec2 is a
 vector of two floats, vec3b is a vector of three bools, vec4i is a
 vector of four integers, etc.)  There are also three square, float
-matrix types: mat2, mat3, and mat4.
+matrix types: mat2, mat3, and mat4.  Texture samplers have type
+``sampler1D'', ``sampler2D'', etc. just as in GLSL.
 
 Arrays have type [t] where t is the type of its elements.  Since shading
 hardware does not yet support variable-length arrays, the length of the array must be specified
 at constant frequency.  In order to access the ith element of an array, treat it as a function,
 calling it with parameter i.
 
-\subsection{Built-In Functions}
+In Renaissance, there are no implicit type conversions.  2 + 2.0 is a
+type error, requiring a constructor conversion:  float 2 + 2.0
+
+
+\subsection{Built-In Functions and Operators}
 
 Once again, we provide access to all GLSL built-in functions, with the same names, types, overloads.
+
+Texture access is done as in GLSL, with the exception that sampler
+types may be called as functions with the lookup coordinates as the
+parameter.
+
+All of GLSL's built-in infix operators are available in Renaissance, with the same precedence.
+Function calls have the highest precedence, but parentheses are available and operate as expected.
+A new ++ operator is defined as vector concatenation, replacing GLSL's vector constructors.
+Given two floats, concatening them with ++ returns a 2-element vector.  For example,
+(vec3 1.2 3.4 5.6) ++ 7.8  ->  vec4 (1.2 3.4 5.6 7.8)
+
 
 \subsection{Overloading and Swizzling}
 
@@ -693,7 +624,82 @@ calls the right hand side with the left hand side as its argument.  This means
 vector swizzling (vec.xyz) to be defined entirely within the standard library, 
 although, for performance reasons, it will be special-cased.
 
-\section{System Description}
+
+\subsection{Composability}
+
+As graphics teams begin to replace the entire fixed function pipeline with their 
+own custom shading algorithms, the restriction that shaders must replace the 
+entire pipeline becomes an increasing problem.  Moreover, it is nontrivial to write 
+two independent pieces of the shading algorithms and combine them into one 
+shader at runtime, even if they are independent in definition.  Some have solved 
+this problem with elaborate preprocessors that combine the pieces into one 
+shader that does not do any redundant computation.  Half-Life 2, for example, 
+builds over 1500 shaders by combining pieces.
+
+As a consequence of the functional programming model and frequency interface, 
+Renaissance naturally supports composition.  Take a look at the following 
+example code:
+
+\begin{verbatim}
+constant bool useLightingModel1
+lightModel1 = ...  # calculations for light model 1
+lightModel2 = ...  # calculations for light model 2
+gl_FragColor = if useLightingModel1 then lightModel1 else 
+lightModel2
+\end{verbatim}
+
+Since the variable useLightingModel1 has constant frequency, it is evaluated at 
+shader compilation time.  Thus, the shader is specialized based on its value, with 
+no extra computation per fragment.
+
+
+\subsection{Abstraction Facilities}
+
+Consider a vertex program that applies skeletal animation bone transformations 
+to each vertex.  Traditionally, the program looks something like:
+
+\begin{verbatim}
+uniform [mat4] bones
+attribute vec4 boneIndices
+attribute vec4 weights
+
+v0 = weights.x * ((bones boneIndices.x) * gl_Vertex)
+v1 = weights.y * ((bones boneIndices.y) * gl_Vertex)
+v2 = weights.z * ((bones boneIndices.z) * gl_Vertex)
+v3 = weights.w * ((bones boneIndices.w) * gl_Vertex)
+vertex = v0 + v1 + v2 + v3
+gl_Position = gl_ModelViewProjectionMatrix * vertex
+\end{verbatim}
+
+Notice that this program has much duplicated logic and is hard-coded for the 
+number of bones applied to each vertex.  One improvement would be to use a for 
+loop or iteration construct to iterate over the bone references.  This would reduce 
+the duplicated logic, but compilers for these languages do not claim to unroll 
+loops and perform high-level optimizations like these.  Given frequency inference 
+and higher-order-functions, however:
+
+\begin{verbatim}
+constant bool enableBones
+
+uniform [mat4] bones
+attribute vec4 boneIndices
+attribute vec4 weights
+
+skinnedVertex = sum [(weights i) * (bones (boneIndices i)) * gl_Vertex)
+                     for i in (range 0 3)]
+vertex = if enableBones then skinnedVertex else gl_Vertex
+gl_Position = gl_ModelViewProjectionMatrix * vertex
+\end{verbatim}
+
+The syntax [expr for var in list] is called a list comprehension.  A new list is 
+created by evaluating expr on every item in list.  In this case, the new list 
+contains weighted vertices, which must be summed to get the result.  The sum 
+function takes a list and returns the result of adding all its elements.
+
+Using frequency inference and staged computation, this version of the shader 
+provides a simple switch to enable and disable bone application.
+
+\section{Runtime Description}
 
 \subsection{Compiler Backend}
 
@@ -713,8 +719,9 @@ required fragment-frequency output.  These output variables can also be
 assigned the special value "undefined", which is equivalent to not giving a 
 definition at all.  This is used in the following situation:
 
-gl\_FragColor = if enablePerPixelShading then getColor else 
-undefined
+\begin{verbatim}
+gl_FragColor = if enablePerPixelShading then getColor else undefined
+\end{verbatim}
 
 < factor these in if they haven't been already...
 Design Decisions
