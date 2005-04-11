@@ -120,9 +120,7 @@ In this work we introduce a shading language built on modern functional
 languages and their pure semantics instead of the procedural roots used
 before. The functional approach significantly simplifies compilation and
 analysis of the program, opening up new avenues for more general
-optimizations and compositions.  The functional approach significantly simplifies compilation and
-analysis of the program, opening up new avenues for more general
-optimizations and natural composition of concepts.
+optimizations and compositions.
 
 
 \section{Related Work}
@@ -132,14 +130,14 @@ optimizations and natural composition of concepts.
 Real-time programmable shading appeared in an early form as multi-pass 
 rendering along with multi-texturing blend modes.  The Quake 3 engine for 
 example provided a simple shader scripting language to control the number of 
-passes, texture stages, and rendering state.  This isn't a complete solution for 
+passes, texture stages, and rendering states.  This isn't a complete solution for 
 general shading, but it goes a long way towards allowing the implementation of 
 several surface appearances.  Peercy, Olano et al. discovered that an OpenGL 
 implementation, with some key extensions, can be treated as a general-purpose 
 SIMD computer in their OpenGL Shader work \cite{peercy00interactive}.  OpenGL Shader can support 
 arbitrary shading computation, using multiple rendering passes.
 
-However, the trend for processors in general; and graphics processors specifically has gone towards higher clock speeds on the 
+However, the trend for processors in general and graphics processors specifically has gone towards higher clock speeds on the 
 processor, but slower and higher latency memory access.  This precludes
 large-scale multipass implementations of shading from being viable, due to the very 
 high memory bandwidth requirements.
@@ -155,7 +153,7 @@ done per batch of geometry, while vertex and fragment computations are done per
 vertex and per fragment, respectively.  RTSL has a retargetable backend that can 
 map vertex computation to either the CPU or to basic programmable vertex 
 hardware.  Fragment computation is mapped to multi-pass OpenGL, as in 
-OpenGL Shader above, or early fragment processing hardware -- NVIDIA's 
+OpenGL Shader above, or early fragment processing hardware like NVIDIA's 
 register combiners.  Their shading language did not separate
 vertex and fragment as the compiler was 
 responsible for splitting the work up among the various computational stages.
@@ -195,14 +193,14 @@ access to the underlying hardware, Cg does very little work for the user. She is
 required to specify how data is transferred into the shaders and which attribute 
 channels map to what. By design, Cg also does not 
 virtualize any resources, if a feature is not available.  One of Cg's primary goals
-is to be as close to the hardware as possible.
+is to be as close to the hardware as possible while maintaining a higher level of abstraction.
 
 \subsection{GLSL}
 
 While Cg and HLSL were being developed, 3DLabs and the OpenGL 
 Architecture Review Board were designing a shading language for the future of 
-OpenGL.  The OpenGL Shading Language (GLSL) had different 
-goals than Cg and HLSL.  First, it was intended to become part of the OpenGL 
+OpenGL.  The OpenGL Shading Language (GLSL \cite{RostGLSL}) had different 
+goals than Cg and HLSL.  It was intended to become part of the OpenGL 
 standard, replacing the assembly languages.  OpenGL implementers must have 
 the shader compiler in the driver itself, as opposed to an external 
 process.  This increases driver complexity, but means that applications that use
@@ -225,7 +223,7 @@ such as this is that it has very tight integration with the host language. If th
 shader references a global variable, and assignments are made to that global variable outside 
 the definition of the shader, the data is automatically passed in as a uniform.  Also, it is
 natural to use the host language's features in order to specialize shaders.  For 
-example, if the shader contains an if statement, two different shaders may be degenerated,
+example, if the shader contains an |if| statement, two different shaders may be generated,
 based on the outcome of the condition.
 
 Sh's primary disadvantage is that it requires a full C++ compiler to use a shader.  
@@ -249,30 +247,26 @@ between accepting a normalized vector or a potentially non-normalized vector and
 explicitly.  Since normalization is expensive, normalizing a vector twice
 should be avoided.  However, in a functional language it is possible to take advantage of 
 referential transparency and expression rewriting to reduce the expression 
-"normalize (normalize v) -> normalize v".  Once this optimization is available, there 
+"normalize (normalize v)" to "normalize v".  Once this optimization is available, there 
 is no reason not to normalize a vector, if it needs to be.  Redundant normalize calls are optimized away.
 Vertigo shows how this is done in an elegant and automatic way.  
 
 
-\subsection{Problems?}
-
-Add a section about problems with existing languages?
-
-
 \section{Contributions}
 
-Shading languages have traditionally followed the path of languages for
-general-purpose processors, even when they aren't applicable to the hardware model.  Recent versions of Cg 
-introduce a concept of interfaces, which have syntax and description 
-deceptively similar to interfaces in Java, even though the problem it tries to solve 
-is better addressed by partial evaluation of functional programs and staged computation.
+% Necessary? DR
+% Shading languages have traditionally followed the path of languages for
+% general-purpose processors, even when they aren't applicable to the hardware model.  Recent versions of Cg 
+% introduce a concept of interfaces, which have syntax and description 
+% deceptively similar to interfaces in Java, even though the problem it tries to solve 
+% is better addressed by partial evaluation of functional programs and staged computation.
 
 In this paper we introduce a programming language for real-time graphics 
 hardware that we believe addresses many of the problems in the existing 
 languages, discussed above.  This language draws from research in 
 modern, pure functional languages, such as Miranda, Haskell, and Clean.  We 
 base our design on functional languages for a variety of reasons.  First, 
-functional languages have a very natural fit to the programming model exposed 
+functional languages are a very natural fit to the programming model exposed 
 by graphics hardware.  Second, functional languages are traditionally easier to 
 efficiently compile than imperative languages with side 
 effects, such as C.  Third, our language is designed to have a minimum of 
@@ -302,7 +296,7 @@ This paper's primary contributions are the following:
 Renaissance is based on the syntax and semantics of modern, typed,
 pure functional languages, specifically the family consisting of
 Miranda, Haskell, Clean.  Since we don't expect our audience to be
-familiar with the syntax or semantics of these languages, let us introduce
+familiar with the syntax or semantics of these languages, the following will introduce
 the look and feel with an example.
 
 \begin{MyVerb}
@@ -319,14 +313,14 @@ and it means "apply the function square to the value r".  Notice that the exampl
 does not make any types explicit.  Types are inferred based on a definition's 
 expression and any arguments.  So, above, |pi| has type |float|.  square's type is 
 |t -> t|, meaning "a function that takes type t and returns type t", where t is the 
-type of the arguments.  So |square 10| has type int and |square 10.0| has type 
-float.  This type inference is discussed in detail later.
+type of the arguments.  So |square 10| has type |int| and |square 10.0| has type 
+|float|.  This type inference is discussed in detail later.
 
 There are no loops or variable assignments in this language.  Every
 object, once created, cannot be changed.  This is called referential
-transparency, which refers to the fact that if you call the same
-function twice with the same arguments, you will always get the same
-result back.
+transparency, which refers to the fact that if the same
+function twice is called twice with the same arguments, the same
+result will be returned.
 
 Modern GPUs have a stream programming model: there is 
 a stream of data elements (vertices or fragments) and a function is 
@@ -363,7 +357,7 @@ void main() {
 
 The value of |a| at the end of |main()| is either 9 or 5, depending on whether |foo()| or |bar()| is called first.
 In general, this restriction complicates the compiler's task of optimization and static analysis.  A functional
-language, on the other hand, is given a lot of freedom to reorder evaluation, because all dependencies
+language, on the other hand, is given a lot of freedom to reorder evaluations, because all dependencies
 are explicit and no evaluation has side effects.  For specialized tasks, functional languages have been shown
 to perform much more efficiently than equivalent C code \cite{ocaml,clean,sac}.
 
@@ -371,14 +365,14 @@ As hardware programmability increases in capability and shaders get longer and l
 language will scale in both performance and maintainability more than a language based on the imperative model of C.
 
 Even ignoring the performance and ``compiler-friendly'' issues, functional languages are a better mental
-model for the humans writing shaders as well.  It makes explicit that an operation on a stream element has no side
+model for the humans writing shaders as well.  They make explicit that an operation on a stream element has no side
 effects beyond the output value.  Other shading languages must explicitly document that modifications to
 global variables do not affect the program's operation on other stream elements.
 
 
 \subsection{Frequency and Type Inference}
 
---- It ``smells'' to me like a lot of this should move into the language description.
+% --- It ``smells'' to me like a lot of this should move into the language description.
 
 Renaissance is a statically typed language, as in C++, other shading systems, and most pure functional languages.
 That is, the type of an expression is associated with its name,
@@ -407,10 +401,10 @@ scalar and the length function can operate on multiple types of vectors, normali
 will work with any vector.  This is similar in practice to C++ template functions.
 
 Alongside each expression's type, we also maintain a computational
-frequency, a concept from Stanford's RTSL.  There are four frequencies: constant (per compile),
+frequency, a concept introduced by Stanford's RTSL.  There are four frequencies: constant (per compile),
 uniform (per primitive group), vertex (per vertex), and fragment (per fragment).  Built-in shader
 inputs each have a specified frequency.  For example, |gl_Vertex| has the frequency |vertex|.  |gl_FragCoord| has
-the frequency |fragment|.  If you perform an operation on two expressions that have different frequencies, the
+the frequency |fragment|.  If an operation on two expressions that have different frequencies is performed, the
 resulting expression usually has the higher of the two.  One exception is the |if| construct:  if the condition
 has constant frequency, the |if| is evaluated at compile-time, and, if true, the resulting frequency is
 the frequency of the |if-true| expression.  Otherwise, it is the frequency of the |if-false| expression.
@@ -418,7 +412,7 @@ the frequency of the |if-true| expression.  Otherwise, it is the frequency of th
 Outputs have a required frequency as well.  The |gl_Position| output has frequency |vertex| and
 |gl_FragColor| output has frequency |fragment|.  It is an error to define |gl_Position| to be an expression with
 frequency |fragment|.  Outputs must have frequency less than or equal to their definition.
-Now let us say that |gl_FragColor| depends on the normalized, transformed normal:
+Now assume that |gl_FragColor| depends on the normalized, transformed normal:
 
 \begin{MyVerb}
 gl_FragColor = dependsOn (
@@ -440,7 +434,7 @@ shaders and fragment shaders.  One concern raised by NVIDIA in the design of Cg 
 support different functionality, and by making the programs explicitly separate,
 the differences are made clear\cite{mark03cg}.  However, recent trends suggest that the vertex and fragment
 processors will grow closer in functionality, rather than farther apart. Mircrosoft's new graphics standard, the
-Windows Graphics FOundation (WGF, aka DirectX 10) is pushing for a unified 
+Windows Graphics Foundation (WGF, aka DirectX 10) is pushing for a unified 
 processor architecture for both the vertex and fragment parts of the pipeline \cite{blythewgf}. ATI technology has 
 also recently been issued a patent on a multi-threaded graphics core that hides the distinction between vertex 
 and fragment units \cite{atimtpatent,b3datimtpatent}. With this in 
@@ -450,7 +444,7 @@ maintainability, and optimization.
 
 To mitigate the potential confusion brought about by this approach, we may allow specification of computational 
 frequency explicitly, as RTSL does.  If a lower frequency is specified for a result than the values it depends on
-(for example, if you claim that a result has a frequency of |vertex| but it depends on the |fragment|-frequency
+(for example, if it is claimed that a result has a frequency of |vertex| but it depends on the |fragment|-frequency
 |gl_FragCoord| value), a compile-time error is raised.  Conversely, explicitly specifying
 a higher frequency than would be inferred would force computation to occur later in the pipeline, which could
 be a performance improvement in some cases.
@@ -504,7 +498,7 @@ One of the niceties of metaprogramming languages is that the interface between
 the host program and the shader is very convenient, since it can use native data types and structures.
 Contrast this with the OpenGL Shading Language APIs which require querying and managing uniform indices, and
 use function names with 'warts' to distinguish between setting different uniform types:
-glUniformfv and glUniformiv etc.  (TODO: what are the real names?)  We can get close to the convenience
+glUniform1f and glUniform2i etc.  We can get close to the convenience
 of a metaprogramming language by providing custom C++ types that hide the internal data transfers.
 
 \begin{MyVerb}
@@ -527,7 +521,7 @@ The next two sections define the language and the compiler in more detail.
 The syntax and semantics of Renaissance are very similar to the languages 
 Miranda, Haskell, and Clean.
 
-A program consists of two things:  inputs and definitions.  Each is separated by a 
+A program consists of two components:  inputs and definitions.  Each is separated by a 
 newline.  (Renaissance is whitespace-sensitive.)
 
 
@@ -593,8 +587,8 @@ matrix types: |mat2|, |mat3|, and |mat4|.  Texture samplers have type
 
 Arrays have type |[t]| where |t| is the type of its elements.  Since shading
 hardware does not yet support variable-length arrays, the length of the array must be specified
-at |constant| frequency.  In order to access the i-th element of an array, treat it as a function and
-call it with parameter i.
+at |constant| frequency.  In order to access the i-th element of an array, it is treated as a function and
+called with parameter |i|.
 
 In Renaissance, there are no implicit type conversions.  |2 + 2.0| is a
 type error, requiring a constructor conversion:  |float 2 + 2.0|
@@ -603,7 +597,6 @@ type error, requiring a constructor conversion:  |float 2 + 2.0|
 \subsection{Built-In Functions, Operators, and State}
 
 As with types, we provide access to all GLSL built-in functions, with the same names, types, and overloads.
-
 Texture access is done as in GLSL, with the exception that sampler
 types may be called as functions with the lookup coordinates as the
 parameter.
@@ -624,11 +617,11 @@ based on the number and type of arguments.  For example, the expressions |vec4 1
 and |vec4 1.0 1.0 1.0 1.0| are equally valid and have the same result, since the first
 is an overloaded constructor that fills the vector with its one argument.  There 
 is a built-in |length| function which takes any vector of size 1 to 4 and returns its 
-length.  Renaissance defines a special dot operator (|.|) (from the language Nice [ref]) that 
+length.  Renaissance defines a special dot operator (|.|) (similar to the language Nice) that 
 calls the right hand side with the left hand side as its argument.  This means 
 |length vec| and |vec.length| are equivalent.  This has the nice property that
 vector swizzling (|vec.xyz|) can be defined entirely within the standard library, 
-although, for performance reasons, it will be special-cased.
+although, for performance reasons, it is special-cased.
 
 
 \subsection{Composability}
@@ -641,10 +634,10 @@ shader at runtime, even if they are independent in definition.  Some have solved
 this problem with elaborate preprocessors that combine the pieces into one 
 shader that does not do any redundant computation.  Valve's Half-Life 2, for example, 
 builds over 1500 shaders as part of their build process by combining pieces of them with a
-preprocessor.  [ref]
+preprocessor.
 
 As a consequence of the functional programming model and frequency inference, 
-Renaissance naturally supports composition.  Take a look at the following 
+Renaissance naturally supports composition, as demonstrated by the following 
 example code:
 
 \begin{MyVerb}
@@ -655,15 +648,15 @@ gl_FragColor = if useLightingModel1 then lightModel1
                                     else lightModel2
 \end{MyVerb}
 
-Since the variable useLightingModel1 has constant frequency, it is evaluated at 
+Since the variable |useLightingModel1| has constant frequency, it is evaluated at 
 shader compilation time.  Thus, the shader is specialized based on its value, with 
 no extra computation per fragment.
 
 
 \subsection{Abstraction Facilities}
 
-Consider a vertex program that applies skeletal animation bone transformations 
-to each vertex.  Traditionally, the program looks something like:
+Traditionally a vertex program that applies skeletal animation bone transformations 
+to each vertex looks something like this:
 
 \begin{MyVerb}
 uniform [mat4] bones
@@ -678,7 +671,7 @@ vertex = v0 + v1 + v2 + v3
 gl_Position = gl_ModelViewProjectionMatrix * vertex
 \end{MyVerb}
 
-Notice that this program has much duplicated logic and is hard-coded for the 
+This program has much duplicated logic and is hard-coded for the 
 number of bones applied to each vertex.  One improvement would be to use a for 
 loop or iteration construct to iterate over the bone references.  This would reduce 
 the duplicated logic, but compilers for these languages do not claim to unroll 
@@ -720,7 +713,7 @@ compile time.
 As mentioned above, we are building Renaissance upon GLSL.  It is a strong foundation for
 our functional language.
 Also, several functional languages compile to C as it makes a 
-very effective "portable assembly language".  <find a quote?>  Nothing in the 
+very effective "portable assembly language".  Nothing in the 
 language itself prevents other backends from being added in the future, however.
 
 Shaders have special output definitions that are the ones actually responsible for 
@@ -740,52 +733,41 @@ gl_FragColor = if enablePerPixelShading then getColor
                                                 else undefined
 \end{MyVerb}
 
-The reason the special value |undefined| is necessary is that let's say we want a shader that can
+The reason the special value |undefined| is necessary can be demonstrated by a shader that can
 switch between per-vertex and per-fragment lighting.  When vertex lighting is enabled, we may not need a
 fragment program at all: the fixed function pipeline may do just fine.  In that case, we want a way to
-define what |gl_FragColor| is, while providing a switch that specifies whether it should generate an output
+define what |gl\_FragColor| is, while providing a switch that specifies whether it should generate an output
 or not.
 
 \begin{figure}[htb]
 \begin{MyVerb}
 # Uniforms.
-
 uniform vec3 LightPosition
 uniform vec3 BrickColor
 uniform vec3 MortarColor
 uniform vec2 BrickSize
 uniform vec2 BrickPct
-
 # Constants.
-
 SpecularContribution = 0.3
 DiffuseContribution = 1.0 - SpecularContribution
-
 # Transform.
-
 gl_Position = ftransform
 ecPosition = (gl_ModelViewMatrix * gl_Vertex).xyz
 tnorm = normalize (gl_NormalMatrix * gl_Normal)
-
 # Lighting.
-
 lightVec   = normalize (LightPosition - ecPosition)
 reflectVec = reflect (-lightVec) tnorm
 viewVec    = normalize (-ecPosition)
-
 diffuse = max (dot lightVec viewVec) 0.0
 spec = if (diffuse > 0.0) then s else 0.0
     where s = pow (max (dot reflectVec viewVec) 0.0) 16.0
 LightIntensity = DiffuseContribution * diffuse + 
                  SpecularContribution * specular
-
 # Brick.
-
 position = gl_Vertex.xy / BrickSize + (vec2 xoffset 0.0)
     where xoffset = if fract (position.y * 0.5) > 0.5 then 
 0.5 else 0.0
 useBrick = step (fract position) BrickPct
-
 color = mix MortarColor BrickColor amount
     where amount = useBrick.x * useBrick.y * LightIntensity
 # gl_FragColor should have 
@@ -795,14 +777,14 @@ type vec4gl_FragColor = color ++ 1.0
 \label{BrickShader}
 \end{figure}
 
-This is the standard OpenGL brick shader translated directly into Renaissance.
+Fig. \ref{BrickShader} shows the standard OpenGL brick shader translated directly into Renaissance.
 
 \section{Future Work}
 
-While Renaissance satisfied our expectations, there are clearly areas
+While Renaissance satisfies our expectations, there are clearly areas
 that we feel we could improve it.  First, composition and
-specialization of shaders in our system requires that you write and compile
-everything in one file.  A ``linking'' or ``module'' system would allow people to
+specialization of shaders in our system requires that everything is written and compiled
+in one file.  A ``linking'' or ``module'' system would allow users to
 write independent concepts by themselves and then combine them as needed.  Similarly,
 we would like to extend the concept of functional graphics up to the level of multi-pass
 effects and state specifications.  As Vertigo shows so eloquently, functional programming
@@ -811,7 +793,7 @@ is a perfect fit for many concepts in computer graphics.
 Our research was focused on implementing high-level optimizations such as specialization without
 redundant code.  We would like to apply Vertigo's expression rewriting system so that we can generate
 efficient code at the instruction level as well.  Along the same lines, additional backends for the
-assembly language shading languages is an obvious improvement.
+assembly language shading languages are an obvious improvement.
 
 Finally, since a functional language provides a clear, unambiguous specification of the dependencies
 in the pipeline, implementing shader debugging and virtualization on top of Renaissance is a nice
