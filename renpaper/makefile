@@ -15,6 +15,8 @@ DOCUSDVI= $(DOCUS:.tex=.dvi)
 
 DOCUSPS= $(DOCUS:.tex=.ps)
 
+DOCUSPDF= $(DOCUS:.tex=.pdf)
+
 ALLDOCUS= 
 
 FIGNAMES=
@@ -27,7 +29,7 @@ EPSS= $(FIGS:.fig=.eps)
 #
 
 .SUFFIXES:
-.SUFFIXES: .dvi .tex .eps .fig .ps .tex,v .fig,v .aux .bib
+.SUFFIXES: .dvi .tex .eps .fig .ps .tex,v .fig,v .aux .bib .pdf
 
 .PATH.fig,v: RCS
 .PATH.tex,v: RCS
@@ -67,11 +69,14 @@ EPSS= $(FIGS:.fig=.eps)
 .dvi.ps:
 	dvips -o $*.ps $*.dvi
 
+.ps.pdf:
+	ps2pdf14 $*.ps $*.pdf
+
 #
 # Service dependencies
 #
 
-default: $(DOCUSPS)
+default: $(DOCUSPDF)
 
 pics: $(EPSS)
 
@@ -106,6 +111,7 @@ small: $(DOCUSPS)
 # Explicit Dependencies
 #
 
+miragl.pdf: miragl.ps
 miragl.ps: ${EPSS} miragl.dvi 
 miragl.dvi: ${EPSS} ${ALLDOCUS} miragl.aux cits.bib
 # main.dvi: $(DOCUS:.tex=.aux)

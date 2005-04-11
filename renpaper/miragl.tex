@@ -54,10 +54,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 
 
-\title{MiraGL : A Functional Shading Language}
+\title[Renaissance : A Functional Shading Language]{Renaissance : A Functional Shading Language}
 
 
-\author{Chad Austin and Dirk Reiners\\
+\author[C. Austin \& D. Reiners]{Chad Austin and Dirk Reiners\\
 Human-Computer Interaction Program\\
 Iowa State University\\
 \{aegisk,dreiners\}@iastate.edu }
@@ -76,74 +76,80 @@ what the topic's going to be until then .;)
 
 \section{Introduction}
 
-[State of shading hardware.  These bracketed notes are just to guide my 
-thoughts, not for inclusion.]
-The trend in real-time computer graphics is towards more general-purpose and 
-unrestricted programmability on the graphics hardware.  With these advances on 
-the silicon, the state-of-the-art of programming languages that run on the 
-hardware is improving as well.
+The most important innovation in computer graphics hardware over the last 
+decade has been the introduction of programmability. Textures were a first
+step  towards fine-grain control over the rendered pixels, and together with
+multi-pass  rendering and later multi-textured pipeline configurability they
+allowed some  basic implementations of user-specific calculations in the
+graphics hardware. But mapping general algorithms to the very limited
+and non-intuitive  operations that were possible in this way remained
+something of a black art, as  witnessed by the many papers that were
+published on mapping specific algorithms to graphics hardware 
+(\cite{kautz99interactive,heidrich01Shading,kautztowards} et al.). 
 
-[State of shading languages.]
-In the early days, we saw "pipeline configurability" by multi-texturing and an ever-
-increasing set of specific blend modes between the texture stages.  This allowed 
-for the implementation of some shading algorithms on fixed function hardware.  
-The first steps towards real programmability where assembly languages for 
-register machines that operated on the primitive type of four element float 
-vectors.  This was a great step forward for generalizing graphics hardware, but it 
-had its limitations.  The shading algorithms were not easy to follow and you 
-couldn't easily create building blocks of functionality on which the rest of the 
+Offline rendering for animation had been using much more general languages
+for a long time \cite{HanrahanRenderman}, and some attempts were made to map 
+them to a slightly extended version of the fixed-function OpenGL pipeline 
+\cite{peercy00interactive}. But the real breakthrough came with actual
+programs that were executed on the graphics hardware. 
+
+The first steps were assembly languages for 
+register machines.  This was a great step forward for generalizing graphics hardware, but it 
+had its limitations.  The shading algorithms were not easy to follow and it
+was hard to create building blocks of functionality on which the rest of the 
 shader was built.  The next natural step was a high-level language built on top of 
 the assembly.  These languages often look like C, both in syntax and semantics.  
 There are also metaprogramming languages built on top of a host language.  
 These allow tight integration between the host language and the graphics 
 processor as well as straightforward shader specialization.
 
-With the advent of Cg's interface features, we're just now starting to see support 
+With the advent of Cg's interface features and looking at shaders (i.e. a 
+program or programs that runs on the GPU) as elements
+of an algebra \cite{mccool-shader}, we're just now starting to see support 
 for composable shaders.
 
-We introduce a language based not on C but on modern functional languages 
-with pure semantics.
-
-<find a home for this.  "Hereafter, a program or programs that runs on the GPU is 
-referred to as a shader.">
+In this work we introduce a language that is built on modern functional
+languages and their pure semantics instead of the procedural roots used
+before. The functional approach significantly simplifies compilation and
+analysis of the program, opening up new avenues for more general
+optimizations and compositions.
 
 \section{Related Work}
-
 
 \subsection{Multi-Pass Texture Blending }
 
 Real-time programmable shading appeared in an early form as multi-pass 
-rendering along with multi-texturing blend modes.  The quake three engine for 
+rendering along with multi-texturing blend modes.  The Quake 3 engine for 
 example provided a simple shader scripting language to control the number of 
 passes, texture stages, and rendering state.  This isn't a complete solution for 
 general shading, but it goes a long way towards allowing the implementation of 
-several surface descriptions.  Piercy élan oh et al. discovered that an OpenGL 
+several surface descriptions.  Peercy, Olano et al. discovered that an OpenGL 
 implementation, with some key extensions, can be treated as a general-purpose 
-SIMD computer in their OpenGL Shader work.  OpenGL Shader can support 
+SIMD computer in their OpenGL Shader work \cite{peercy00interactive}.  OpenGL Shader can support 
 arbitrary shading computation, using multiple rendering passes.
 
-However, the trend for processors has gone towards higher clock speeds on the 
+However, the trend for processors in general; and graphics processors specifically has gone towards higher clock speeds on the 
 processor, but slower and higher latency memory access.  This precludes large-
 scale multipass implementations of shading from being viable, due to the very 
-high memory bandwidth requirement.
+high memory bandwidth requirements.
 
 
 \subsection{RTSL}
 
-Stanford's real time programmable shading system, RTSL, introduced the 
+Stanford's real time programmable shading system, RTSL \cite{rtsl}, introduced the 
 concept of computational frequency.  They defined four frequencies: constant, 
 primitive group, vertex, and fragment.  Constant computation is done at compile 
 time and not during the processing of geometry.  Primitive group computation is 
 done per batch of geometry.  Vertex and fragment computations are done per 
-vertex, and per fragment, obviously.  RTSL has a retargetable backend that can 
+vertex, and per fragment.  RTSL has a retargetable backend that can 
 map vertex computation to either the CPU or to basic programmable vertex 
 hardware.  Fragment computation is mapped to multipass OpenGL, as in 
 OpenGL shader above, or early fragment processing hardware -- NVIDIA's 
-register combiners.  They're shading language did not differentiate between 
+register combiners.  Their shading language did not differentiate between 
 vertex and fragment hardware in the programs themselves.  The compiler was 
 responsible for splitting the work up among the various computational stages.  In 
-many cases, frequency analysis was implicit, but they allow you to explicitly 
-specify where computation is done; for example, to easily compare two lighting 
+many cases, frequency analysis was implicit, but they allowed explicit
+specification of where computation is to be done; for example, to easily compare two lighting 
 algorithms, one per vertex and the other per fragment.
 
 
@@ -152,18 +158,20 @@ algorithms, one per vertex and the other per fragment.
 The next generation of shading languages allowed full programmability at the 
 vertex and pixel levels via assembly languages for a vector based register 
 machine architecture.  Although the instruction sets were limited at first, the 
-languages allowed arbitrary computation per vertex and per fragment.  They also 
-a more efficient than the multi-pass approaches above, because they require 
-much less memory bandwidth.  The disadvantaged, of course, of assembly 
+languages allowed arbitrary computation per vertex and per fragment.  They are 
+more efficient than the multi-pass approaches above, because they require 
+much less memory bandwidth.  One disadvantage of assembly 
 languages is that they are difficult for people to write and understand, as well as 
-maintain.  Their operation is not immediately clear.  Another disadvantage is that 
-they may not map directly to the underlying hardware.  In this sense, they can be 
-considered virtual assembly languages.
+maintain, especially when programs get larger. One principal advantage of
+assembly languages is that they are directly executed by the underlying
+hardware. Due to the variability of graphics hardware, between and within
+vendors, this is rarely the case for shader languages, making them less
+attractive.
 
 \subsection{Cg, HLSL}
 
 Naturally, the next step beyond an assembly language is a high-level language 
-that compiles to it.  Cg and HLSL were created by NVIDIA and Microsoft, 
+that is compiled to it.  Cg \cite{mark03cg} and HLSL were created by NVIDIA and Microsoft, 
 respectively, as C-like, high-level shading languages.  HLSL compiles to the 
 Microsoft-defined vertex and pixel shader assembly architecture, which is loaded 
 into the card at runtime.  Cg, on the other hand, compiles to a variety of back 
@@ -172,9 +180,9 @@ for compiling Cg in the driver itself.
 
 When referring to the language used by both Cg and HLSL, I will call it simply 
 Cg.  For the sake of compatibility with other shading systems, and transparent 
-access to the underlying hardware, Cg does very little work for you.  You are 
-required to specify how data is transferred into the shaders, which attribute 
-channels map to what, (... and other stuff? ...)  Cg also does not do any 
+access to the underlying hardware, Cg does very little work for the user. She is 
+required to specify how data is transferred into the shaders and which attribute 
+channels map to what. Cg also does not do any 
 virtualization of resources, if a feature is not available.  This is not a criticism of 
 Cg, just a description of the design decisions they made.
 
@@ -197,19 +205,21 @@ texture units than are available, and accessing textures from the vertex shader.
 \subsection{Sh}
 
 
-Sh isn't exactly a language, per se.  It is a metaprogramming system on top of 
+Sh \cite{mccool02shader} isn't exactly a language, per se.  It is a metaprogramming system on top of 
 C++ designed for building shaders.  Sh is implemented through a set of custom 
 C++ objects that build an internal program representation when operations are 
 applied to them.  This program is compiled to an underlying shader that is then 
 run directly on the graphics card.  The advantage of a metaprogramming system 
-such as this is that it has very tight integration with the host language.  If your 
-shader references a global variable, and you assign that global variable outside 
+such as this is that it has very tight integration with the host language. If the 
+shader references a global variable, and assignments are made to that global variable outside 
 the definition of the shader, it automatically becomes a uniform.  It also becomes 
 natural to use the host languages features in order to specialize shaders.  For 
-example, if you put an if statement inside a shader, depending on the outcome of 
-the condition, you can generate two different shaders.  The disadvantage of a 
-metaprogramming system is that requires a full C++ compiler to use a shader.  
-Thus, you can't easily pass the shaders along with 3-D models, for example, 
+example, if when putting an if statement inside a shader, depending on the outcome of 
+the condition, two different shaders are generated.  
+
+The disadvantage of a 
+metaprogramming system is that it requires a full C++ compiler to use a shader.  
+Thus, shaders can't easily be passed along with 3-D models, 
 limiting their usefulness to people who aren't programmers.  That said, there are 
 some uses for shaders where a metaprogramming approach is ideal; such as 
 implementation of custom graphics algorithms.
@@ -218,22 +228,20 @@ implementation of custom graphics algorithms.
 \subsection{Vertigo}
 
 
-Vertigo is a metaprogramming system like Sh, but built on top of Haskell instead 
+Vertigo \cite{elliott04vertigo} is a metaprogramming system like Sh, but built on top of Haskell instead 
 of C++.  The interesting aspects of vertigo are that it is a functional language and 
 eases expression rewriting for optimization.  Expression rewriting allows it to do 
 an optimal search of expression space to reduce the amount of computation 
 necessary to evaluate a particular expression.  A compelling example is that of 
 vector normalization.  Vector normalization is a common requirements when 
-writing graphics programs.  When you write eight procedure, you have a choice 
-between accepting a normalized specter, or any vector and then normalizing in 
-yourself.  Since normalization is expensive, you don't want to normalize a vector 
-twice.  However, if you have a functional language you can take advantage of 
+writing graphics programs.  When writing a procedure, there is a choice 
+between accepting a normalized vector, or any vector and then normalizing it 
+explicitly.  Since normalization is expensive, normalizing a vector twice
+should be avoided.  However, in a functional language it is possible to take advantage of 
 referential transparency and expression rewriting to reduce the expression 
-"normalize (normalize v) -> normalize v".  Once you have this optimization, there 
-is no reason not to normalize a vector, if you need it to be normalized.  [Vertigo] 
-shows how this is done in an elegant and automatic way.  There is a similar 
-example for optimizing the cross product operation into an architecture that 
-allows vector swizzles for free, as GPUs do.
+"normalize (normalize v) -> normalize v".  Once this optimization is available, there 
+is no reason not to normalize a vector, if it needs to be normalized. Vertigo
+shows how this is done in an elegant and automatic way.  
 
 
 \section{Contributions}
