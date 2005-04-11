@@ -413,10 +413,10 @@ resulting expression usually has the higher of the two.  One exception is the |i
 has constant frequency, the |if| is evaluated at compile-time, and, if true, the resulting frequency is
 the frequency of the |if-true| expression.  Otherwise, it is the frequency of the |if-false| expression.
 
-Outputs have a required frequency as well.  The gl_Position output has frequency |vertex| and
-gl_FragColor output has frequency |fragment|.  It is an error to define gl_Position to be an expression with
+Outputs have a required frequency as well.  The |gl_Position| output has frequency |vertex| and
+|gl_FragColor| output has frequency |fragment|.  It is an error to define gl_Position to be an expression with
 frequency |fragment|.  Outputs must have frequency less than or equal to their definition.
-Now let us say that gl_FragColor depends on the normalized, transformed normal:
+Now let us say that |gl_FragColor| depends on the normalized, transformed normal:
 
 \begin{MyVerb}
 gl_FragColor = dependsOn (normalize (gl_NormalMatrix * gl_Normal))
