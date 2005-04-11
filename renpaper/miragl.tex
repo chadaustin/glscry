@@ -286,8 +286,7 @@ This paper's primary contributions are the following:
 
 \end{itemize}
 
-\section{Key Design Decisions (This title is copied straight from the Cg
-paper.  Is that bad?)[No, I don't think so]}
+\section{Key Design Decisions}
 
 \subsection{Functional Model}
 
@@ -308,14 +307,14 @@ circumference r = pi * square r
 \end{MyVerb}
 
 The first line defines a name |pi| to have the approximate value of pi.  The 
-second line to find a function called "square" that takes one parameter and 
+second line to find a function called |square| that takes one parameter and 
 returns its square.  The third line defines the circumference, given a radius, to be 
-pi times the square of the radius.  "square r" is the syntax for function application, 
+pi times the square of the radius.  |square r| is the syntax for function application, 
 and it means "apply the function square to the value r".  Notice that the example 
 does not make any types explicit.  Types are inferred based on a definition's 
-expression and any arguments.  So, above, "pi" has type 'float'.  square's type is 
-'t -> t', meaning "a function that takes type t and returns type t", where t is the 
-type of the arguments.  So 'square 10' has type int and 'square 10.0' has type 
+expression and any arguments.  So, above, |pi| has type |float|.  square's type is 
+|t -> t|, meaning "a function that takes type t and returns type t", where t is the 
+type of the arguments.  So |square 10| has type int and |square 10.0| has type 
 float.
 
 There are no loops or variable assignments in this language.  Every
@@ -357,7 +356,7 @@ void main() {
 \label{CExample}
 \end{figure}
 
-The value of |a| at the end of |main()| is either 9 or 5, depending on whether foo() or bar() is called first.
+The value of |a| at the end of |main()| is either 9 or 5, depending on whether |foo()| or |bar()| is called first.
 In general, this restriction complicates the compiler's task of optimization and static analysis.  A functional
 language, on the other hand, is given a lot of freedom to reorder evaluation, because all dependencies
 are explicit and no evaluation has side effects.  For specialized tasks, functional languages have been shown
@@ -389,10 +388,10 @@ result = foo 10 4
 \end{MyVerb}
 
 
-Notice that no types are explicitly specified.  However, when {\verb result} is evaluated, <var>foo 
-is called with two integers and returns the sum of the first and <var>bar of the second.  
-The result of this addition is an integer as well, so the value <var>result has type 
-<type>int.  Consider the definition of a function that normalizes a vector:
+Notice that no types are explicitly specified.  However, when |result| is evaluated, |foo| 
+is called with two integers and returns the sum of the first and |bar| of the second.  
+The result of this addition is an integer as well, so the value |result| has type 
+|int|.  Consider the definition of a function that normalizes a vector:
 
 
 \begin{MyVerb}
@@ -401,7 +400,7 @@ normalize v = v / length v
 
 
 The operation of the function is clear even though its argument and return types are not 
-specified.  This has a surprising side effect: the <def> normalize function actually 
+specified.  This has a surprising side effect: the |normalize| function actually 
 represents several functions, each of different type.  Given that division by a 
 scalar and the length function operate on multiple types of vectors, normalize itself 
 will work with any vector.  This is similar to C++ template functions.
@@ -569,9 +568,9 @@ value = 2 + 2
 function arg1 arg2 = arg1 / arg2
 \end{MyVerb}
 
-'value' is a value of type int and function is a function of type 't * t -> t'.  
-Technically, 'function's return type is not evaluated until it is called with 
-arguments.  In this sense, 'function' actually refers to a template of possible 
+|value| is a value of type int and function is a function of type |t * t -> t|.  
+Technically, |function|s return type is not evaluated until it is called with 
+arguments.  In this sense, |function| actually refers to a template of possible 
 functions which is instantiated at call time, similar to the operation of C++ 
 templates.
 
@@ -589,9 +588,9 @@ cheap
 gl_FragColor = choose ExpensiveCalculation CheapCalculation
 \end{MyVerb}
 
-The arguments to <name>choose are only evaluated if necessary; that is, if doExpensive 
-is true, then ExpensiveCalculation will be performed.  Otherwise, 
-CheapCalculation will be performed.
+The arguments to |choose| are only evaluated if necessary; that is, if |doExpensive| 
+is true, then |ExpensiveCalculation| will be performed.  Otherwise, 
+|CheapCalculation| will be performed.
 
 \subsection{Types}
 
@@ -602,13 +601,13 @@ vector of four integers, etc.)  There are also three square, float
 matrix types: mat2, mat3, and mat4.  Texture samplers have type
 ``sampler1D'', ``sampler2D'', etc. just as in GLSL.
 
-Arrays have type [t] where t is the type of its elements.  Since shading
+Arrays have type |[t]| where |t| is the type of its elements.  Since shading
 hardware does not yet support variable-length arrays, the length of the array must be specified
 at constant frequency.  In order to access the ith element of an array, treat it as a function,
 calling it with parameter i.
 
-In Renaissance, there are no implicit type conversions.  2 + 2.0 is a
-type error, requiring a constructor conversion:  float 2 + 2.0
+In Renaissance, there are no implicit type conversions.  |2 + 2.0| is a
+type error, requiring a constructor conversion:  |float 2 + 2.0|
 
 
 \subsection{Built-In Functions and Operators}
@@ -629,10 +628,10 @@ Given two floats, concatening them with ++ returns a 2-element vector.  For exam
 \subsection{Overloading and Swizzling}
 
 Renaissance supports what is known as ad-hoc polymorphism, or overloading, 
-based on the number and type of arguments.  For example, the expression "vec4 
-1.0" and "vec4 1.0 1.0 1.0 1.0" are equally valid and have the same result.  There 
+based on the number and type of arguments.  For example, the expression |vec4 
+1.0| and |vec4 1.0 1.0 1.0 1.0| are equally valid and have the same result.  There 
 is a built-in "length" function which takes any vector of size 1 to 4 and returns its 
-length.  Renaissance defines a special operator "." (from the language Nice) that 
+length.  Renaissance defines a special operator |.| (from the language Nice) that 
 calls the right hand side with the left hand side as its argument.  This means 
 "length vec" and "vec.length" are equivalent.  This has nice property of allowing 
 vector swizzling (vec.xyz) to be defined entirely within the standard library, 
@@ -672,7 +671,7 @@ no extra computation per fragment.
 Consider a vertex program that applies skeletal animation bone transformations 
 to each vertex.  Traditionally, the program looks something like:
 
-\begin{verbatim}
+\begin{MyVerb}
 uniform [mat4] bones
 attribute vec4 boneIndices
 attribute vec4 weights
@@ -683,7 +682,7 @@ v2 = weights.z * ((bones boneIndices.z) * gl_Vertex)
 v3 = weights.w * ((bones boneIndices.w) * gl_Vertex)
 vertex = v0 + v1 + v2 + v3
 gl_Position = gl_ModelViewProjectionMatrix * vertex
-\end{verbatim}
+\end{MyVerb}
 
 Notice that this program has much duplicated logic and is hard-coded for the 
 number of bones applied to each vertex.  One improvement would be to use a for 
@@ -692,7 +691,7 @@ the duplicated logic, but compilers for these languages do not claim to unroll
 loops and perform high-level optimizations like these.  Given frequency inference 
 and higher-order-functions, however:
 
-\begin{verbatim}
+\begin{MyVerb}
 constant bool enableBones
 
 uniform [mat4] bones
@@ -703,7 +702,7 @@ skinnedVertex = sum [(weights i) * (bones (boneIndices i)) * gl_Vertex)
                      for i in (range 0 3)]
 vertex = if enableBones then skinnedVertex else gl_Vertex
 gl_Position = gl_ModelViewProjectionMatrix * vertex
-\end{verbatim}
+\end{MyVerb}
 
 The syntax [expr for var in list] is called a list comprehension.  A new list is 
 created by evaluating expr on every item in list.  In this case, the new list 
@@ -724,13 +723,13 @@ very effective "portable assembly language".  <find a quote?>  Nothing in the
 language itself prevents other backends from being added in the future, however.
 
 Shaders have special output definitions that are the ones actually responsible for 
-generating code.  For example, if "gl\_Position" is defined, it must have type vec4 
+generating code.  For example, if |gl\_Position| is defined, it must have type vec4 
 and frequency of vertex or less.  Its evaluation becomes part of the vertex 
 program.  If it and all other vertex-frequency outputs are not defined, a vertex 
 program is not generated at all and the fixed function pipeline is used.  
-gl\_Position is the only required vertex-frequency output.  gl\_FragColor is the only 
+|gl\_Position| is the only required vertex-frequency output.  |gl\_FragColor| is the only 
 required fragment-frequency output.  These output variables can also be 
-assigned the special value "undefined", which is equivalent to not giving a 
+assigned the special value |undefined|, which is equivalent to not giving a 
 definition at all.  This is used in the following situation:
 
 \begin{MyVerb}
