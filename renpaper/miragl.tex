@@ -152,7 +152,7 @@ time and not during the processing of geometry.  Primitive group computation is
 done per batch of geometry, while vertex and fragment computations are done per 
 vertex and per fragment, respectively.  RTSL has a retargetable backend that can 
 map vertex computation to either the CPU or to basic programmable vertex 
-hardware.  Fragment computation is mapped to multipass OpenGL, as in 
+hardware.  Fragment computation is mapped to multi-pass OpenGL, as in 
 OpenGL Shader above, or early fragment processing hardware -- NVIDIA's 
 register combiners.  Their shading language did not separate
 vertex and fragment as the compiler was 
@@ -363,7 +363,7 @@ The value of |a| at the end of |main()| is either 9 or 5, depending on whether |
 In general, this restriction complicates the compiler's task of optimization and static analysis.  A functional
 language, on the other hand, is given a lot of freedom to reorder evaluation, because all dependencies
 are explicit and no evaluation has side effects.  For specialized tasks, functional languages have been shown
-to perform much more efficiently than equivalent C code.  [ref: ocaml, clean, sac]
+to perform much more efficiently than equivalent C code \cite{ocaml,clean,sac}.
 
 As hardware programmability increases in capability and shaders get longer and larger, we believe a functional
 language will scale in both performance and maintainability more than a language based on the imperative model of C.
@@ -435,11 +435,12 @@ In contrast with the most popular real-time shading languages today, Cg, HLSL,
 and GLSL, we decided to blur the distinction between vertex 
 shaders and fragment shaders.  One concern raised by NVIDIA in the design of Cg is that the different processors 
 support different functionality, and by making the programs explicitly separate,
-the differences are made clear.  [ref]  However, recent trends suggest that the vertex and fragment
-processors will grow closer in functionality, rather than farther apart.  DirectX 10 is pushing for a unified 
-processor architecture for both the vertex and fragment parts of the pipeline.  [ref]  ATI technology has 
-also recently announced that they are unifying their two processors with a scheduling unit that manages the
-load balancing between the two stages of the pipeline.  [ref]  With this in 
+the differences are made clear\cite{mark03cg}.  However, recent trends suggest that the vertex and fragment
+processors will grow closer in functionality, rather than farther apart. Mircrosoft's new graphics standard, the
+Windows Graphics FOundation (WGF, aka DirectX 10) is pushing for a unified 
+processor architecture for both the vertex and fragment parts of the pipeline \cite{blythewgf}. ATI technology has 
+also recently been issued a patent on a multi-threaded graphics core that hides the distinction between vertex 
+and fragment units \cite{atimtpatent,b3datimtpatent}. With this in 
 mind, we feel the potential confusion caused by executing "one" program on two 
 potentially-different processors (in addition to the CPU) is worth the benefit in improved shader clarity,
 maintainability, and optimization.
@@ -466,7 +467,7 @@ generation of your shaders is offset by the requirement of having a complete C++
 or Haskell compiler in order to use your shaders at all.  Further, the basis of 
 functional programming languages, the lambda calculus, provides
 a high degree of abstraction and notational convenience even with a 
-naïve implementation.  [ref The Implementation of Functional Programming Languages, Simon Peyton-Jones]
+naïve implementation \cite{PeytonFunctional}.
 Therefore, we can provide many of the important features of other high-level languages,
 such as higher-order functions and specialization, with a minimum of effort.  Also, Vertigo shows that
 an optimizing compiler from a functional language to GPU architectures is relatively straightforward,
@@ -596,7 +597,7 @@ matrix types: mat2, mat3, and mat4.  Texture samplers have type
 
 Arrays have type |[t]| where |t| is the type of its elements.  Since shading
 hardware does not yet support variable-length arrays, the length of the array must be specified
-at constant frequency.  In order to access the ith element of an array, treat it as a function,
+at constant frequency.  In order to access the i-th element of an array, treat it as a function,
 calling it with parameter i.
 
 In Renaissance, there are no implicit type conversions.  |2 + 2.0| is a
@@ -614,7 +615,7 @@ parameter.
 All of GLSL's built-in infix operators are available in Renaissance, with the same precedence.
 Function calls have the highest precedence, but parentheses are available and operate as expected.
 A new ++ operator is defined as vector concatenation, replacing GLSL's vector constructors.
-Given two floats, concatening them with ++ returns a 2-element vector.  For example,
+Given two floats, concatenating them with ++ returns a 2-element vector.  For example,
 (vec3 1.2 3.4 5.6) ++ 7.8  ->  vec4 (1.2 3.4 5.6 7.8)
 
 
@@ -826,7 +827,7 @@ programmable shading system with configurable state that can be
 flipped on and off, just like the interface to the fixed function
 pipeline.
 
-\section{Acknowledgements}
+\section{Acknowledgments}
 
 We would like to thank Conal Elliot for his work on Vertigo while at
 Microsoft Research -- without it we would not have gotten far.  Thanks
