@@ -799,12 +799,24 @@ This is the standard OpenGL brick shader translated directly into Renaissance.
 
 \section{Future Work}
 
-expression rewriting
+While Renaissance satisfied our expectations, there are clearly areas
+that we feel we could improve it.  First, composition and
+specialization of shaders in our system requires that you write and compile
+everything in one file.  A ``linking'' or ``module'' system would allow people to
+write independent concepts by themselves and then combine them as needed.  Similarly,
+we would like to extend the concept of functional graphics up to the level of multi-pass
+effects and state specifications.  As Vertigo shows so eloquently, functional programming
+is a perfect fit for many concepts in computer graphics.
 
-new backends
+Our research was focused on implementing high-level optimizations such as specialization without
+redundant code.  We would like to apply Vertigo's expression rewriting system so that we can generate
+efficient code at the instruction level as well.  Along the same lines, additional backends for the
+assembly language shading languages is an obvious improvement.
 
-extension of pure functional language to effects framework, encompassing 
-individual shading calculations, passes, and states
+Finally, since a functional language provides a clear, unambiguous specification of the dependencies
+in the pipeline, implementing shader debugging and virtualization on top of Renaissance is a nice
+opportunity.
+
 
 \section{Conclusion}
 
