@@ -422,7 +422,7 @@ Now let us say that |gl_FragColor| depends on the normalized, transformed normal
 gl_FragColor = dependsOn (normalize (gl_NormalMatrix * gl_Normal))
 \end{MyVerb}
 
-gl_NormalMatrix has frequency |uniform| and gl_Normal has frequency |vertex|.  Thus, the normal transformation
+|gl_NormalMatrix| has frequency |uniform| and |gl_Normal| has frequency |vertex|.  Thus, the normal transformation
 can be done on the vertex processor.  It looks at first glance like the |normalize| call can be moved up
 to the vertex processor too, but, since it is a nonlinear operation and the fragment interpolators linearly
 interpolate, the normalization must be done on the fragment processor.  Conceptually, all operations are
