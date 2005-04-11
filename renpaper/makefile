@@ -70,7 +70,16 @@ EPSS= $(FIGS:.fig=.eps)
 	dvips -o $*.ps $*.dvi
 
 .ps.pdf:
-	ps2pdf14 $*.ps $*.pdf
+	ps2pdf -dMaxSubsetPct=100 \
+         -dCompatibilityLevel=1.3 \
+         -dSubsetFonts=true \
+         -dEmbedAllFonts=true \
+         -dAutoFilterColorImages=false \
+         -dAutoFilterGrayImages=false \
+         -dColorImageFilter=/FlateEncode \
+         -dGrayImageFilter=/FlateEncode \
+         -dMonoImageFilter=/FlateEncode \
+         $*.ps $*.pdf
 
 #
 # Service dependencies

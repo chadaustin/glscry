@@ -4,6 +4,7 @@
 
 \documentclass{egpubl}
 \usepackage{gh05}
+\usepackage{fancyvrb}
 
 % --- for  Annual CONFERENCE
 % \ConferenceSubmission % uncomment for Conference submission
@@ -48,6 +49,11 @@
 
 % end of prologue
 
+\fvset{fontsize=\small, fontfamily=helvetica, fontseries=b, xleftmargin=2em}
+\DefineVerbatimEnvironment{MyVerb}{Verbatim}{fontseries=auto}
+
+\DefineShortVerb{\|}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
 \providecommand{\LyX}{L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
 
@@ -60,7 +66,7 @@
 \author[C. Austin \& D. Reiners]{Chad Austin and Dirk Reiners\\
 Human-Computer Interaction Program\\
 Iowa State University\\
-\{aegisk,dreiners\}@iastate.edu }
+\{aegisk,dreiners\}@cs.iastate.edu }
 
 \begin{document}
 
@@ -84,8 +90,8 @@ allowed some  basic implementations of user-specific calculations in the
 graphics hardware. But mapping general algorithms to the very limited
 and non-intuitive  operations that were possible in this way remained
 something of a black art, as  witnessed by the many papers that were
-published on mapping specific algorithms to graphics hardware 
-(\cite{kautz99interactive,heidrich01Shading,kautztowards} et al.). 
+published on mapping specific algorithms to graphics hardware, e.g. 
+\cite{kautz99interactive,heidrich01Shading,kautztowards}. 
 
 Offline rendering for animation had been using much more general languages
 for a long time \cite{HanrahanRenderman}, and some attempts were made to map 
@@ -267,16 +273,21 @@ these issues in detail.
 
 This paper's primary contributions are the following:
 
-- A pure functional programming language with a straightforward
-  semantic model and syntax.
+\begin{itemize}
 
-- Automatic computational frequency inference for optimal partitioning
-  of program execution to four stages of the graphics pipeline.
+\item{A pure functional programming language with a straightforward
+  semantic model and syntax}
 
-- Natural shader composability that follows naturally from the simple
-  execution model and frequency inference.
+\item{Automatic computational frequency inference for optimal partitioning
+  of program execution to four stages of the graphics pipeline}
 
-\section{Key Design Decisions (This title is copied straight from the Cg paper.  Is that bad?)}
+\item{Natural shader composability that follows naturally from the simple
+  execution model and frequency inference}
+
+\end{itemize}
+
+\section{Key Design Decisions (This title is copied straight from the Cg
+paper.  Is that bad?)[No, I don't think so]}
 
 \subsection{Functional Model}
 
@@ -290,13 +301,13 @@ Miranda, Clean, and Haskell.  Since we don't expect our audience to be
 familiar with the syntax or semantics of these languages, let us introduce
 the look and feel with an example.
 
-\begin{verbatim}
+\begin{MyVerb}
 pi = 3.1415927
 square x = x * x
 circumference r = pi * square r
-\end{verbatim}
+\end{MyVerb}
 
-The first line defines a name "pi" to have the approximate value of pi.  The 
+The first line defines a name |pi| to have the approximate value of pi.  The 
 second line to find a function called "square" that takes one parameter and 
 returns its square.  The third line defines the circumference, given a radius, to be 
 pi times the square of the radius.  "square r" is the syntax for function application, 
@@ -322,32 +333,31 @@ why graphics processors these days are so efficient: performance increases linea
 available.  Previous shading languages 
 have semantic models similar to C; that is, variables that 
 can be modified and read from.  Further, the order statements are executed is critical.
-Consider the following, C-like code:
+Consider the C-like code in figure \ref{CExample}.
 
-\begin{verbatim}
+\begin{figure}[htb]
+\begin{MyVerb}
 int a = 1;
-
 int foo() {
   a += 2;
-
   // Some code.
   return 10;
 }
-
 int bar() {
   a *= 3;
-
   // Other code.
   return 15;
 }
-
 void main() {
   int sum = foo() + bar();
   // do something with a
 }
-\end{verbatim}
+\end{MyVerb}
+\caption{C code example}
+\label{CExample}
+\end{figure}
 
-The value of 'a' at the end of main() is either 9 or 5, depending on whether foo() or bar() is called first.
+The value of |a| at the end of |main()| is either 9 or 5, depending on whether foo() or bar() is called first.
 In general, this restriction complicates the compiler's task of optimization and static analysis.  A functional
 language, on the other hand, is given a lot of freedom to reorder evaluation, because all dependencies
 are explicit and no evaluation has side effects.  For specialized tasks, functional languages have been shown
@@ -371,20 +381,24 @@ is a statically typed language.  That is, the type of an expression is associate
 not its value.  However, Renaissance infers the type of an expression from context, so no types
 need be specified explicitly.  Consider:
 
-\begin{verbatim}
+
+\begin{MyVerb}
 foo a b = a + bar b
 bar b = b + 2
 result = foo 10 4
-\end{verbatim}
+\end{MyVerb}
 
-Notice that no types are explicitly specified.  However, when <var>result is evaluated, <var>foo 
+
+Notice that no types are explicitly specified.  However, when {\verb result} is evaluated, <var>foo 
 is called with two integers and returns the sum of the first and <var>bar of the second.  
 The result of this addition is an integer as well, so the value <var>result has type 
 <type>int.  Consider the definition of a function that normalizes a vector:
 
-\begin{verbatim}
+
+\begin{MyVerb}
 normalize v = v / length v
-\end{verbatim}
+\end{MyVerb}
+
 
 The operation of the function is clear even though its argument and return types are not 
 specified.  This has a surprising side effect: the <def> normalize function actually 
@@ -512,7 +526,7 @@ use function names with 'warts' to distinguish between setting different uniform
 glUniformfv and glUniformiv etc.  (TODO: what are the real names?)  We can get close to the convenience
 of a metaprogramming language by providing custom C++ types that hide the internal data transfers.
 
-\begin{verbatim}
+\begin{MyVerb}
 ren::Bool enableBones(program, "enableBones");
 
 enableBones = true;
@@ -520,10 +534,9 @@ program->bind();
 
 enableBones = false;
 program->bind();
-\end{verbatim}
+\end{MyVerb}
 
 The next two sections define the language and the compiler in more detail.
-
 
 \section{Language Description}
 
@@ -541,20 +554,20 @@ taken into account at compile time, uniforms at primitive group time, and
 attributes per vertex.  Since their type cannot be inferred, it must be made 
 implicit:
 
-\begin{verbatim}
+\begin{MyVerb}
 constant bool enablePerPixelLighting
 uniform mat3 colorMatrix
 attribute float temperature
-\end{verbatim}
+\end{MyVerb}
 
 \subsection{Definitions}
 
 A definition either specifies a value or a function.
 
-\begin{verbatim}
+\begin{MyVerb}
 value = 2 + 2
 function arg1 arg2 = arg1 / arg2
-\end{verbatim}
+\end{MyVerb}
 
 'value' is a value of type int and function is a function of type 't * t -> t'.  
 Technically, 'function's return type is not evaluated until it is called with 
@@ -569,17 +582,16 @@ priority.
 Evaluation of functions is done lazily, as in Haskell, Miranda, and Clean.  This 
 prevents redundant code generation:
 
-\begin{verbatim}
+\begin{MyVerb}
 constant bool doExpensive
 choose expensive cheap = if doExpensive then expensive else 
 cheap
 gl_FragColor = choose ExpensiveCalculation CheapCalculation
-\end{verbatim}
+\end{MyVerb}
 
 The arguments to <name>choose are only evaluated if necessary; that is, if doExpensive 
 is true, then ExpensiveCalculation will be performed.  Otherwise, 
 CheapCalculation will be performed.
-
 
 \subsection{Types}
 
@@ -642,13 +654,13 @@ As a consequence of the functional programming model and frequency interface,
 Renaissance naturally supports composition.  Take a look at the following 
 example code:
 
-\begin{verbatim}
+\begin{MyVerb}
 constant bool useLightingModel1
 lightModel1 = ...  # calculations for light model 1
 lightModel2 = ...  # calculations for light model 2
 gl_FragColor = if useLightingModel1 then lightModel1 else 
 lightModel2
-\end{verbatim}
+\end{MyVerb}
 
 Since the variable useLightingModel1 has constant frequency, it is evaluated at 
 shader compilation time.  Thus, the shader is specialized based on its value, with 
@@ -721,9 +733,9 @@ required fragment-frequency output.  These output variables can also be
 assigned the special value "undefined", which is equivalent to not giving a 
 definition at all.  This is used in the following situation:
 
-\begin{verbatim}
+\begin{MyVerb}
 gl_FragColor = if enablePerPixelShading then getColor else undefined
-\end{verbatim}
+\end{MyVerb}
 
 < factor these in if they haven't been already...
 Design Decisions
@@ -743,9 +755,8 @@ of such things as side effects and aliasing (my bad, aliasing isn't actually a
 problem yet.  but it may be someday.).
 >
 
-Example Program
-
-\begin{verbatim}
+\begin{figure}[htb]
+\begin{MyVerb}
 # Uniforms.
 
 uniform vec3 LightPosition
@@ -786,9 +797,12 @@ useBrick = step (fract position) BrickPct
 
 color = mix MortarColor BrickColor amount
     where amount = useBrick.x * useBrick.y * LightIntensity
-gl_FragColor = color ++ 1.0  # gl_FragColor should have 
-type vec4
-\end{verbatim}
+# gl_FragColor should have 
+type vec4gl_FragColor = color ++ 1.0
+\end{MyVerb}
+\caption{Brick shader}
+\label{BrickShader}
+\end{figure}
 
 This is the standard OpenGL brick shader translated directly into Renaissance.
 
@@ -829,58 +843,6 @@ the Haskell language and for releasing his out-of-print book The
 Implementation of Functional Programming Languages.  Finally, Dusty
 Leary and his infectious love of functional programming greatly influenced the
 design of the language.
-
-
-
-an example for a code insert:
-
-%
-\begin{figure}
-\begin{verse}
-\begin{verbatim}
-
-for (int i = 0; i < 10; ++i)
-cout << i;
-cout << std::endl;
-
-\end{verbatim}
-\end{verse}
-
-\caption{Code Example}
-\end{figure}
-
-
-But that won't let you freely format.
-
-Alternatively you can just verbatimly include external files:
-
-%
-\begin{figure}
-\verbatiminput{testcode.txt}
-
-
-\caption{External Code Example}
-\end{figure}
-
-
-Note that using the browser will result in absolute filenames. Please
-correct them to relative ones.
-
-Including a picture (should be eps):
-
-%
-\begin{figure}
-%\includegraphics{sampleFig.eps}
-
-
-\caption{A Picture}
-\end{figure}
-
-
-References are handled using Bib\TeX{}. Take a look at the egbibsample.bib
-file to see how to defines references. The URL-based stuff doesn't
-work in \LyX{}, though, that we'll have to correct later. Usage is
-very simple (Insert->Citation): \cite{Fellner-Helmberg93}
 
 \bibliographystyle{eg-alpha}
 \bibliography{cits}
