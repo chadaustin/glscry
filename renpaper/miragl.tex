@@ -489,7 +489,9 @@ metaprogramming systems, without the requirement of a host environment.
 \section{System Overview}
 
 The Renaissance system is implemented in C++ and split into two pieces: the language, including its 
-compiler, and the shader management API.
+compiler, and the shader management API.  For simplicity of implementation and to leverage the extensive
+design work that went into the OpenGL Shading Language, we have chosen GLSL as the basis for a large
+portion of our language.
 
 <insert diagram>
 
@@ -703,9 +705,9 @@ provides a simple switch to enable and disable bone application.
 
 \subsection{Compiler Backend}
 
-For simplicity of implementation and to leverage the extensive design work that 
+<<moved.  For simplicity of implementation and to leverage the extensive design work that 
 went into the OpenGL Shading Language, we have chosen GLSL as the 
-compiler target.  Also, several functional languages compile to C as it makes a 
+compiler target.>>  Also, several functional languages compile to C as it makes a 
 very effective "portable assembly language".  <find a quote?>  Nothing in the 
 language itself prevents other backends from being added in the future, however.
 
