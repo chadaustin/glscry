@@ -49,7 +49,7 @@
 
 % end of prologue
 
-\fvset{fontsize=\small, fontfamily=helvetica, fontseries=b, xleftmargin=2em}
+\fvset{fontsize=\small, fontfamily=helvetica, fontseries=b, xleftmargin=1em}
 \DefineVerbatimEnvironment{MyVerb}{Verbatim}{fontseries=auto}
 
 \DefineShortVerb{\|}
@@ -63,10 +63,12 @@
 \title[Renaissance : A Functional Shading Language]{Renaissance : A Functional Shading Language}
 
 
-\author[C. Austin \& D. Reiners]{Chad Austin and Dirk Reiners\\
-Human-Computer Interaction Program\\
-Iowa State University\\
-\{aegisk,dreiners\}@cs.iastate.edu }
+%\author[C. Austin \& D. Reiners]{Chad Austin and Dirk Reiners\\
+%Human-Computer Interaction Program\\
+%Iowa State University\\
+%\{aegisk,dreiners\}@cs.iastate.edu }
+
+\author[Witheld for Review]{Witheld for Review}
 
 \begin{document}
 
@@ -419,7 +421,8 @@ frequency |fragment|.  Outputs must have frequency less than or equal to their d
 Now let us say that |gl_FragColor| depends on the normalized, transformed normal:
 
 \begin{MyVerb}
-gl_FragColor = dependsOn (normalize (gl_NormalMatrix * gl_Normal))
+gl_FragColor = dependsOn (
+                normalize (gl_NormalMatrix * gl_Normal))
 \end{MyVerb}
 
 |gl_NormalMatrix| has frequency |uniform| and |gl_Normal| has frequency |vertex|.  Thus, the normal transformation
@@ -569,7 +572,8 @@ prevents redundant code generation:
 
 \begin{MyVerb}
 constant bool doExpensive
-choose expensive cheap = if doExpensive then expensive else cheap
+choose expensive cheap = 
+        if doExpensive then expensive else cheap
 gl_FragColor = choose ExpensiveCalculation CheapCalculation
 \end{MyVerb}
 
@@ -647,7 +651,8 @@ example code:
 constant bool useLightingModel1
 lightModel1 = ...  # calculations for light model 1
 lightModel2 = ...  # calculations for light model 2
-gl_FragColor = if useLightingModel1 then lightModel1 else lightModel2
+gl_FragColor = if useLightingModel1 then lightModel1 
+                                    else lightModel2
 \end{MyVerb}
 
 Since the variable useLightingModel1 has constant frequency, it is evaluated at 
@@ -688,7 +693,8 @@ uniform [mat4] bones
 attribute vec4 boneIndices
 attribute vec4 weights
 
-skinnedVertex = sum [(weights i) * (bones (boneIndices i)) * gl_Vertex)
+skinnedVertex = 
+    sum [(weights i) * (bones (boneIndices i)) * gl_Vertex)
                      for i in (range 0 3)]
 vertex = if enableBones then skinnedVertex else gl_Vertex
 gl_Position = gl_ModelViewProjectionMatrix * vertex
@@ -730,7 +736,8 @@ assigned the special value |undefined|, which is equivalent to not giving a
 definition at all.  This is used in the following situation:
 
 \begin{MyVerb}
-gl_FragColor = if enablePerPixelShading then getColor else undefined
+gl_FragColor = if enablePerPixelShading then getColor 
+                                                else undefined
 \end{MyVerb}
 
 The reason the special value |undefined| is necessary is that let's say we want a shader that can
