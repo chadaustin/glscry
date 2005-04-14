@@ -3,14 +3,14 @@
 
 from wxPython.wx import *
 
-import wxFrame1
+import testFrame
 
-modules ={'wxFrame1': [1, 'Main frame of Application', 'none://wxFrame1.py']}
+modules ={u'testFrame': [1, 'Main frame of Application', u'testFrame.py']}
 
 class BoaApp(wxApp):
     def OnInit(self):
         wxInitAllImageHandlers()
-        self.main = wxFrame1.create(None)
+        self.main = testFrame.create(None)
         self.main.Show()
         self.SetTopWindow(self.main)
         return True
