@@ -3,12 +3,13 @@ from math import *
 
 runFor = 4
 
-def runStateChange(suffix, state1, state2):
-    TestType = VertexArrayTest
-    finishAction = FinishAction()
+TestType = VertexArrayTest
+finishAction = FinishAction()
+v = defineArray(Array_f, 2, (5, 5) + (5, 6) + (6, 6))
+geo = buildGeometry((GL_TRIANGLES, 1024), v=defineArray(Array_f, 2))
 
-    v = defineArray(Array_f, 2, (5, 5) + (5, 6) + (6, 6))
-    geo = buildGeometry((GL_TRIANGLES, 1024), v=defineArray(Array_f, 2))
+
+def runStateChange(suffix, state1, state2):
     testNoChange       = TestType("No Change",          geo)
     testChange         = TestType("Change",             geo)
     testNoChangeFull   = TestType("No Change - Full",   geo)
@@ -41,7 +42,10 @@ def runStateChange(suffix, state1, state2):
     end   = ceil(log(4096) / log(power))
     range = uniquePowerRange(start, end, power)
 
-    results = runTestsRange(testList, runFor, 'batchSize', range)
+    def setBatchSize(test, size):
+        test.geometry.batches[0].batchSize = size
+
+    results = runTestsRange(testList, runFor, setBatchSize, range)
     generateGraph('statechange_%s' % suffix, results, "VertexRate",
                   graphType=GraphType.LINE, normalizeBy=results[0])
 
