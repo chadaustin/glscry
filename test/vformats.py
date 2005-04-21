@@ -1,5 +1,7 @@
 from glscry import *
 
+runFor = 10
+
 w = 1
 h = 1
 
@@ -45,15 +47,17 @@ def run(file, test, name):
         test("VCNT", geo_vcnt)]
 
     print "Writing data to %s" % file
-    line = runTests(name, tests, 10)
+    line = runTests(name, tests, runFor)
     generateGraph(file + '_vertexrate', line, 'VertexRate')
     generateGraph(file + '_datarate',   line, 'DataRate')
     return line
 
-line1 = run('vformats_imm', ImmediateTest,           'Immediate')
-line2 = run('vformats_dl',  DisplayListTest,         'Display Lists')
-line3 = run('vformats_va',  VertexArrayTest,         'Vertex Arrays')
-line4 = run('vformats_cva', CompiledVertexArrayTest, 'Compiled Vertex Arrays')
-line5 = run('vformats_vbo', VertexBufferObjectTest,  'Vertex Buffers')
+lines = [
+    run('vformats_imm', ImmediateTest,           'Immediate'),
+    run('vformats_dl',  DisplayListTest,         'Display Lists'),
+    run('vformats_va',  VertexArrayTest,         'Vertex Arrays'),
+    run('vformats_cva', CompiledVertexArrayTest, 'Compiled Vertex Arrays'),
+    run('vformats_vbo', VertexBufferObjectTest,  'Vertex Buffers') ]
 
-generateGraph('vformats', [line1, line2, line3, line4, line5], 'VertexRate')
+generateGraph('vformats_all_vertexrate', lines, 'VertexRate')
+generateGraph('vformats_all_datarate',   lines, 'DataRate')

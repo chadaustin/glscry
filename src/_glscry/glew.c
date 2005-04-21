@@ -1,7 +1,7 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
-** Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
+** Copyright (C) 2002-2005, Milan Ikits <milan ikits[]ieee org>
+** Copyright (C) 2002-2005, Marcelo E. Magallon <mmagallo[]debian org>
 ** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
@@ -36,32 +36,47 @@
 #  include "glxew.h"
 #endif
 
-#if defined(_WIN32)
-#  define glewGetProcAddress(name) wglGetProcAddress((LPCSTR)name)
-#else
-#  if defined(__APPLE__)
-#    define glewGetProcAddress(name) NSGLGetProcAddress(name)
-#  else
-#    if defined(__sgi) || defined(__sun)
-#      define glewGetProcAddress(name) dlGetProcAddress(name)
-#    else /* __linux */
-#      define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
-#    endif
-#  endif
-#endif
+/*
+ * Define glewGetContext and related helper macros.
+ */
+#ifdef GLEW_MX
+#  define glewGetContext() ctx
+#  ifdef _WIN32
+#    define GLEW_CONTEXT_ARG_DEF_INIT GLEWContext* ctx
+#    define GLEW_CONTEXT_ARG_VAR_INIT ctx
+#    define wglewGetContext() ctx
+#    define WGLEW_CONTEXT_ARG_DEF_INIT WGLEWContext* ctx
+#    define WGLEW_CONTEXT_ARG_DEF_LIST WGLEWContext* ctx
+#  else /* _WIN32 */
+#    define GLEW_CONTEXT_ARG_DEF_INIT void
+#    define GLEW_CONTEXT_ARG_VAR_INIT
+#    define glxewGetContext() ctx
+#    define GLXEW_CONTEXT_ARG_DEF_INIT void
+#    define GLXEW_CONTEXT_ARG_DEF_LIST GLXEWContext* ctx
+#  endif /* _WIN32 */
+#  define GLEW_CONTEXT_ARG_DEF_LIST GLEWContext* ctx
+#else /* GLEW_MX */
+#  define GLEW_CONTEXT_ARG_DEF_INIT void
+#  define GLEW_CONTEXT_ARG_VAR_INIT
+#  define GLEW_CONTEXT_ARG_DEF_LIST void
+#  define WGLEW_CONTEXT_ARG_DEF_INIT void
+#  define WGLEW_CONTEXT_ARG_DEF_LIST void
+#  define GLXEW_CONTEXT_ARG_DEF_INIT void
+#  define GLXEW_CONTEXT_ARG_DEF_LIST void
+#endif /* GLEW_MX */
 
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void *NSGLGetProcAddress (const GLubyte *name)
+void* NSGLGetProcAddress (const GLubyte *name)
 {
   NSSymbol symbol;
-  char *symbolName;
+  char* symbolName;
   /* prepend a '_' for the Unix C symbol mangling convention */
-  symbolName = malloc(strlen((const char *)name) + 2);
-  strcpy(symbolName+1, (const char *)name);
+  symbolName = malloc(strlen((const char*)name) + 2);
+  strcpy(symbolName+1, (const char*)name);
   symbolName[0] = '_';
   symbol = NULL;
   if (NSIsSymbolNameDefined(symbolName))
@@ -76,10 +91,10 @@ static void *NSGLGetProcAddress (const GLubyte *name)
 #include <stdio.h>
 #include <stdlib.h>
 
-static void *dlGetProcAddress (const GLubyte* name)
+void* dlGetProcAddress (const GLubyte* name)
 {
-  static void *h = NULL;
-  static void *gpa;
+  static void* h = NULL;
+  static void* gpa;
 
   if (h == NULL)
   {
@@ -88,46 +103,109 @@ static void *dlGetProcAddress (const GLubyte* name)
   }
 
   if (gpa != NULL)
-    return ((void *(*)(const GLubyte *))gpa)(name);
+    return ((void*(*)(const GLubyte*))gpa)(name);
   else
-    return dlsym(h, (const char *)name);
+    return dlsym(h, (const char*)name);
 }
 #endif /* __sgi || __sun */
 
-#ifdef GLEW_MX
-#define glewGetContext() ctx
-#define wglewGetContext() ctx
-#define glxewGetContext() ctx
-#ifdef _WIN32
-#define GLEW_CONTEXT_ARG_DEF_INIT GLEWContext* ctx
-#define WGLEW_CONTEXT_ARG_DEF_INIT WGLEWContext* ctx
-#define GLXEW_CONTEXT_ARG_DEF_INIT GLXEWContext* ctx
-#define GLEW_CONTEXT_ARG_VAR_INIT ctx
-#else /* _WIN32 */
-#define GLEW_CONTEXT_ARG_DEF_INIT void
-#define WGLEW_CONTEXT_ARG_DEF_INIT void
-#define GLXEW_CONTEXT_ARG_DEF_INIT void
-#define GLEW_CONTEXT_ARG_VAR_INIT
-#endif /* _WIN32 */
-#define GLEW_CONTEXT_ARG_DEF_LIST GLEWContext* ctx
-#define WGLEW_CONTEXT_ARG_DEF_LIST WGLEWContext* ctx
-#define GLXEW_CONTEXT_ARG_DEF_LIST GLXEWContext* ctx
-#else /* GLEW_MX */
-#define GLEW_CONTEXT_ARG_DEF_INIT void
-#define WGLEW_CONTEXT_ARG_DEF_INIT void
-#define GLXEW_CONTEXT_ARG_DEF_INIT void
-#define GLEW_CONTEXT_ARG_DEF_LIST void
-#define WGLEW_CONTEXT_ARG_DEF_LIST void
-#define GLXEW_CONTEXT_ARG_DEF_LIST void
-#define GLEW_CONTEXT_ARG_VAR_INIT
-#endif /* GLEW_MX */
+/*
+ * Define glewGetProcAddress.
+ */
+#if defined(_WIN32)
+#  define glewGetProcAddress(name) wglGetProcAddress((LPCSTR)name)
+#else
+#  if defined(__APPLE__)
+#    define glewGetProcAddress(name) NSGLGetProcAddress(name)
+#  else
+#    if defined(__sgi) || defined(__sun)
+#      define glewGetProcAddress(name) dlGetProcAddress(name)
+#    else /* __linux */
+#      define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
+#    endif
+#  endif
+#endif
+
+/*
+ * GLEW, just like OpenGL or GLU, does not rely on the standard C library.
+ * These functions implement the functionality required in this file.
+ */
+
+static GLuint _glewStrLen (const GLubyte* s)
+{
+  GLuint i=0;
+  while (s+i != NULL && s[i] != '\0') i++;
+  return i;
+}
+
+static GLuint _glewStrCLen (const GLubyte* s, GLubyte c)
+{
+  GLuint i=0;
+  while (s+i != NULL && s[i] != '\0' && s[i] != c) i++;
+  return i;
+}
+
+static GLboolean _glewStrSame (const GLubyte* a, const GLubyte* b, GLuint n)
+{
+  GLuint i=0;
+  while (i < n && a+i != NULL && b+i != NULL && a[i] == b[i]) i++;
+  return i == n ? GL_TRUE : GL_FALSE;
+}
+
+static GLboolean _glewStrSame1 (GLubyte** a, GLuint* na, const GLubyte* b, GLuint nb)
+{
+  while (*na > 0 && (**a == ' ' || **a == '\n' || **a == '\r' || **a == '\t'))
+  {
+    (*a)++;
+    (*na)--;
+  }
+  if(*na >= nb)
+  {
+    GLuint i=0;
+    while (i < nb && (*a)+i != NULL && b+i != NULL && (*a)[i] == b[i]) i++;
+	if(i == nb)
+	{
+		*a = *a + nb;
+		*na = *na - nb;
+		return GL_TRUE;
+	}
+  }
+  return GL_FALSE;
+}
+
+static GLboolean _glewStrSame2 (GLubyte** a, GLuint* na, const GLubyte* b, GLuint nb)
+{
+  if(*na >= nb)
+  {
+    GLuint i=0;
+    while (i < nb && (*a)+i != NULL && b+i != NULL && (*a)[i] == b[i]) i++;
+	if(i == nb)
+	{
+		*a = *a + nb;
+		*na = *na - nb;
+		return GL_TRUE;
+	}
+  }
+  return GL_FALSE;
+}
+
+static GLboolean _glewStrSame3 (GLubyte** a, GLuint* na, const GLubyte* b, GLuint nb)
+{
+  if(*na >= nb)
+  {
+    GLuint i=0;
+    while (i < nb && (*a)+i != NULL && b+i != NULL && (*a)[i] == b[i]) i++;
+    if (i == nb && (*na == nb || (*a)[i] == ' ' || (*a)[i] == '\n' || (*a)[i] == '\r' || (*a)[i] == '\t'))
+    {
+      *a = *a + nb;
+      *na = *na - nb;
+      return GL_TRUE;
+    }
+  }
+  return GL_FALSE;
+}
 
 #if !defined(_WIN32) || !defined(GLEW_MX)
-
-GLboolean __GLEW_VERSION_1_1 = GL_FALSE;
-GLboolean __GLXEW_VERSION_1_0 = GL_FALSE;
-GLboolean __GLXEW_VERSION_1_1 = GL_FALSE;
-
 
 PFNGLCOPYTEXSUBIMAGE3DPROC __glewCopyTexSubImage3D = NULL;
 PFNGLDRAWRANGEELEMENTSPROC __glewDrawRangeElements = NULL;
@@ -247,6 +325,100 @@ PFNGLISQUERYPROC __glewIsQuery = NULL;
 PFNGLMAPBUFFERPROC __glewMapBuffer = NULL;
 PFNGLUNMAPBUFFERPROC __glewUnmapBuffer = NULL;
 
+PFNGLATTACHSHADERPROC __glewAttachShader = NULL;
+PFNGLBINDATTRIBLOCATIONPROC __glewBindAttribLocation = NULL;
+PFNGLBLENDEQUATIONSEPARATEPROC __glewBlendEquationSeparate = NULL;
+PFNGLCOMPILESHADERPROC __glewCompileShader = NULL;
+PFNGLCREATEPROGRAMPROC __glewCreateProgram = NULL;
+PFNGLCREATESHADERPROC __glewCreateShader = NULL;
+PFNGLDELETEPROGRAMPROC __glewDeleteProgram = NULL;
+PFNGLDELETESHADERPROC __glewDeleteShader = NULL;
+PFNGLDETACHSHADERPROC __glewDetachShader = NULL;
+PFNGLDISABLEVERTEXATTRIBARRAYPROC __glewDisableVertexAttribArray = NULL;
+PFNGLDRAWBUFFERSPROC __glewDrawBuffers = NULL;
+PFNGLENABLEVERTEXATTRIBARRAYPROC __glewEnableVertexAttribArray = NULL;
+PFNGLGETACTIVEATTRIBPROC __glewGetActiveAttrib = NULL;
+PFNGLGETACTIVEUNIFORMPROC __glewGetActiveUniform = NULL;
+PFNGLGETATTACHEDSHADERSPROC __glewGetAttachedShaders = NULL;
+PFNGLGETATTRIBLOCATIONPROC __glewGetAttribLocation = NULL;
+PFNGLGETPROGRAMINFOLOGPROC __glewGetProgramInfoLog = NULL;
+PFNGLGETPROGRAMIVPROC __glewGetProgramiv = NULL;
+PFNGLGETSHADERINFOLOGPROC __glewGetShaderInfoLog = NULL;
+PFNGLGETSHADERSOURCEPROC __glewGetShaderSource = NULL;
+PFNGLGETSHADERIVPROC __glewGetShaderiv = NULL;
+PFNGLGETUNIFORMLOCATIONPROC __glewGetUniformLocation = NULL;
+PFNGLGETUNIFORMFVPROC __glewGetUniformfv = NULL;
+PFNGLGETUNIFORMIVPROC __glewGetUniformiv = NULL;
+PFNGLGETVERTEXATTRIBPOINTERVPROC __glewGetVertexAttribPointerv = NULL;
+PFNGLGETVERTEXATTRIBDVPROC __glewGetVertexAttribdv = NULL;
+PFNGLGETVERTEXATTRIBFVPROC __glewGetVertexAttribfv = NULL;
+PFNGLGETVERTEXATTRIBIVPROC __glewGetVertexAttribiv = NULL;
+PFNGLISPROGRAMPROC __glewIsProgram = NULL;
+PFNGLISSHADERPROC __glewIsShader = NULL;
+PFNGLLINKPROGRAMPROC __glewLinkProgram = NULL;
+PFNGLSHADERSOURCEPROC __glewShaderSource = NULL;
+PFNGLSTENCILFUNCSEPARATEPROC __glewStencilFuncSeparate = NULL;
+PFNGLSTENCILMASKSEPARATEPROC __glewStencilMaskSeparate = NULL;
+PFNGLSTENCILOPSEPARATEPROC __glewStencilOpSeparate = NULL;
+PFNGLUNIFORM1FPROC __glewUniform1f = NULL;
+PFNGLUNIFORM1FVPROC __glewUniform1fv = NULL;
+PFNGLUNIFORM1IPROC __glewUniform1i = NULL;
+PFNGLUNIFORM1IVPROC __glewUniform1iv = NULL;
+PFNGLUNIFORM2FPROC __glewUniform2f = NULL;
+PFNGLUNIFORM2FVPROC __glewUniform2fv = NULL;
+PFNGLUNIFORM2IPROC __glewUniform2i = NULL;
+PFNGLUNIFORM2IVPROC __glewUniform2iv = NULL;
+PFNGLUNIFORM3FPROC __glewUniform3f = NULL;
+PFNGLUNIFORM3FVPROC __glewUniform3fv = NULL;
+PFNGLUNIFORM3IPROC __glewUniform3i = NULL;
+PFNGLUNIFORM3IVPROC __glewUniform3iv = NULL;
+PFNGLUNIFORM4FPROC __glewUniform4f = NULL;
+PFNGLUNIFORM4FVPROC __glewUniform4fv = NULL;
+PFNGLUNIFORM4IPROC __glewUniform4i = NULL;
+PFNGLUNIFORM4IVPROC __glewUniform4iv = NULL;
+PFNGLUNIFORMMATRIX2FVPROC __glewUniformMatrix2fv = NULL;
+PFNGLUNIFORMMATRIX3FVPROC __glewUniformMatrix3fv = NULL;
+PFNGLUNIFORMMATRIX4FVPROC __glewUniformMatrix4fv = NULL;
+PFNGLUSEPROGRAMPROC __glewUseProgram = NULL;
+PFNGLVALIDATEPROGRAMPROC __glewValidateProgram = NULL;
+PFNGLVERTEXATTRIB1DPROC __glewVertexAttrib1d = NULL;
+PFNGLVERTEXATTRIB1DVPROC __glewVertexAttrib1dv = NULL;
+PFNGLVERTEXATTRIB1FPROC __glewVertexAttrib1f = NULL;
+PFNGLVERTEXATTRIB1FVPROC __glewVertexAttrib1fv = NULL;
+PFNGLVERTEXATTRIB1SPROC __glewVertexAttrib1s = NULL;
+PFNGLVERTEXATTRIB1SVPROC __glewVertexAttrib1sv = NULL;
+PFNGLVERTEXATTRIB2DPROC __glewVertexAttrib2d = NULL;
+PFNGLVERTEXATTRIB2DVPROC __glewVertexAttrib2dv = NULL;
+PFNGLVERTEXATTRIB2FPROC __glewVertexAttrib2f = NULL;
+PFNGLVERTEXATTRIB2FVPROC __glewVertexAttrib2fv = NULL;
+PFNGLVERTEXATTRIB2SPROC __glewVertexAttrib2s = NULL;
+PFNGLVERTEXATTRIB2SVPROC __glewVertexAttrib2sv = NULL;
+PFNGLVERTEXATTRIB3DPROC __glewVertexAttrib3d = NULL;
+PFNGLVERTEXATTRIB3DVPROC __glewVertexAttrib3dv = NULL;
+PFNGLVERTEXATTRIB3FPROC __glewVertexAttrib3f = NULL;
+PFNGLVERTEXATTRIB3FVPROC __glewVertexAttrib3fv = NULL;
+PFNGLVERTEXATTRIB3SPROC __glewVertexAttrib3s = NULL;
+PFNGLVERTEXATTRIB3SVPROC __glewVertexAttrib3sv = NULL;
+PFNGLVERTEXATTRIB4NBVPROC __glewVertexAttrib4Nbv = NULL;
+PFNGLVERTEXATTRIB4NIVPROC __glewVertexAttrib4Niv = NULL;
+PFNGLVERTEXATTRIB4NSVPROC __glewVertexAttrib4Nsv = NULL;
+PFNGLVERTEXATTRIB4NUBPROC __glewVertexAttrib4Nub = NULL;
+PFNGLVERTEXATTRIB4NUBVPROC __glewVertexAttrib4Nubv = NULL;
+PFNGLVERTEXATTRIB4NUIVPROC __glewVertexAttrib4Nuiv = NULL;
+PFNGLVERTEXATTRIB4NUSVPROC __glewVertexAttrib4Nusv = NULL;
+PFNGLVERTEXATTRIB4BVPROC __glewVertexAttrib4bv = NULL;
+PFNGLVERTEXATTRIB4DPROC __glewVertexAttrib4d = NULL;
+PFNGLVERTEXATTRIB4DVPROC __glewVertexAttrib4dv = NULL;
+PFNGLVERTEXATTRIB4FPROC __glewVertexAttrib4f = NULL;
+PFNGLVERTEXATTRIB4FVPROC __glewVertexAttrib4fv = NULL;
+PFNGLVERTEXATTRIB4IVPROC __glewVertexAttrib4iv = NULL;
+PFNGLVERTEXATTRIB4SPROC __glewVertexAttrib4s = NULL;
+PFNGLVERTEXATTRIB4SVPROC __glewVertexAttrib4sv = NULL;
+PFNGLVERTEXATTRIB4UBVPROC __glewVertexAttrib4ubv = NULL;
+PFNGLVERTEXATTRIB4UIVPROC __glewVertexAttrib4uiv = NULL;
+PFNGLVERTEXATTRIB4USVPROC __glewVertexAttrib4usv = NULL;
+PFNGLVERTEXATTRIBPOINTERPROC __glewVertexAttribPointer = NULL;
+
 PFNGLTBUFFERMASK3DFXPROC __glewTbufferMask3DFX = NULL;
 
 PFNGLDRAWELEMENTARRAYAPPLEPROC __glewDrawElementArrayAPPLE = NULL;
@@ -275,6 +447,10 @@ PFNGLISVERTEXARRAYAPPLEPROC __glewIsVertexArrayAPPLE = NULL;
 PFNGLFLUSHVERTEXARRAYRANGEAPPLEPROC __glewFlushVertexArrayRangeAPPLE = NULL;
 PFNGLVERTEXARRAYPARAMETERIAPPLEPROC __glewVertexArrayParameteriAPPLE = NULL;
 PFNGLVERTEXARRAYRANGEAPPLEPROC __glewVertexArrayRangeAPPLE = NULL;
+
+PFNGLCLAMPCOLORARBPROC __glewClampColorARB = NULL;
+
+PFNGLDRAWBUFFERSARBPROC __glewDrawBuffersARB = NULL;
 
 PFNGLCOLORSUBTABLEPROC __glewColorSubTable = NULL;
 PFNGLCOLORTABLEPROC __glewColorTable = NULL;
@@ -651,6 +827,8 @@ PFNGLCULLPARAMETERFVEXTPROC __glewCullParameterfvEXT = NULL;
 
 PFNGLDEPTHBOUNDSEXTPROC __glewDepthBoundsEXT = NULL;
 
+PFNGLDRAWRANGEELEMENTSEXTPROC __glewDrawRangeElementsEXT = NULL;
+
 PFNGLFOGCOORDPOINTEREXTPROC __glewFogCoordPointerEXT = NULL;
 PFNGLFOGCOORDDEXTPROC __glewFogCoorddEXT = NULL;
 PFNGLFOGCOORDDVEXTPROC __glewFogCoorddvEXT = NULL;
@@ -675,6 +853,24 @@ PFNGLGETFRAGMENTLIGHTIVEXTPROC __glewGetFragmentLightivEXT = NULL;
 PFNGLGETFRAGMENTMATERIALFVEXTPROC __glewGetFragmentMaterialfvEXT = NULL;
 PFNGLGETFRAGMENTMATERIALIVEXTPROC __glewGetFragmentMaterialivEXT = NULL;
 PFNGLLIGHTENVIEXTPROC __glewLightEnviEXT = NULL;
+
+PFNGLBINDFRAMEBUFFEREXTPROC __glewBindFramebufferEXT = NULL;
+PFNGLBINDRENDERBUFFEREXTPROC __glewBindRenderbufferEXT = NULL;
+PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC __glewCheckFramebufferStatusEXT = NULL;
+PFNGLDELETEFRAMEBUFFERSEXTPROC __glewDeleteFramebuffersEXT = NULL;
+PFNGLDELETERENDERBUFFERSEXTPROC __glewDeleteRenderbuffersEXT = NULL;
+PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC __glewFramebufferRenderbufferEXT = NULL;
+PFNGLFRAMEBUFFERTEXTURE1DEXTPROC __glewFramebufferTexture1DEXT = NULL;
+PFNGLFRAMEBUFFERTEXTURE2DEXTPROC __glewFramebufferTexture2DEXT = NULL;
+PFNGLFRAMEBUFFERTEXTURE3DEXTPROC __glewFramebufferTexture3DEXT = NULL;
+PFNGLGENFRAMEBUFFERSEXTPROC __glewGenFramebuffersEXT = NULL;
+PFNGLGENRENDERBUFFERSEXTPROC __glewGenRenderbuffersEXT = NULL;
+PFNGLGENERATEMIPMAPEXTPROC __glewGenerateMipmapEXT = NULL;
+PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC __glewGetFramebufferAttachmentParameterivEXT = NULL;
+PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC __glewGetRenderbufferParameterivEXT = NULL;
+PFNGLISFRAMEBUFFEREXTPROC __glewIsFramebufferEXT = NULL;
+PFNGLISRENDERBUFFEREXTPROC __glewIsRenderbufferEXT = NULL;
+PFNGLRENDERBUFFERSTORAGEEXTPROC __glewRenderbufferStorageEXT = NULL;
 
 PFNGLGETHISTOGRAMEXTPROC __glewGetHistogramEXT = NULL;
 PFNGLGETHISTOGRAMPARAMETERFVEXTPROC __glewGetHistogramParameterfvEXT = NULL;
@@ -839,6 +1035,12 @@ PFNGLVERTEXPOINTERVINTELPROC __glewVertexPointervINTEL = NULL;
 
 PFNGLTEXSCISSORFUNCINTELPROC __glewTexScissorFuncINTEL = NULL;
 PFNGLTEXSCISSORINTELPROC __glewTexScissorINTEL = NULL;
+
+PFNGLBUFFERREGIONENABLEDEXTPROC __glewBufferRegionEnabledEXT = NULL;
+PFNGLDELETEBUFFERREGIONEXTPROC __glewDeleteBufferRegionEXT = NULL;
+PFNGLDRAWBUFFERREGIONEXTPROC __glewDrawBufferRegionEXT = NULL;
+PFNGLNEWBUFFERREGIONEXTPROC __glewNewBufferRegionEXT = NULL;
+PFNGLREADBUFFERREGIONEXTPROC __glewReadBufferRegionEXT = NULL;
 
 PFNGLRESIZEBUFFERSMESAPROC __glewResizeBuffersMESA = NULL;
 
@@ -1173,10 +1375,16 @@ PFNGLTEXCOORD4FVERTEX4FVSUNPROC __glewTexCoord4fVertex4fvSUN = NULL;
 
 PFNGLADDSWAPHINTRECTWINPROC __glewAddSwapHintRectWIN = NULL;
 
+#endif /* !WIN32 || !GLEW_MX */
+
+#if !defined(GLEW_MX)
+
+GLboolean __GLEW_VERSION_1_1 = GL_FALSE;
 GLboolean __GLEW_VERSION_1_2 = GL_FALSE;
 GLboolean __GLEW_VERSION_1_3 = GL_FALSE;
 GLboolean __GLEW_VERSION_1_4 = GL_FALSE;
 GLboolean __GLEW_VERSION_1_5 = GL_FALSE;
+GLboolean __GLEW_VERSION_2_0 = GL_FALSE;
 GLboolean __GLEW_3DFX_multisample = GL_FALSE;
 GLboolean __GLEW_3DFX_tbuffer = GL_FALSE;
 GLboolean __GLEW_3DFX_texture_compression_FXT1 = GL_FALSE;
@@ -1184,21 +1392,26 @@ GLboolean __GLEW_APPLE_client_storage = GL_FALSE;
 GLboolean __GLEW_APPLE_element_array = GL_FALSE;
 GLboolean __GLEW_APPLE_fence = GL_FALSE;
 GLboolean __GLEW_APPLE_float_pixels = GL_FALSE;
+GLboolean __GLEW_APPLE_pixel_buffer = GL_FALSE;
 GLboolean __GLEW_APPLE_specular_vector = GL_FALSE;
 GLboolean __GLEW_APPLE_texture_range = GL_FALSE;
 GLboolean __GLEW_APPLE_transform_hint = GL_FALSE;
 GLboolean __GLEW_APPLE_vertex_array_object = GL_FALSE;
 GLboolean __GLEW_APPLE_vertex_array_range = GL_FALSE;
 GLboolean __GLEW_APPLE_ycbcr_422 = GL_FALSE;
+GLboolean __GLEW_ARB_color_buffer_float = GL_FALSE;
 GLboolean __GLEW_ARB_depth_texture = GL_FALSE;
+GLboolean __GLEW_ARB_draw_buffers = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_program = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_program_shadow = GL_FALSE;
 GLboolean __GLEW_ARB_fragment_shader = GL_FALSE;
+GLboolean __GLEW_ARB_half_float_pixel = GL_FALSE;
 GLboolean __GLEW_ARB_imaging = GL_FALSE;
 GLboolean __GLEW_ARB_matrix_palette = GL_FALSE;
 GLboolean __GLEW_ARB_multisample = GL_FALSE;
 GLboolean __GLEW_ARB_multitexture = GL_FALSE;
 GLboolean __GLEW_ARB_occlusion_query = GL_FALSE;
+GLboolean __GLEW_ARB_pixel_buffer_object = GL_FALSE;
 GLboolean __GLEW_ARB_point_parameters = GL_FALSE;
 GLboolean __GLEW_ARB_point_sprite = GL_FALSE;
 GLboolean __GLEW_ARB_shader_objects = GL_FALSE;
@@ -1212,8 +1425,10 @@ GLboolean __GLEW_ARB_texture_env_add = GL_FALSE;
 GLboolean __GLEW_ARB_texture_env_combine = GL_FALSE;
 GLboolean __GLEW_ARB_texture_env_crossbar = GL_FALSE;
 GLboolean __GLEW_ARB_texture_env_dot3 = GL_FALSE;
+GLboolean __GLEW_ARB_texture_float = GL_FALSE;
 GLboolean __GLEW_ARB_texture_mirrored_repeat = GL_FALSE;
 GLboolean __GLEW_ARB_texture_non_power_of_two = GL_FALSE;
+GLboolean __GLEW_ARB_texture_rectangle = GL_FALSE;
 GLboolean __GLEW_ARB_transpose_matrix = GL_FALSE;
 GLboolean __GLEW_ARB_vertex_blend = GL_FALSE;
 GLboolean __GLEW_ARB_vertex_buffer_object = GL_FALSE;
@@ -1232,6 +1447,7 @@ GLboolean __GLEW_ATI_map_object_buffer = GL_FALSE;
 GLboolean __GLEW_ATI_pn_triangles = GL_FALSE;
 GLboolean __GLEW_ATI_separate_stencil = GL_FALSE;
 GLboolean __GLEW_ATI_text_fragment_shader = GL_FALSE;
+GLboolean __GLEW_ATI_texture_compression_3dc = GL_FALSE;
 GLboolean __GLEW_ATI_texture_env_combine3 = GL_FALSE;
 GLboolean __GLEW_ATI_texture_float = GL_FALSE;
 GLboolean __GLEW_ATI_texture_mirror_once = GL_FALSE;
@@ -1239,6 +1455,7 @@ GLboolean __GLEW_ATI_vertex_array_object = GL_FALSE;
 GLboolean __GLEW_ATI_vertex_attrib_array_object = GL_FALSE;
 GLboolean __GLEW_ATI_vertex_streams = GL_FALSE;
 GLboolean __GLEW_EXT_422_pixels = GL_FALSE;
+GLboolean __GLEW_EXT_Cg_shader = GL_FALSE;
 GLboolean __GLEW_EXT_abgr = GL_FALSE;
 GLboolean __GLEW_EXT_bgra = GL_FALSE;
 GLboolean __GLEW_EXT_blend_color = GL_FALSE;
@@ -1259,6 +1476,7 @@ GLboolean __GLEW_EXT_depth_bounds_test = GL_FALSE;
 GLboolean __GLEW_EXT_draw_range_elements = GL_FALSE;
 GLboolean __GLEW_EXT_fog_coord = GL_FALSE;
 GLboolean __GLEW_EXT_fragment_lighting = GL_FALSE;
+GLboolean __GLEW_EXT_framebuffer_object = GL_FALSE;
 GLboolean __GLEW_EXT_histogram = GL_FALSE;
 GLboolean __GLEW_EXT_index_array_formats = GL_FALSE;
 GLboolean __GLEW_EXT_index_func = GL_FALSE;
@@ -1286,6 +1504,7 @@ GLboolean __GLEW_EXT_stencil_wrap = GL_FALSE;
 GLboolean __GLEW_EXT_subtexture = GL_FALSE;
 GLboolean __GLEW_EXT_texture = GL_FALSE;
 GLboolean __GLEW_EXT_texture3D = GL_FALSE;
+GLboolean __GLEW_EXT_texture_compression_dxt1 = GL_FALSE;
 GLboolean __GLEW_EXT_texture_compression_s3tc = GL_FALSE;
 GLboolean __GLEW_EXT_texture_cube_map = GL_FALSE;
 GLboolean __GLEW_EXT_texture_edge_clamp = GL_FALSE;
@@ -1316,6 +1535,7 @@ GLboolean __GLEW_INGR_color_clamp = GL_FALSE;
 GLboolean __GLEW_INGR_interlace_read = GL_FALSE;
 GLboolean __GLEW_INTEL_parallel_arrays = GL_FALSE;
 GLboolean __GLEW_INTEL_texture_scissor = GL_FALSE;
+GLboolean __GLEW_KTX_buffer_region = GL_FALSE;
 GLboolean __GLEW_MESA_pack_invert = GL_FALSE;
 GLboolean __GLEW_MESA_resize_buffers = GL_FALSE;
 GLboolean __GLEW_MESA_window_pos = GL_FALSE;
@@ -1328,6 +1548,8 @@ GLboolean __GLEW_NV_fence = GL_FALSE;
 GLboolean __GLEW_NV_float_buffer = GL_FALSE;
 GLboolean __GLEW_NV_fog_distance = GL_FALSE;
 GLboolean __GLEW_NV_fragment_program = GL_FALSE;
+GLboolean __GLEW_NV_fragment_program2 = GL_FALSE;
+GLboolean __GLEW_NV_fragment_program_option = GL_FALSE;
 GLboolean __GLEW_NV_half_float = GL_FALSE;
 GLboolean __GLEW_NV_light_max_exponent = GL_FALSE;
 GLboolean __GLEW_NV_multisample_filter_hint = GL_FALSE;
@@ -1352,6 +1574,8 @@ GLboolean __GLEW_NV_vertex_array_range2 = GL_FALSE;
 GLboolean __GLEW_NV_vertex_program = GL_FALSE;
 GLboolean __GLEW_NV_vertex_program1_1 = GL_FALSE;
 GLboolean __GLEW_NV_vertex_program2 = GL_FALSE;
+GLboolean __GLEW_NV_vertex_program2_option = GL_FALSE;
+GLboolean __GLEW_NV_vertex_program3 = GL_FALSE;
 GLboolean __GLEW_OML_interlace = GL_FALSE;
 GLboolean __GLEW_OML_resample = GL_FALSE;
 GLboolean __GLEW_OML_subsample = GL_FALSE;
@@ -1418,265 +1642,7 @@ GLboolean __GLEW_WIN_phong_shading = GL_FALSE;
 GLboolean __GLEW_WIN_specular_fog = GL_FALSE;
 GLboolean __GLEW_WIN_swap_hint = GL_FALSE;
 
-#endif /* !_WIN32 || !GLEW_MX */
-
-#if defined(_WIN32) && !defined(GLEW_MX)
-
-PFNWGLCREATEBUFFERREGIONARBPROC __wglewCreateBufferRegionARB = NULL;
-PFNWGLDELETEBUFFERREGIONARBPROC __wglewDeleteBufferRegionARB = NULL;
-PFNWGLRESTOREBUFFERREGIONARBPROC __wglewRestoreBufferRegionARB = NULL;
-PFNWGLSAVEBUFFERREGIONARBPROC __wglewSaveBufferRegionARB = NULL;
-
-PFNWGLGETEXTENSIONSSTRINGARBPROC __wglewGetExtensionsStringARB = NULL;
-
-PFNWGLGETCURRENTREADDCARBPROC __wglewGetCurrentReadDCARB = NULL;
-PFNWGLMAKECONTEXTCURRENTARBPROC __wglewMakeContextCurrentARB = NULL;
-
-PFNWGLCREATEPBUFFERARBPROC __wglewCreatePbufferARB = NULL;
-PFNWGLDESTROYPBUFFERARBPROC __wglewDestroyPbufferARB = NULL;
-PFNWGLGETPBUFFERDCARBPROC __wglewGetPbufferDCARB = NULL;
-PFNWGLQUERYPBUFFERARBPROC __wglewQueryPbufferARB = NULL;
-PFNWGLRELEASEPBUFFERDCARBPROC __wglewReleasePbufferDCARB = NULL;
-
-PFNWGLCHOOSEPIXELFORMATARBPROC __wglewChoosePixelFormatARB = NULL;
-PFNWGLGETPIXELFORMATATTRIBFVARBPROC __wglewGetPixelFormatAttribfvARB = NULL;
-PFNWGLGETPIXELFORMATATTRIBIVARBPROC __wglewGetPixelFormatAttribivARB = NULL;
-
-PFNWGLBINDTEXIMAGEARBPROC __wglewBindTexImageARB = NULL;
-PFNWGLRELEASETEXIMAGEARBPROC __wglewReleaseTexImageARB = NULL;
-PFNWGLSETPBUFFERATTRIBARBPROC __wglewSetPbufferAttribARB = NULL;
-
-PFNWGLBINDDISPLAYCOLORTABLEEXTPROC __wglewBindDisplayColorTableEXT = NULL;
-PFNWGLCREATEDISPLAYCOLORTABLEEXTPROC __wglewCreateDisplayColorTableEXT = NULL;
-PFNWGLDESTROYDISPLAYCOLORTABLEEXTPROC __wglewDestroyDisplayColorTableEXT = NULL;
-PFNWGLLOADDISPLAYCOLORTABLEEXTPROC __wglewLoadDisplayColorTableEXT = NULL;
-
-PFNWGLGETEXTENSIONSSTRINGEXTPROC __wglewGetExtensionsStringEXT = NULL;
-
-PFNWGLGETCURRENTREADDCEXTPROC __wglewGetCurrentReadDCEXT = NULL;
-PFNWGLMAKECONTEXTCURRENTEXTPROC __wglewMakeContextCurrentEXT = NULL;
-
-PFNWGLCREATEPBUFFEREXTPROC __wglewCreatePbufferEXT = NULL;
-PFNWGLDESTROYPBUFFEREXTPROC __wglewDestroyPbufferEXT = NULL;
-PFNWGLGETPBUFFERDCEXTPROC __wglewGetPbufferDCEXT = NULL;
-PFNWGLQUERYPBUFFEREXTPROC __wglewQueryPbufferEXT = NULL;
-PFNWGLRELEASEPBUFFERDCEXTPROC __wglewReleasePbufferDCEXT = NULL;
-
-PFNWGLCHOOSEPIXELFORMATEXTPROC __wglewChoosePixelFormatEXT = NULL;
-PFNWGLGETPIXELFORMATATTRIBFVEXTPROC __wglewGetPixelFormatAttribfvEXT = NULL;
-PFNWGLGETPIXELFORMATATTRIBIVEXTPROC __wglewGetPixelFormatAttribivEXT = NULL;
-
-PFNWGLGETSWAPINTERVALEXTPROC __wglewGetSwapIntervalEXT = NULL;
-PFNWGLSWAPINTERVALEXTPROC __wglewSwapIntervalEXT = NULL;
-
-PFNWGLGETDIGITALVIDEOPARAMETERSI3DPROC __wglewGetDigitalVideoParametersI3D = NULL;
-PFNWGLSETDIGITALVIDEOPARAMETERSI3DPROC __wglewSetDigitalVideoParametersI3D = NULL;
-
-PFNWGLGETGAMMATABLEI3DPROC __wglewGetGammaTableI3D = NULL;
-PFNWGLGETGAMMATABLEPARAMETERSI3DPROC __wglewGetGammaTableParametersI3D = NULL;
-PFNWGLSETGAMMATABLEI3DPROC __wglewSetGammaTableI3D = NULL;
-PFNWGLSETGAMMATABLEPARAMETERSI3DPROC __wglewSetGammaTableParametersI3D = NULL;
-
-PFNWGLDISABLEGENLOCKI3DPROC __wglewDisableGenlockI3D = NULL;
-PFNWGLENABLEGENLOCKI3DPROC __wglewEnableGenlockI3D = NULL;
-PFNWGLGENLOCKSAMPLERATEI3DPROC __wglewGenlockSampleRateI3D = NULL;
-PFNWGLGENLOCKSOURCEDELAYI3DPROC __wglewGenlockSourceDelayI3D = NULL;
-PFNWGLGENLOCKSOURCEEDGEI3DPROC __wglewGenlockSourceEdgeI3D = NULL;
-PFNWGLGENLOCKSOURCEI3DPROC __wglewGenlockSourceI3D = NULL;
-PFNWGLGETGENLOCKSAMPLERATEI3DPROC __wglewGetGenlockSampleRateI3D = NULL;
-PFNWGLGETGENLOCKSOURCEDELAYI3DPROC __wglewGetGenlockSourceDelayI3D = NULL;
-PFNWGLGETGENLOCKSOURCEEDGEI3DPROC __wglewGetGenlockSourceEdgeI3D = NULL;
-PFNWGLGETGENLOCKSOURCEI3DPROC __wglewGetGenlockSourceI3D = NULL;
-PFNWGLISENABLEDGENLOCKI3DPROC __wglewIsEnabledGenlockI3D = NULL;
-PFNWGLQUERYGENLOCKMAXSOURCEDELAYI3DPROC __wglewQueryGenlockMaxSourceDelayI3D = NULL;
-
-PFNWGLASSOCIATEIMAGEBUFFEREVENTSI3DPROC __wglewAssociateImageBufferEventsI3D = NULL;
-PFNWGLCREATEIMAGEBUFFERI3DPROC __wglewCreateImageBufferI3D = NULL;
-PFNWGLDESTROYIMAGEBUFFERI3DPROC __wglewDestroyImageBufferI3D = NULL;
-PFNWGLRELEASEIMAGEBUFFEREVENTSI3DPROC __wglewReleaseImageBufferEventsI3D = NULL;
-
-PFNWGLDISABLEFRAMELOCKI3DPROC __wglewDisableFrameLockI3D = NULL;
-PFNWGLENABLEFRAMELOCKI3DPROC __wglewEnableFrameLockI3D = NULL;
-PFNWGLISENABLEDFRAMELOCKI3DPROC __wglewIsEnabledFrameLockI3D = NULL;
-PFNWGLQUERYFRAMELOCKMASTERI3DPROC __wglewQueryFrameLockMasterI3D = NULL;
-
-PFNWGLBEGINFRAMETRACKINGI3DPROC __wglewBeginFrameTrackingI3D = NULL;
-PFNWGLENDFRAMETRACKINGI3DPROC __wglewEndFrameTrackingI3D = NULL;
-PFNWGLGETFRAMEUSAGEI3DPROC __wglewGetFrameUsageI3D = NULL;
-PFNWGLQUERYFRAMETRACKINGI3DPROC __wglewQueryFrameTrackingI3D = NULL;
-
-PFNWGLALLOCATEMEMORYNVPROC __wglewAllocateMemoryNV = NULL;
-PFNWGLFREEMEMORYNVPROC __wglewFreeMemoryNV = NULL;
-
-PFNWGLGETMSCRATEOMLPROC __wglewGetMscRateOML = NULL;
-PFNWGLGETSYNCVALUESOMLPROC __wglewGetSyncValuesOML = NULL;
-PFNWGLSWAPBUFFERSMSCOMLPROC __wglewSwapBuffersMscOML = NULL;
-PFNWGLSWAPLAYERBUFFERSMSCOMLPROC __wglewSwapLayerBuffersMscOML = NULL;
-PFNWGLWAITFORMSCOMLPROC __wglewWaitForMscOML = NULL;
-PFNWGLWAITFORSBCOMLPROC __wglewWaitForSbcOML = NULL;
-
-GLboolean __WGLEW_3DFX_multisample = GL_FALSE;
-GLboolean __WGLEW_ARB_buffer_region = GL_FALSE;
-GLboolean __WGLEW_ARB_extensions_string = GL_FALSE;
-GLboolean __WGLEW_ARB_make_current_read = GL_FALSE;
-GLboolean __WGLEW_ARB_multisample = GL_FALSE;
-GLboolean __WGLEW_ARB_pbuffer = GL_FALSE;
-GLboolean __WGLEW_ARB_pixel_format = GL_FALSE;
-GLboolean __WGLEW_ARB_render_texture = GL_FALSE;
-GLboolean __WGLEW_ATI_pixel_format_float = GL_FALSE;
-GLboolean __WGLEW_EXT_depth_float = GL_FALSE;
-GLboolean __WGLEW_EXT_display_color_table = GL_FALSE;
-GLboolean __WGLEW_EXT_extensions_string = GL_FALSE;
-GLboolean __WGLEW_EXT_make_current_read = GL_FALSE;
-GLboolean __WGLEW_EXT_multisample = GL_FALSE;
-GLboolean __WGLEW_EXT_pbuffer = GL_FALSE;
-GLboolean __WGLEW_EXT_pixel_format = GL_FALSE;
-GLboolean __WGLEW_EXT_swap_control = GL_FALSE;
-GLboolean __WGLEW_I3D_digital_video_control = GL_FALSE;
-GLboolean __WGLEW_I3D_gamma = GL_FALSE;
-GLboolean __WGLEW_I3D_genlock = GL_FALSE;
-GLboolean __WGLEW_I3D_image_buffer = GL_FALSE;
-GLboolean __WGLEW_I3D_swap_frame_lock = GL_FALSE;
-GLboolean __WGLEW_I3D_swap_frame_usage = GL_FALSE;
-GLboolean __WGLEW_NV_float_buffer = GL_FALSE;
-GLboolean __WGLEW_NV_render_depth_texture = GL_FALSE;
-GLboolean __WGLEW_NV_render_texture_rectangle = GL_FALSE;
-GLboolean __WGLEW_NV_vertex_array_range = GL_FALSE;
-GLboolean __WGLEW_OML_sync_control = GL_FALSE;
-
-#endif /* _WIN32 && !GLEW_MX */
-
-#if !(defined(_WIN32) || (defined(__APPLE__) && !defined(GLEW_APPLE_GLX)))
-
-PFNGLXGETCURRENTDISPLAYPROC __glewXGetCurrentDisplay = NULL;
-
-PFNGLXCHOOSEFBCONFIGPROC __glewXChooseFBConfig = NULL;
-PFNGLXCREATENEWCONTEXTPROC __glewXCreateNewContext = NULL;
-PFNGLXCREATEPBUFFERPROC __glewXCreatePbuffer = NULL;
-PFNGLXCREATEPIXMAPPROC __glewXCreatePixmap = NULL;
-PFNGLXCREATEWINDOWPROC __glewXCreateWindow = NULL;
-PFNGLXDESTROYPBUFFERPROC __glewXDestroyPbuffer = NULL;
-PFNGLXDESTROYPIXMAPPROC __glewXDestroyPixmap = NULL;
-PFNGLXDESTROYWINDOWPROC __glewXDestroyWindow = NULL;
-PFNGLXGETCURRENTREADDRAWABLEPROC __glewXGetCurrentReadDrawable = NULL;
-PFNGLXGETFBCONFIGATTRIBPROC __glewXGetFBConfigAttrib = NULL;
-PFNGLXGETFBCONFIGSPROC __glewXGetFBConfigs = NULL;
-PFNGLXGETSELECTEDEVENTPROC __glewXGetSelectedEvent = NULL;
-PFNGLXGETVISUALFROMFBCONFIGPROC __glewXGetVisualFromFBConfig = NULL;
-PFNGLXMAKECONTEXTCURRENTPROC __glewXMakeContextCurrent = NULL;
-PFNGLXQUERYCONTEXTPROC __glewXQueryContext = NULL;
-PFNGLXQUERYDRAWABLEPROC __glewXQueryDrawable = NULL;
-PFNGLXSELECTEVENTPROC __glewXSelectEvent = NULL;
-
-PFNGLXBINDTEXIMAGEATIPROC __glewXBindTexImageATI = NULL;
-PFNGLXDRAWABLEATTRIBATIPROC __glewXDrawableAttribATI = NULL;
-PFNGLXRELEASETEXIMAGEATIPROC __glewXReleaseTexImageATI = NULL;
-
-PFNGLXFREECONTEXTEXTPROC __glewXFreeContextEXT = NULL;
-PFNGLXGETCONTEXTIDEXTPROC __glewXGetContextIDEXT = NULL;
-PFNGLXIMPORTCONTEXTEXTPROC __glewXImportContextEXT = NULL;
-PFNGLXQUERYCONTEXTINFOEXTPROC __glewXQueryContextInfoEXT = NULL;
-
-PFNGLXCOPYSUBBUFFERMESAPROC __glewXCopySubBufferMESA = NULL;
-
-PFNGLXCREATEGLXPIXMAPMESAPROC __glewXCreateGLXPixmapMESA = NULL;
-
-PFNGLXRELEASEBUFFERSMESAPROC __glewXReleaseBuffersMESA = NULL;
-
-PFNGLXSET3DFXMODEMESAPROC __glewXSet3DfxModeMESA = NULL;
-
-PFNGLXALLOCATEMEMORYNVPROC __glewXAllocateMemoryNV = NULL;
-PFNGLXFREEMEMORYNVPROC __glewXFreeMemoryNV = NULL;
-
-#ifdef GLX_OML_sync_control
-PFNGLXGETMSCRATEOMLPROC __glewXGetMscRateOML = NULL;
-PFNGLXGETSYNCVALUESOMLPROC __glewXGetSyncValuesOML = NULL;
-PFNGLXSWAPBUFFERSMSCOMLPROC __glewXSwapBuffersMscOML = NULL;
-PFNGLXWAITFORMSCOMLPROC __glewXWaitForMscOML = NULL;
-PFNGLXWAITFORSBCOMLPROC __glewXWaitForSbcOML = NULL;
-#endif
-
-PFNGLXCHOOSEFBCONFIGSGIXPROC __glewXChooseFBConfigSGIX = NULL;
-PFNGLXCREATECONTEXTWITHCONFIGSGIXPROC __glewXCreateContextWithConfigSGIX = NULL;
-PFNGLXCREATEGLXPIXMAPWITHCONFIGSGIXPROC __glewXCreateGLXPixmapWithConfigSGIX = NULL;
-PFNGLXGETFBCONFIGATTRIBSGIXPROC __glewXGetFBConfigAttribSGIX = NULL;
-PFNGLXGETFBCONFIGFROMVISUALSGIXPROC __glewXGetFBConfigFromVisualSGIX = NULL;
-PFNGLXGETVISUALFROMFBCONFIGSGIXPROC __glewXGetVisualFromFBConfigSGIX = NULL;
-
-PFNGLXCREATEGLXPBUFFERSGIXPROC __glewXCreateGLXPbufferSGIX = NULL;
-PFNGLXDESTROYGLXPBUFFERSGIXPROC __glewXDestroyGLXPbufferSGIX = NULL;
-PFNGLXGETSELECTEDEVENTSGIXPROC __glewXGetSelectedEventSGIX = NULL;
-PFNGLXQUERYGLXPBUFFERSGIXPROC __glewXQueryGLXPbufferSGIX = NULL;
-PFNGLXSELECTEVENTSGIXPROC __glewXSelectEventSGIX = NULL;
-
-PFNGLXBINDSWAPBARRIERSGIXPROC __glewXBindSwapBarrierSGIX = NULL;
-PFNGLXQUERYMAXSWAPBARRIERSSGIXPROC __glewXQueryMaxSwapBarriersSGIX = NULL;
-
-PFNGLXJOINSWAPGROUPSGIXPROC __glewXJoinSwapGroupSGIX = NULL;
-
-PFNGLXBINDCHANNELTOWINDOWSGIXPROC __glewXBindChannelToWindowSGIX = NULL;
-PFNGLXCHANNELRECTSGIXPROC __glewXChannelRectSGIX = NULL;
-PFNGLXCHANNELRECTSYNCSGIXPROC __glewXChannelRectSyncSGIX = NULL;
-PFNGLXQUERYCHANNELDELTASSGIXPROC __glewXQueryChannelDeltasSGIX = NULL;
-PFNGLXQUERYCHANNELRECTSGIXPROC __glewXQueryChannelRectSGIX = NULL;
-
-PFNGLXCUSHIONSGIPROC __glewXCushionSGI = NULL;
-
-PFNGLXGETCURRENTREADDRAWABLESGIPROC __glewXGetCurrentReadDrawableSGI = NULL;
-PFNGLXMAKECURRENTREADSGIPROC __glewXMakeCurrentReadSGI = NULL;
-
-PFNGLXSWAPINTERVALSGIPROC __glewXSwapIntervalSGI = NULL;
-
-PFNGLXGETVIDEOSYNCSGIPROC __glewXGetVideoSyncSGI = NULL;
-PFNGLXWAITVIDEOSYNCSGIPROC __glewXWaitVideoSyncSGI = NULL;
-
-PFNGLXGETTRANSPARENTINDEXSUNPROC __glewXGetTransparentIndexSUN = NULL;
-
-PFNGLXGETVIDEORESIZESUNPROC __glewXGetVideoResizeSUN = NULL;
-PFNGLXVIDEORESIZESUNPROC __glewXVideoResizeSUN = NULL;
-
-GLboolean __GLXEW_VERSION_1_2 = GL_FALSE;
-GLboolean __GLXEW_VERSION_1_3 = GL_FALSE;
-GLboolean __GLXEW_VERSION_1_4 = GL_FALSE;
-GLboolean __GLXEW_3DFX_multisample = GL_FALSE;
-GLboolean __GLXEW_ARB_get_proc_address = GL_FALSE;
-GLboolean __GLXEW_ARB_multisample = GL_FALSE;
-GLboolean __GLXEW_ATI_pixel_format_float = GL_FALSE;
-GLboolean __GLXEW_ATI_render_texture = GL_FALSE;
-GLboolean __GLXEW_EXT_import_context = GL_FALSE;
-GLboolean __GLXEW_EXT_scene_marker = GL_FALSE;
-GLboolean __GLXEW_EXT_visual_info = GL_FALSE;
-GLboolean __GLXEW_EXT_visual_rating = GL_FALSE;
-GLboolean __GLXEW_MESA_copy_sub_buffer = GL_FALSE;
-GLboolean __GLXEW_MESA_pixmap_colormap = GL_FALSE;
-GLboolean __GLXEW_MESA_release_buffers = GL_FALSE;
-GLboolean __GLXEW_MESA_set_3dfx_mode = GL_FALSE;
-GLboolean __GLXEW_NV_float_buffer = GL_FALSE;
-GLboolean __GLXEW_NV_vertex_array_range = GL_FALSE;
-GLboolean __GLXEW_OML_swap_method = GL_FALSE;
-#ifdef GLX_OML_sync_control
-GLboolean __GLXEW_OML_sync_control = GL_FALSE;
-#endif
-GLboolean __GLXEW_SGIS_blended_overlay = GL_FALSE;
-GLboolean __GLXEW_SGIS_color_range = GL_FALSE;
-GLboolean __GLXEW_SGIS_multisample = GL_FALSE;
-GLboolean __GLXEW_SGIS_shared_multisample = GL_FALSE;
-GLboolean __GLXEW_SGIX_fbconfig = GL_FALSE;
-GLboolean __GLXEW_SGIX_pbuffer = GL_FALSE;
-GLboolean __GLXEW_SGIX_swap_barrier = GL_FALSE;
-GLboolean __GLXEW_SGIX_swap_group = GL_FALSE;
-GLboolean __GLXEW_SGIX_video_resize = GL_FALSE;
-GLboolean __GLXEW_SGIX_visual_select_group = GL_FALSE;
-GLboolean __GLXEW_SGI_cushion = GL_FALSE;
-GLboolean __GLXEW_SGI_make_current_read = GL_FALSE;
-GLboolean __GLXEW_SGI_swap_control = GL_FALSE;
-GLboolean __GLXEW_SGI_video_sync = GL_FALSE;
-GLboolean __GLXEW_SUN_get_transparent_index = GL_FALSE;
-GLboolean __GLXEW_SUN_video_resize = GL_FALSE;
-
-#endif /* !_WIN32 */
-
-/* ----------------------------- GL_VERSION_1_2 ---------------------------- */
+#endif /* !GLEW_MX */
 
 #ifdef GL_VERSION_1_2
 
@@ -1691,9 +1657,8 @@ static GLboolean _glewInit_GL_VERSION_1_2 (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_VERSION_1_2 */
 
-/* ----------------------------- GL_VERSION_1_3 ---------------------------- */
+#endif /* GL_VERSION_1_2 */
 
 #ifdef GL_VERSION_1_3
 
@@ -1750,9 +1715,8 @@ static GLboolean _glewInit_GL_VERSION_1_3 (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_VERSION_1_3 */
 
-/* ----------------------------- GL_VERSION_1_4 ---------------------------- */
+#endif /* GL_VERSION_1_3 */
 
 #ifdef GL_VERSION_1_4
 
@@ -1808,9 +1772,8 @@ static GLboolean _glewInit_GL_VERSION_1_4 (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_VERSION_1_4 */
 
-/* ----------------------------- GL_VERSION_1_5 ---------------------------- */
+#endif /* GL_VERSION_1_4 */
 
 #ifdef GL_VERSION_1_5
 
@@ -1840,15 +1803,117 @@ static GLboolean _glewInit_GL_VERSION_1_5 (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
+
 #endif /* GL_VERSION_1_5 */
 
-/* -------------------------- GL_3DFX_multisample -------------------------- */
+#ifdef GL_VERSION_2_0
+
+static GLboolean _glewInit_GL_VERSION_2_0 (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glAttachShader = (PFNGLATTACHSHADERPROC)glewGetProcAddress((const GLubyte*)"glAttachShader")) == NULL) || r;
+  r = ((glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)glewGetProcAddress((const GLubyte*)"glBindAttribLocation")) == NULL) || r;
+  r = ((glBlendEquationSeparate = (PFNGLBLENDEQUATIONSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationSeparate")) == NULL) || r;
+  r = ((glCompileShader = (PFNGLCOMPILESHADERPROC)glewGetProcAddress((const GLubyte*)"glCompileShader")) == NULL) || r;
+  r = ((glCreateProgram = (PFNGLCREATEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glCreateProgram")) == NULL) || r;
+  r = ((glCreateShader = (PFNGLCREATESHADERPROC)glewGetProcAddress((const GLubyte*)"glCreateShader")) == NULL) || r;
+  r = ((glDeleteProgram = (PFNGLDELETEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glDeleteProgram")) == NULL) || r;
+  r = ((glDeleteShader = (PFNGLDELETESHADERPROC)glewGetProcAddress((const GLubyte*)"glDeleteShader")) == NULL) || r;
+  r = ((glDetachShader = (PFNGLDETACHSHADERPROC)glewGetProcAddress((const GLubyte*)"glDetachShader")) == NULL) || r;
+  r = ((glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)glewGetProcAddress((const GLubyte*)"glDisableVertexAttribArray")) == NULL) || r;
+  r = ((glDrawBuffers = (PFNGLDRAWBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffers")) == NULL) || r;
+  r = ((glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)glewGetProcAddress((const GLubyte*)"glEnableVertexAttribArray")) == NULL) || r;
+  r = ((glGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC)glewGetProcAddress((const GLubyte*)"glGetActiveAttrib")) == NULL) || r;
+  r = ((glGetActiveUniform = (PFNGLGETACTIVEUNIFORMPROC)glewGetProcAddress((const GLubyte*)"glGetActiveUniform")) == NULL) || r;
+  r = ((glGetAttachedShaders = (PFNGLGETATTACHEDSHADERSPROC)glewGetProcAddress((const GLubyte*)"glGetAttachedShaders")) == NULL) || r;
+  r = ((glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC)glewGetProcAddress((const GLubyte*)"glGetAttribLocation")) == NULL) || r;
+  r = ((glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)glewGetProcAddress((const GLubyte*)"glGetProgramInfoLog")) == NULL) || r;
+  r = ((glGetProgramiv = (PFNGLGETPROGRAMIVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramiv")) == NULL) || r;
+  r = ((glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)glewGetProcAddress((const GLubyte*)"glGetShaderInfoLog")) == NULL) || r;
+  r = ((glGetShaderSource = (PFNGLGETSHADERSOURCEPROC)glewGetProcAddress((const GLubyte*)"glGetShaderSource")) == NULL) || r;
+  r = ((glGetShaderiv = (PFNGLGETSHADERIVPROC)glewGetProcAddress((const GLubyte*)"glGetShaderiv")) == NULL) || r;
+  r = ((glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)glewGetProcAddress((const GLubyte*)"glGetUniformLocation")) == NULL) || r;
+  r = ((glGetUniformfv = (PFNGLGETUNIFORMFVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformfv")) == NULL) || r;
+  r = ((glGetUniformiv = (PFNGLGETUNIFORMIVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformiv")) == NULL) || r;
+  r = ((glGetVertexAttribPointerv = (PFNGLGETVERTEXATTRIBPOINTERVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribPointerv")) == NULL) || r;
+  r = ((glGetVertexAttribdv = (PFNGLGETVERTEXATTRIBDVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribdv")) == NULL) || r;
+  r = ((glGetVertexAttribfv = (PFNGLGETVERTEXATTRIBFVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribfv")) == NULL) || r;
+  r = ((glGetVertexAttribiv = (PFNGLGETVERTEXATTRIBIVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribiv")) == NULL) || r;
+  r = ((glIsProgram = (PFNGLISPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glIsProgram")) == NULL) || r;
+  r = ((glIsShader = (PFNGLISSHADERPROC)glewGetProcAddress((const GLubyte*)"glIsShader")) == NULL) || r;
+  r = ((glLinkProgram = (PFNGLLINKPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glLinkProgram")) == NULL) || r;
+  r = ((glShaderSource = (PFNGLSHADERSOURCEPROC)glewGetProcAddress((const GLubyte*)"glShaderSource")) == NULL) || r;
+  r = ((glStencilFuncSeparate = (PFNGLSTENCILFUNCSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glStencilFuncSeparate")) == NULL) || r;
+  r = ((glStencilMaskSeparate = (PFNGLSTENCILMASKSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glStencilMaskSeparate")) == NULL) || r;
+  r = ((glStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glStencilOpSeparate")) == NULL) || r;
+  r = ((glUniform1f = (PFNGLUNIFORM1FPROC)glewGetProcAddress((const GLubyte*)"glUniform1f")) == NULL) || r;
+  r = ((glUniform1fv = (PFNGLUNIFORM1FVPROC)glewGetProcAddress((const GLubyte*)"glUniform1fv")) == NULL) || r;
+  r = ((glUniform1i = (PFNGLUNIFORM1IPROC)glewGetProcAddress((const GLubyte*)"glUniform1i")) == NULL) || r;
+  r = ((glUniform1iv = (PFNGLUNIFORM1IVPROC)glewGetProcAddress((const GLubyte*)"glUniform1iv")) == NULL) || r;
+  r = ((glUniform2f = (PFNGLUNIFORM2FPROC)glewGetProcAddress((const GLubyte*)"glUniform2f")) == NULL) || r;
+  r = ((glUniform2fv = (PFNGLUNIFORM2FVPROC)glewGetProcAddress((const GLubyte*)"glUniform2fv")) == NULL) || r;
+  r = ((glUniform2i = (PFNGLUNIFORM2IPROC)glewGetProcAddress((const GLubyte*)"glUniform2i")) == NULL) || r;
+  r = ((glUniform2iv = (PFNGLUNIFORM2IVPROC)glewGetProcAddress((const GLubyte*)"glUniform2iv")) == NULL) || r;
+  r = ((glUniform3f = (PFNGLUNIFORM3FPROC)glewGetProcAddress((const GLubyte*)"glUniform3f")) == NULL) || r;
+  r = ((glUniform3fv = (PFNGLUNIFORM3FVPROC)glewGetProcAddress((const GLubyte*)"glUniform3fv")) == NULL) || r;
+  r = ((glUniform3i = (PFNGLUNIFORM3IPROC)glewGetProcAddress((const GLubyte*)"glUniform3i")) == NULL) || r;
+  r = ((glUniform3iv = (PFNGLUNIFORM3IVPROC)glewGetProcAddress((const GLubyte*)"glUniform3iv")) == NULL) || r;
+  r = ((glUniform4f = (PFNGLUNIFORM4FPROC)glewGetProcAddress((const GLubyte*)"glUniform4f")) == NULL) || r;
+  r = ((glUniform4fv = (PFNGLUNIFORM4FVPROC)glewGetProcAddress((const GLubyte*)"glUniform4fv")) == NULL) || r;
+  r = ((glUniform4i = (PFNGLUNIFORM4IPROC)glewGetProcAddress((const GLubyte*)"glUniform4i")) == NULL) || r;
+  r = ((glUniform4iv = (PFNGLUNIFORM4IVPROC)glewGetProcAddress((const GLubyte*)"glUniform4iv")) == NULL) || r;
+  r = ((glUniformMatrix2fv = (PFNGLUNIFORMMATRIX2FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2fv")) == NULL) || r;
+  r = ((glUniformMatrix3fv = (PFNGLUNIFORMMATRIX3FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3fv")) == NULL) || r;
+  r = ((glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4fv")) == NULL) || r;
+  r = ((glUseProgram = (PFNGLUSEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glUseProgram")) == NULL) || r;
+  r = ((glValidateProgram = (PFNGLVALIDATEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glValidateProgram")) == NULL) || r;
+  r = ((glVertexAttrib1d = (PFNGLVERTEXATTRIB1DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1d")) == NULL) || r;
+  r = ((glVertexAttrib1dv = (PFNGLVERTEXATTRIB1DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1dv")) == NULL) || r;
+  r = ((glVertexAttrib1f = (PFNGLVERTEXATTRIB1FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1f")) == NULL) || r;
+  r = ((glVertexAttrib1fv = (PFNGLVERTEXATTRIB1FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1fv")) == NULL) || r;
+  r = ((glVertexAttrib1s = (PFNGLVERTEXATTRIB1SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1s")) == NULL) || r;
+  r = ((glVertexAttrib1sv = (PFNGLVERTEXATTRIB1SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1sv")) == NULL) || r;
+  r = ((glVertexAttrib2d = (PFNGLVERTEXATTRIB2DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2d")) == NULL) || r;
+  r = ((glVertexAttrib2dv = (PFNGLVERTEXATTRIB2DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2dv")) == NULL) || r;
+  r = ((glVertexAttrib2f = (PFNGLVERTEXATTRIB2FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2f")) == NULL) || r;
+  r = ((glVertexAttrib2fv = (PFNGLVERTEXATTRIB2FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2fv")) == NULL) || r;
+  r = ((glVertexAttrib2s = (PFNGLVERTEXATTRIB2SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2s")) == NULL) || r;
+  r = ((glVertexAttrib2sv = (PFNGLVERTEXATTRIB2SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2sv")) == NULL) || r;
+  r = ((glVertexAttrib3d = (PFNGLVERTEXATTRIB3DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3d")) == NULL) || r;
+  r = ((glVertexAttrib3dv = (PFNGLVERTEXATTRIB3DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3dv")) == NULL) || r;
+  r = ((glVertexAttrib3f = (PFNGLVERTEXATTRIB3FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3f")) == NULL) || r;
+  r = ((glVertexAttrib3fv = (PFNGLVERTEXATTRIB3FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3fv")) == NULL) || r;
+  r = ((glVertexAttrib3s = (PFNGLVERTEXATTRIB3SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3s")) == NULL) || r;
+  r = ((glVertexAttrib3sv = (PFNGLVERTEXATTRIB3SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3sv")) == NULL) || r;
+  r = ((glVertexAttrib4Nbv = (PFNGLVERTEXATTRIB4NBVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nbv")) == NULL) || r;
+  r = ((glVertexAttrib4Niv = (PFNGLVERTEXATTRIB4NIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Niv")) == NULL) || r;
+  r = ((glVertexAttrib4Nsv = (PFNGLVERTEXATTRIB4NSVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nsv")) == NULL) || r;
+  r = ((glVertexAttrib4Nub = (PFNGLVERTEXATTRIB4NUBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nub")) == NULL) || r;
+  r = ((glVertexAttrib4Nubv = (PFNGLVERTEXATTRIB4NUBVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nubv")) == NULL) || r;
+  r = ((glVertexAttrib4Nuiv = (PFNGLVERTEXATTRIB4NUIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nuiv")) == NULL) || r;
+  r = ((glVertexAttrib4Nusv = (PFNGLVERTEXATTRIB4NUSVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nusv")) == NULL) || r;
+  r = ((glVertexAttrib4bv = (PFNGLVERTEXATTRIB4BVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4bv")) == NULL) || r;
+  r = ((glVertexAttrib4d = (PFNGLVERTEXATTRIB4DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4d")) == NULL) || r;
+  r = ((glVertexAttrib4dv = (PFNGLVERTEXATTRIB4DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4dv")) == NULL) || r;
+  r = ((glVertexAttrib4f = (PFNGLVERTEXATTRIB4FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4f")) == NULL) || r;
+  r = ((glVertexAttrib4fv = (PFNGLVERTEXATTRIB4FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4fv")) == NULL) || r;
+  r = ((glVertexAttrib4iv = (PFNGLVERTEXATTRIB4IVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4iv")) == NULL) || r;
+  r = ((glVertexAttrib4s = (PFNGLVERTEXATTRIB4SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4s")) == NULL) || r;
+  r = ((glVertexAttrib4sv = (PFNGLVERTEXATTRIB4SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4sv")) == NULL) || r;
+  r = ((glVertexAttrib4ubv = (PFNGLVERTEXATTRIB4UBVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4ubv")) == NULL) || r;
+  r = ((glVertexAttrib4uiv = (PFNGLVERTEXATTRIB4UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4uiv")) == NULL) || r;
+  r = ((glVertexAttrib4usv = (PFNGLVERTEXATTRIB4USVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4usv")) == NULL) || r;
+  r = ((glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribPointer")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_VERSION_2_0 */
 
 #ifdef GL_3DFX_multisample
 
 #endif /* GL_3DFX_multisample */
-
-/* ---------------------------- GL_3DFX_tbuffer ---------------------------- */
 
 #ifdef GL_3DFX_tbuffer
 
@@ -1860,21 +1925,16 @@ static GLboolean _glewInit_GL_3DFX_tbuffer (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_3DFX_tbuffer */
 
-/* -------------------- GL_3DFX_texture_compression_FXT1 ------------------- */
+#endif /* GL_3DFX_tbuffer */
 
 #ifdef GL_3DFX_texture_compression_FXT1
 
 #endif /* GL_3DFX_texture_compression_FXT1 */
 
-/* ------------------------ GL_APPLE_client_storage ------------------------ */
-
 #ifdef GL_APPLE_client_storage
 
 #endif /* GL_APPLE_client_storage */
-
-/* ------------------------- GL_APPLE_element_array ------------------------ */
 
 #ifdef GL_APPLE_element_array
 
@@ -1890,9 +1950,8 @@ static GLboolean _glewInit_GL_APPLE_element_array (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_APPLE_element_array */
 
-/* ----------------------------- GL_APPLE_fence ---------------------------- */
+#endif /* GL_APPLE_element_array */
 
 #ifdef GL_APPLE_fence
 
@@ -1911,21 +1970,20 @@ static GLboolean _glewInit_GL_APPLE_fence (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_APPLE_fence */
 
-/* ------------------------- GL_APPLE_float_pixels ------------------------- */
+#endif /* GL_APPLE_fence */
 
 #ifdef GL_APPLE_float_pixels
 
 #endif /* GL_APPLE_float_pixels */
 
-/* ------------------------ GL_APPLE_specular_vector ----------------------- */
+#ifdef GL_APPLE_pixel_buffer
+
+#endif /* GL_APPLE_pixel_buffer */
 
 #ifdef GL_APPLE_specular_vector
 
 #endif /* GL_APPLE_specular_vector */
-
-/* ------------------------- GL_APPLE_texture_range ------------------------ */
 
 #ifdef GL_APPLE_texture_range
 
@@ -1938,15 +1996,12 @@ static GLboolean _glewInit_GL_APPLE_texture_range (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_APPLE_texture_range */
 
-/* ------------------------ GL_APPLE_transform_hint ------------------------ */
+#endif /* GL_APPLE_texture_range */
 
 #ifdef GL_APPLE_transform_hint
 
 #endif /* GL_APPLE_transform_hint */
-
-/* ---------------------- GL_APPLE_vertex_array_object --------------------- */
 
 #ifdef GL_APPLE_vertex_array_object
 
@@ -1961,9 +2016,8 @@ static GLboolean _glewInit_GL_APPLE_vertex_array_object (GLEW_CONTEXT_ARG_DEF_IN
 
   return r;
 }
-#endif /* GL_APPLE_vertex_array_object */
 
-/* ---------------------- GL_APPLE_vertex_array_range ---------------------- */
+#endif /* GL_APPLE_vertex_array_object */
 
 #ifdef GL_APPLE_vertex_array_range
 
@@ -1977,39 +2031,58 @@ static GLboolean _glewInit_GL_APPLE_vertex_array_range (GLEW_CONTEXT_ARG_DEF_INI
 
   return r;
 }
-#endif /* GL_APPLE_vertex_array_range */
 
-/* --------------------------- GL_APPLE_ycbcr_422 -------------------------- */
+#endif /* GL_APPLE_vertex_array_range */
 
 #ifdef GL_APPLE_ycbcr_422
 
 #endif /* GL_APPLE_ycbcr_422 */
 
-/* -------------------------- GL_ARB_depth_texture ------------------------- */
+#ifdef GL_ARB_color_buffer_float
+
+static GLboolean _glewInit_GL_ARB_color_buffer_float (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glClampColorARB = (PFNGLCLAMPCOLORARBPROC)glewGetProcAddress((const GLubyte*)"glClampColorARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_ARB_color_buffer_float */
 
 #ifdef GL_ARB_depth_texture
 
 #endif /* GL_ARB_depth_texture */
 
-/* ------------------------ GL_ARB_fragment_program ------------------------ */
+#ifdef GL_ARB_draw_buffers
+
+static GLboolean _glewInit_GL_ARB_draw_buffers (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glDrawBuffersARB = (PFNGLDRAWBUFFERSARBPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffersARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_ARB_draw_buffers */
 
 #ifdef GL_ARB_fragment_program
 
 #endif /* GL_ARB_fragment_program */
 
-/* --------------------- GL_ARB_fragment_program_shadow -------------------- */
-
 #ifdef GL_ARB_fragment_program_shadow
 
 #endif /* GL_ARB_fragment_program_shadow */
-
-/* ------------------------- GL_ARB_fragment_shader ------------------------ */
 
 #ifdef GL_ARB_fragment_shader
 
 #endif /* GL_ARB_fragment_shader */
 
-/* ----------------------------- GL_ARB_imaging ---------------------------- */
+#ifdef GL_ARB_half_float_pixel
+
+#endif /* GL_ARB_half_float_pixel */
 
 #ifdef GL_ARB_imaging
 
@@ -2052,9 +2125,8 @@ static GLboolean _glewInit_GL_ARB_imaging (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_imaging */
 
-/* ------------------------- GL_ARB_matrix_palette ------------------------- */
+#endif /* GL_ARB_imaging */
 
 #ifdef GL_ARB_matrix_palette
 
@@ -2070,9 +2142,8 @@ static GLboolean _glewInit_GL_ARB_matrix_palette (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_matrix_palette */
 
-/* --------------------------- GL_ARB_multisample -------------------------- */
+#endif /* GL_ARB_matrix_palette */
 
 #ifdef GL_ARB_multisample
 
@@ -2084,9 +2155,8 @@ static GLboolean _glewInit_GL_ARB_multisample (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_multisample */
 
-/* -------------------------- GL_ARB_multitexture -------------------------- */
+#endif /* GL_ARB_multisample */
 
 #ifdef GL_ARB_multitexture
 
@@ -2131,9 +2201,8 @@ static GLboolean _glewInit_GL_ARB_multitexture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_multitexture */
 
-/* ------------------------- GL_ARB_occlusion_query ------------------------ */
+#endif /* GL_ARB_multitexture */
 
 #ifdef GL_ARB_occlusion_query
 
@@ -2152,9 +2221,12 @@ static GLboolean _glewInit_GL_ARB_occlusion_query (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
+
 #endif /* GL_ARB_occlusion_query */
 
-/* ------------------------ GL_ARB_point_parameters ------------------------ */
+#ifdef GL_ARB_pixel_buffer_object
+
+#endif /* GL_ARB_pixel_buffer_object */
 
 #ifdef GL_ARB_point_parameters
 
@@ -2167,15 +2239,12 @@ static GLboolean _glewInit_GL_ARB_point_parameters (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_point_parameters */
 
-/* -------------------------- GL_ARB_point_sprite -------------------------- */
+#endif /* GL_ARB_point_parameters */
 
 #ifdef GL_ARB_point_sprite
 
 #endif /* GL_ARB_point_sprite */
-
-/* ------------------------- GL_ARB_shader_objects ------------------------- */
 
 #ifdef GL_ARB_shader_objects
 
@@ -2225,33 +2294,24 @@ static GLboolean _glewInit_GL_ARB_shader_objects (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_shader_objects */
 
-/* ---------------------- GL_ARB_shading_language_100 ---------------------- */
+#endif /* GL_ARB_shader_objects */
 
 #ifdef GL_ARB_shading_language_100
 
 #endif /* GL_ARB_shading_language_100 */
 
-/* ----------------------------- GL_ARB_shadow ----------------------------- */
-
 #ifdef GL_ARB_shadow
 
 #endif /* GL_ARB_shadow */
-
-/* ------------------------- GL_ARB_shadow_ambient ------------------------- */
 
 #ifdef GL_ARB_shadow_ambient
 
 #endif /* GL_ARB_shadow_ambient */
 
-/* ---------------------- GL_ARB_texture_border_clamp ---------------------- */
-
 #ifdef GL_ARB_texture_border_clamp
 
 #endif /* GL_ARB_texture_border_clamp */
-
-/* ----------------------- GL_ARB_texture_compression ---------------------- */
 
 #ifdef GL_ARB_texture_compression
 
@@ -2269,57 +2329,48 @@ static GLboolean _glewInit_GL_ARB_texture_compression (GLEW_CONTEXT_ARG_DEF_INIT
 
   return r;
 }
-#endif /* GL_ARB_texture_compression */
 
-/* ------------------------ GL_ARB_texture_cube_map ------------------------ */
+#endif /* GL_ARB_texture_compression */
 
 #ifdef GL_ARB_texture_cube_map
 
 #endif /* GL_ARB_texture_cube_map */
 
-/* ------------------------- GL_ARB_texture_env_add ------------------------ */
-
 #ifdef GL_ARB_texture_env_add
 
 #endif /* GL_ARB_texture_env_add */
-
-/* ----------------------- GL_ARB_texture_env_combine ---------------------- */
 
 #ifdef GL_ARB_texture_env_combine
 
 #endif /* GL_ARB_texture_env_combine */
 
-/* ---------------------- GL_ARB_texture_env_crossbar ---------------------- */
-
 #ifdef GL_ARB_texture_env_crossbar
 
 #endif /* GL_ARB_texture_env_crossbar */
-
-/* ------------------------ GL_ARB_texture_env_dot3 ------------------------ */
 
 #ifdef GL_ARB_texture_env_dot3
 
 #endif /* GL_ARB_texture_env_dot3 */
 
-/* --------------------- GL_ARB_texture_mirrored_repeat -------------------- */
+#ifdef GL_ARB_texture_float
+
+#endif /* GL_ARB_texture_float */
 
 #ifdef GL_ARB_texture_mirrored_repeat
 
 #endif /* GL_ARB_texture_mirrored_repeat */
 
-/* -------------------- GL_ARB_texture_non_power_of_two -------------------- */
-
 #ifdef GL_ARB_texture_non_power_of_two
 
 #endif /* GL_ARB_texture_non_power_of_two */
 
-/* ------------------------ GL_ARB_transpose_matrix ------------------------ */
+#ifdef GL_ARB_texture_rectangle
+
+#endif /* GL_ARB_texture_rectangle */
 
 #ifdef GL_ARB_transpose_matrix
 
 #endif /* GL_ARB_transpose_matrix */
-
-/* -------------------------- GL_ARB_vertex_blend -------------------------- */
 
 #ifdef GL_ARB_vertex_blend
 
@@ -2340,9 +2391,8 @@ static GLboolean _glewInit_GL_ARB_vertex_blend (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_vertex_blend */
 
-/* ---------------------- GL_ARB_vertex_buffer_object ---------------------- */
+#endif /* GL_ARB_vertex_blend */
 
 #ifdef GL_ARB_vertex_buffer_object
 
@@ -2364,9 +2414,8 @@ static GLboolean _glewInit_GL_ARB_vertex_buffer_object (GLEW_CONTEXT_ARG_DEF_INI
 
   return r;
 }
-#endif /* GL_ARB_vertex_buffer_object */
 
-/* ------------------------- GL_ARB_vertex_program ------------------------- */
+#endif /* GL_ARB_vertex_buffer_object */
 
 #ifdef GL_ARB_vertex_program
 
@@ -2439,9 +2488,8 @@ static GLboolean _glewInit_GL_ARB_vertex_program (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_vertex_program */
 
-/* -------------------------- GL_ARB_vertex_shader ------------------------- */
+#endif /* GL_ARB_vertex_program */
 
 #ifdef GL_ARB_vertex_shader
 
@@ -2455,9 +2503,8 @@ static GLboolean _glewInit_GL_ARB_vertex_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_vertex_shader */
 
-/* --------------------------- GL_ARB_window_pos --------------------------- */
+#endif /* GL_ARB_vertex_shader */
 
 #ifdef GL_ARB_window_pos
 
@@ -2484,33 +2531,24 @@ static GLboolean _glewInit_GL_ARB_window_pos (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ARB_window_pos */
 
-/* ------------------------- GL_ATIX_point_sprites ------------------------- */
+#endif /* GL_ARB_window_pos */
 
 #ifdef GL_ATIX_point_sprites
 
 #endif /* GL_ATIX_point_sprites */
 
-/* ---------------------- GL_ATIX_texture_env_combine3 --------------------- */
-
 #ifdef GL_ATIX_texture_env_combine3
 
 #endif /* GL_ATIX_texture_env_combine3 */
-
-/* ----------------------- GL_ATIX_texture_env_route ----------------------- */
 
 #ifdef GL_ATIX_texture_env_route
 
 #endif /* GL_ATIX_texture_env_route */
 
-/* ---------------- GL_ATIX_vertex_shader_output_point_size ---------------- */
-
 #ifdef GL_ATIX_vertex_shader_output_point_size
 
 #endif /* GL_ATIX_vertex_shader_output_point_size */
-
-/* -------------------------- GL_ATI_draw_buffers -------------------------- */
 
 #ifdef GL_ATI_draw_buffers
 
@@ -2522,9 +2560,8 @@ static GLboolean _glewInit_GL_ATI_draw_buffers (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_draw_buffers */
 
-/* -------------------------- GL_ATI_element_array ------------------------- */
+#endif /* GL_ATI_draw_buffers */
 
 #ifdef GL_ATI_element_array
 
@@ -2538,9 +2575,8 @@ static GLboolean _glewInit_GL_ATI_element_array (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_element_array */
 
-/* ------------------------- GL_ATI_envmap_bumpmap ------------------------- */
+#endif /* GL_ATI_element_array */
 
 #ifdef GL_ATI_envmap_bumpmap
 
@@ -2555,9 +2591,8 @@ static GLboolean _glewInit_GL_ATI_envmap_bumpmap (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_envmap_bumpmap */
 
-/* ------------------------- GL_ATI_fragment_shader ------------------------ */
+#endif /* GL_ATI_envmap_bumpmap */
 
 #ifdef GL_ATI_fragment_shader
 
@@ -2582,9 +2617,8 @@ static GLboolean _glewInit_GL_ATI_fragment_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_fragment_shader */
 
-/* ------------------------ GL_ATI_map_object_buffer ----------------------- */
+#endif /* GL_ATI_fragment_shader */
 
 #ifdef GL_ATI_map_object_buffer
 
@@ -2597,9 +2631,8 @@ static GLboolean _glewInit_GL_ATI_map_object_buffer (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_map_object_buffer */
 
-/* -------------------------- GL_ATI_pn_triangles -------------------------- */
+#endif /* GL_ATI_map_object_buffer */
 
 #ifdef GL_ATI_pn_triangles
 
@@ -2612,9 +2645,8 @@ static GLboolean _glewInit_GL_ATI_pn_triangles (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_pn_triangles */
 
-/* ------------------------ GL_ATI_separate_stencil ------------------------ */
+#endif /* GL_ATI_pn_triangles */
 
 #ifdef GL_ATI_separate_stencil
 
@@ -2627,33 +2659,28 @@ static GLboolean _glewInit_GL_ATI_separate_stencil (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_separate_stencil */
 
-/* ---------------------- GL_ATI_text_fragment_shader ---------------------- */
+#endif /* GL_ATI_separate_stencil */
 
 #ifdef GL_ATI_text_fragment_shader
 
 #endif /* GL_ATI_text_fragment_shader */
 
-/* ---------------------- GL_ATI_texture_env_combine3 ---------------------- */
+#ifdef GL_ATI_texture_compression_3dc
+
+#endif /* GL_ATI_texture_compression_3dc */
 
 #ifdef GL_ATI_texture_env_combine3
 
 #endif /* GL_ATI_texture_env_combine3 */
 
-/* -------------------------- GL_ATI_texture_float ------------------------- */
-
 #ifdef GL_ATI_texture_float
 
 #endif /* GL_ATI_texture_float */
 
-/* ----------------------- GL_ATI_texture_mirror_once ---------------------- */
-
 #ifdef GL_ATI_texture_mirror_once
 
 #endif /* GL_ATI_texture_mirror_once */
-
-/* ----------------------- GL_ATI_vertex_array_object ---------------------- */
 
 #ifdef GL_ATI_vertex_array_object
 
@@ -2676,9 +2703,8 @@ static GLboolean _glewInit_GL_ATI_vertex_array_object (GLEW_CONTEXT_ARG_DEF_INIT
 
   return r;
 }
-#endif /* GL_ATI_vertex_array_object */
 
-/* ------------------- GL_ATI_vertex_attrib_array_object ------------------- */
+#endif /* GL_ATI_vertex_array_object */
 
 #ifdef GL_ATI_vertex_attrib_array_object
 
@@ -2692,9 +2718,8 @@ static GLboolean _glewInit_GL_ATI_vertex_attrib_array_object (GLEW_CONTEXT_ARG_D
 
   return r;
 }
-#endif /* GL_ATI_vertex_attrib_array_object */
 
-/* ------------------------- GL_ATI_vertex_streams ------------------------- */
+#endif /* GL_ATI_vertex_attrib_array_object */
 
 #ifdef GL_ATI_vertex_streams
 
@@ -2742,27 +2767,24 @@ static GLboolean _glewInit_GL_ATI_vertex_streams (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_ATI_vertex_streams */
 
-/* --------------------------- GL_EXT_422_pixels --------------------------- */
+#endif /* GL_ATI_vertex_streams */
 
 #ifdef GL_EXT_422_pixels
 
 #endif /* GL_EXT_422_pixels */
 
-/* ------------------------------ GL_EXT_abgr ------------------------------ */
+#ifdef GL_EXT_Cg_shader
+
+#endif /* GL_EXT_Cg_shader */
 
 #ifdef GL_EXT_abgr
 
 #endif /* GL_EXT_abgr */
 
-/* ------------------------------ GL_EXT_bgra ------------------------------ */
-
 #ifdef GL_EXT_bgra
 
 #endif /* GL_EXT_bgra */
-
-/* --------------------------- GL_EXT_blend_color -------------------------- */
 
 #ifdef GL_EXT_blend_color
 
@@ -2774,9 +2796,8 @@ static GLboolean _glewInit_GL_EXT_blend_color (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_blend_color */
 
-/* --------------------- GL_EXT_blend_equation_separate -------------------- */
+#endif /* GL_EXT_blend_color */
 
 #ifdef GL_EXT_blend_equation_separate
 
@@ -2788,9 +2809,8 @@ static GLboolean _glewInit_GL_EXT_blend_equation_separate (GLEW_CONTEXT_ARG_DEF_
 
   return r;
 }
-#endif /* GL_EXT_blend_equation_separate */
 
-/* ----------------------- GL_EXT_blend_func_separate ---------------------- */
+#endif /* GL_EXT_blend_equation_separate */
 
 #ifdef GL_EXT_blend_func_separate
 
@@ -2802,15 +2822,12 @@ static GLboolean _glewInit_GL_EXT_blend_func_separate (GLEW_CONTEXT_ARG_DEF_INIT
 
   return r;
 }
-#endif /* GL_EXT_blend_func_separate */
 
-/* ------------------------- GL_EXT_blend_logic_op ------------------------- */
+#endif /* GL_EXT_blend_func_separate */
 
 #ifdef GL_EXT_blend_logic_op
 
 #endif /* GL_EXT_blend_logic_op */
-
-/* -------------------------- GL_EXT_blend_minmax -------------------------- */
 
 #ifdef GL_EXT_blend_minmax
 
@@ -2822,27 +2839,20 @@ static GLboolean _glewInit_GL_EXT_blend_minmax (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_blend_minmax */
 
-/* ------------------------- GL_EXT_blend_subtract ------------------------- */
+#endif /* GL_EXT_blend_minmax */
 
 #ifdef GL_EXT_blend_subtract
 
 #endif /* GL_EXT_blend_subtract */
 
-/* ------------------------ GL_EXT_clip_volume_hint ------------------------ */
-
 #ifdef GL_EXT_clip_volume_hint
 
 #endif /* GL_EXT_clip_volume_hint */
 
-/* ------------------------------ GL_EXT_cmyka ----------------------------- */
-
 #ifdef GL_EXT_cmyka
 
 #endif /* GL_EXT_cmyka */
-
-/* ------------------------- GL_EXT_color_subtable ------------------------- */
 
 #ifdef GL_EXT_color_subtable
 
@@ -2855,9 +2865,8 @@ static GLboolean _glewInit_GL_EXT_color_subtable (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_color_subtable */
 
-/* ---------------------- GL_EXT_compiled_vertex_array --------------------- */
+#endif /* GL_EXT_color_subtable */
 
 #ifdef GL_EXT_compiled_vertex_array
 
@@ -2870,9 +2879,8 @@ static GLboolean _glewInit_GL_EXT_compiled_vertex_array (GLEW_CONTEXT_ARG_DEF_IN
 
   return r;
 }
-#endif /* GL_EXT_compiled_vertex_array */
 
-/* --------------------------- GL_EXT_convolution -------------------------- */
+#endif /* GL_EXT_compiled_vertex_array */
 
 #ifdef GL_EXT_convolution
 
@@ -2896,9 +2904,8 @@ static GLboolean _glewInit_GL_EXT_convolution (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_convolution */
 
-/* ------------------------ GL_EXT_coordinate_frame ------------------------ */
+#endif /* GL_EXT_convolution */
 
 #ifdef GL_EXT_coordinate_frame
 
@@ -2911,9 +2918,8 @@ static GLboolean _glewInit_GL_EXT_coordinate_frame (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_coordinate_frame */
 
-/* -------------------------- GL_EXT_copy_texture -------------------------- */
+#endif /* GL_EXT_coordinate_frame */
 
 #ifdef GL_EXT_copy_texture
 
@@ -2929,9 +2935,8 @@ static GLboolean _glewInit_GL_EXT_copy_texture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_copy_texture */
 
-/* --------------------------- GL_EXT_cull_vertex -------------------------- */
+#endif /* GL_EXT_copy_texture */
 
 #ifdef GL_EXT_cull_vertex
 
@@ -2944,9 +2949,8 @@ static GLboolean _glewInit_GL_EXT_cull_vertex (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_cull_vertex */
 
-/* ------------------------ GL_EXT_depth_bounds_test ----------------------- */
+#endif /* GL_EXT_cull_vertex */
 
 #ifdef GL_EXT_depth_bounds_test
 
@@ -2958,15 +2962,21 @@ static GLboolean _glewInit_GL_EXT_depth_bounds_test (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_depth_bounds_test */
 
-/* ----------------------- GL_EXT_draw_range_elements ---------------------- */
+#endif /* GL_EXT_depth_bounds_test */
 
 #ifdef GL_EXT_draw_range_elements
 
-#endif /* GL_EXT_draw_range_elements */
+static GLboolean _glewInit_GL_EXT_draw_range_elements (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
 
-/* ---------------------------- GL_EXT_fog_coord --------------------------- */
+  r = ((glDrawRangeElementsEXT = (PFNGLDRAWRANGEELEMENTSEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawRangeElementsEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_EXT_draw_range_elements */
 
 #ifdef GL_EXT_fog_coord
 
@@ -2982,9 +2992,8 @@ static GLboolean _glewInit_GL_EXT_fog_coord (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_fog_coord */
 
-/* ------------------------ GL_EXT_fragment_lighting ----------------------- */
+#endif /* GL_EXT_fog_coord */
 
 #ifdef GL_EXT_fragment_lighting
 
@@ -3013,9 +3022,37 @@ static GLboolean _glewInit_GL_EXT_fragment_lighting (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
+
 #endif /* GL_EXT_fragment_lighting */
 
-/* ---------------------------- GL_EXT_histogram --------------------------- */
+#ifdef GL_EXT_framebuffer_object
+
+static GLboolean _glewInit_GL_EXT_framebuffer_object (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindFramebufferEXT")) == NULL) || r;
+  r = ((glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindRenderbufferEXT")) == NULL) || r;
+  r = ((glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glewGetProcAddress((const GLubyte*)"glCheckFramebufferStatusEXT")) == NULL) || r;
+  r = ((glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteFramebuffersEXT")) == NULL) || r;
+  r = ((glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteRenderbuffersEXT")) == NULL) || r;
+  r = ((glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferRenderbufferEXT")) == NULL) || r;
+  r = ((glFramebufferTexture1DEXT = (PFNGLFRAMEBUFFERTEXTURE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture1DEXT")) == NULL) || r;
+  r = ((glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture2DEXT")) == NULL) || r;
+  r = ((glFramebufferTexture3DEXT = (PFNGLFRAMEBUFFERTEXTURE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture3DEXT")) == NULL) || r;
+  r = ((glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glGenFramebuffersEXT")) == NULL) || r;
+  r = ((glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glGenRenderbuffersEXT")) == NULL) || r;
+  r = ((glGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC)glewGetProcAddress((const GLubyte*)"glGenerateMipmapEXT")) == NULL) || r;
+  r = ((glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFramebufferAttachmentParameterivEXT")) == NULL) || r;
+  r = ((glGetRenderbufferParameterivEXT = (PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetRenderbufferParameterivEXT")) == NULL) || r;
+  r = ((glIsFramebufferEXT = (PFNGLISFRAMEBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glIsFramebufferEXT")) == NULL) || r;
+  r = ((glIsRenderbufferEXT = (PFNGLISRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glIsRenderbufferEXT")) == NULL) || r;
+  r = ((glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_EXT_framebuffer_object */
 
 #ifdef GL_EXT_histogram
 
@@ -3036,15 +3073,12 @@ static GLboolean _glewInit_GL_EXT_histogram (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_histogram */
 
-/* ----------------------- GL_EXT_index_array_formats ---------------------- */
+#endif /* GL_EXT_histogram */
 
 #ifdef GL_EXT_index_array_formats
 
 #endif /* GL_EXT_index_array_formats */
-
-/* --------------------------- GL_EXT_index_func --------------------------- */
 
 #ifdef GL_EXT_index_func
 
@@ -3056,9 +3090,8 @@ static GLboolean _glewInit_GL_EXT_index_func (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_index_func */
 
-/* ------------------------- GL_EXT_index_material ------------------------- */
+#endif /* GL_EXT_index_func */
 
 #ifdef GL_EXT_index_material
 
@@ -3070,15 +3103,12 @@ static GLboolean _glewInit_GL_EXT_index_material (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_index_material */
 
-/* -------------------------- GL_EXT_index_texture ------------------------- */
+#endif /* GL_EXT_index_material */
 
 #ifdef GL_EXT_index_texture
 
 #endif /* GL_EXT_index_texture */
-
-/* -------------------------- GL_EXT_light_texture ------------------------- */
 
 #ifdef GL_EXT_light_texture
 
@@ -3092,15 +3122,12 @@ static GLboolean _glewInit_GL_EXT_light_texture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_light_texture */
 
-/* ------------------------- GL_EXT_misc_attribute ------------------------- */
+#endif /* GL_EXT_light_texture */
 
 #ifdef GL_EXT_misc_attribute
 
 #endif /* GL_EXT_misc_attribute */
-
-/* ------------------------ GL_EXT_multi_draw_arrays ----------------------- */
 
 #ifdef GL_EXT_multi_draw_arrays
 
@@ -3113,9 +3140,8 @@ static GLboolean _glewInit_GL_EXT_multi_draw_arrays (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_multi_draw_arrays */
 
-/* --------------------------- GL_EXT_multisample -------------------------- */
+#endif /* GL_EXT_multi_draw_arrays */
 
 #ifdef GL_EXT_multisample
 
@@ -3128,15 +3154,12 @@ static GLboolean _glewInit_GL_EXT_multisample (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_multisample */
 
-/* -------------------------- GL_EXT_packed_pixels ------------------------- */
+#endif /* GL_EXT_multisample */
 
 #ifdef GL_EXT_packed_pixels
 
 #endif /* GL_EXT_packed_pixels */
-
-/* ------------------------ GL_EXT_paletted_texture ------------------------ */
 
 #ifdef GL_EXT_paletted_texture
 
@@ -3151,15 +3174,12 @@ static GLboolean _glewInit_GL_EXT_paletted_texture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_paletted_texture */
 
-/* ----------------------- GL_EXT_pixel_buffer_object ---------------------- */
+#endif /* GL_EXT_paletted_texture */
 
 #ifdef GL_EXT_pixel_buffer_object
 
 #endif /* GL_EXT_pixel_buffer_object */
-
-/* ------------------------- GL_EXT_pixel_transform ------------------------ */
 
 #ifdef GL_EXT_pixel_transform
 
@@ -3176,15 +3196,12 @@ static GLboolean _glewInit_GL_EXT_pixel_transform (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_pixel_transform */
 
-/* ------------------- GL_EXT_pixel_transform_color_table ------------------ */
+#endif /* GL_EXT_pixel_transform */
 
 #ifdef GL_EXT_pixel_transform_color_table
 
 #endif /* GL_EXT_pixel_transform_color_table */
-
-/* ------------------------ GL_EXT_point_parameters ------------------------ */
 
 #ifdef GL_EXT_point_parameters
 
@@ -3197,9 +3214,8 @@ static GLboolean _glewInit_GL_EXT_point_parameters (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_point_parameters */
 
-/* ------------------------- GL_EXT_polygon_offset ------------------------- */
+#endif /* GL_EXT_point_parameters */
 
 #ifdef GL_EXT_polygon_offset
 
@@ -3211,15 +3227,12 @@ static GLboolean _glewInit_GL_EXT_polygon_offset (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_polygon_offset */
 
-/* ------------------------- GL_EXT_rescale_normal ------------------------- */
+#endif /* GL_EXT_polygon_offset */
 
 #ifdef GL_EXT_rescale_normal
 
 #endif /* GL_EXT_rescale_normal */
-
-/* -------------------------- GL_EXT_scene_marker -------------------------- */
 
 #ifdef GL_EXT_scene_marker
 
@@ -3232,9 +3245,8 @@ static GLboolean _glewInit_GL_EXT_scene_marker (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_scene_marker */
 
-/* ------------------------- GL_EXT_secondary_color ------------------------ */
+#endif /* GL_EXT_scene_marker */
 
 #ifdef GL_EXT_secondary_color
 
@@ -3262,27 +3274,20 @@ static GLboolean _glewInit_GL_EXT_secondary_color (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_secondary_color */
 
-/* --------------------- GL_EXT_separate_specular_color -------------------- */
+#endif /* GL_EXT_secondary_color */
 
 #ifdef GL_EXT_separate_specular_color
 
 #endif /* GL_EXT_separate_specular_color */
 
-/* -------------------------- GL_EXT_shadow_funcs -------------------------- */
-
 #ifdef GL_EXT_shadow_funcs
 
 #endif /* GL_EXT_shadow_funcs */
 
-/* --------------------- GL_EXT_shared_texture_palette --------------------- */
-
 #ifdef GL_EXT_shared_texture_palette
 
 #endif /* GL_EXT_shared_texture_palette */
-
-/* ------------------------ GL_EXT_stencil_two_side ------------------------ */
 
 #ifdef GL_EXT_stencil_two_side
 
@@ -3294,15 +3299,12 @@ static GLboolean _glewInit_GL_EXT_stencil_two_side (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_stencil_two_side */
 
-/* -------------------------- GL_EXT_stencil_wrap -------------------------- */
+#endif /* GL_EXT_stencil_two_side */
 
 #ifdef GL_EXT_stencil_wrap
 
 #endif /* GL_EXT_stencil_wrap */
-
-/* --------------------------- GL_EXT_subtexture --------------------------- */
 
 #ifdef GL_EXT_subtexture
 
@@ -3316,15 +3318,12 @@ static GLboolean _glewInit_GL_EXT_subtexture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_subtexture */
 
-/* ----------------------------- GL_EXT_texture ---------------------------- */
+#endif /* GL_EXT_subtexture */
 
 #ifdef GL_EXT_texture
 
 #endif /* GL_EXT_texture */
-
-/* ---------------------------- GL_EXT_texture3D --------------------------- */
 
 #ifdef GL_EXT_texture3D
 
@@ -3336,69 +3335,52 @@ static GLboolean _glewInit_GL_EXT_texture3D (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
+
 #endif /* GL_EXT_texture3D */
 
-/* -------------------- GL_EXT_texture_compression_s3tc -------------------- */
+#ifdef GL_EXT_texture_compression_dxt1
+
+#endif /* GL_EXT_texture_compression_dxt1 */
 
 #ifdef GL_EXT_texture_compression_s3tc
 
 #endif /* GL_EXT_texture_compression_s3tc */
 
-/* ------------------------ GL_EXT_texture_cube_map ------------------------ */
-
 #ifdef GL_EXT_texture_cube_map
 
 #endif /* GL_EXT_texture_cube_map */
-
-/* ----------------------- GL_EXT_texture_edge_clamp ----------------------- */
 
 #ifdef GL_EXT_texture_edge_clamp
 
 #endif /* GL_EXT_texture_edge_clamp */
 
-/* --------------------------- GL_EXT_texture_env -------------------------- */
-
 #ifdef GL_EXT_texture_env
 
 #endif /* GL_EXT_texture_env */
-
-/* ------------------------- GL_EXT_texture_env_add ------------------------ */
 
 #ifdef GL_EXT_texture_env_add
 
 #endif /* GL_EXT_texture_env_add */
 
-/* ----------------------- GL_EXT_texture_env_combine ---------------------- */
-
 #ifdef GL_EXT_texture_env_combine
 
 #endif /* GL_EXT_texture_env_combine */
-
-/* ------------------------ GL_EXT_texture_env_dot3 ------------------------ */
 
 #ifdef GL_EXT_texture_env_dot3
 
 #endif /* GL_EXT_texture_env_dot3 */
 
-/* ------------------- GL_EXT_texture_filter_anisotropic ------------------- */
-
 #ifdef GL_EXT_texture_filter_anisotropic
 
 #endif /* GL_EXT_texture_filter_anisotropic */
-
-/* ------------------------ GL_EXT_texture_lod_bias ------------------------ */
 
 #ifdef GL_EXT_texture_lod_bias
 
 #endif /* GL_EXT_texture_lod_bias */
 
-/* ---------------------- GL_EXT_texture_mirror_clamp ---------------------- */
-
 #ifdef GL_EXT_texture_mirror_clamp
 
 #endif /* GL_EXT_texture_mirror_clamp */
-
-/* ------------------------- GL_EXT_texture_object ------------------------- */
 
 #ifdef GL_EXT_texture_object
 
@@ -3415,9 +3397,8 @@ static GLboolean _glewInit_GL_EXT_texture_object (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_texture_object */
 
-/* --------------------- GL_EXT_texture_perturb_normal --------------------- */
+#endif /* GL_EXT_texture_object */
 
 #ifdef GL_EXT_texture_perturb_normal
 
@@ -3429,15 +3410,12 @@ static GLboolean _glewInit_GL_EXT_texture_perturb_normal (GLEW_CONTEXT_ARG_DEF_I
 
   return r;
 }
-#endif /* GL_EXT_texture_perturb_normal */
 
-/* ------------------------ GL_EXT_texture_rectangle ----------------------- */
+#endif /* GL_EXT_texture_perturb_normal */
 
 #ifdef GL_EXT_texture_rectangle
 
 #endif /* GL_EXT_texture_rectangle */
-
-/* -------------------------- GL_EXT_vertex_array -------------------------- */
 
 #ifdef GL_EXT_vertex_array
 
@@ -3457,9 +3435,8 @@ static GLboolean _glewInit_GL_EXT_vertex_array (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_vertex_array */
 
-/* -------------------------- GL_EXT_vertex_shader ------------------------- */
+#endif /* GL_EXT_vertex_array */
 
 #ifdef GL_EXT_vertex_shader
 
@@ -3512,9 +3489,8 @@ static GLboolean _glewInit_GL_EXT_vertex_shader (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_vertex_shader */
 
-/* ------------------------ GL_EXT_vertex_weighting ------------------------ */
+#endif /* GL_EXT_vertex_shader */
 
 #ifdef GL_EXT_vertex_weighting
 
@@ -3528,15 +3504,12 @@ static GLboolean _glewInit_GL_EXT_vertex_weighting (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_EXT_vertex_weighting */
 
-/* --------------------- GL_HP_convolution_border_modes -------------------- */
+#endif /* GL_EXT_vertex_weighting */
 
 #ifdef GL_HP_convolution_border_modes
 
 #endif /* GL_HP_convolution_border_modes */
-
-/* ------------------------- GL_HP_image_transform ------------------------- */
 
 #ifdef GL_HP_image_transform
 
@@ -3553,27 +3526,20 @@ static GLboolean _glewInit_GL_HP_image_transform (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_HP_image_transform */
 
-/* -------------------------- GL_HP_occlusion_test ------------------------- */
+#endif /* GL_HP_image_transform */
 
 #ifdef GL_HP_occlusion_test
 
 #endif /* GL_HP_occlusion_test */
 
-/* ------------------------- GL_HP_texture_lighting ------------------------ */
-
 #ifdef GL_HP_texture_lighting
 
 #endif /* GL_HP_texture_lighting */
 
-/* --------------------------- GL_IBM_cull_vertex -------------------------- */
-
 #ifdef GL_IBM_cull_vertex
 
 #endif /* GL_IBM_cull_vertex */
-
-/* ---------------------- GL_IBM_multimode_draw_arrays --------------------- */
 
 #ifdef GL_IBM_multimode_draw_arrays
 
@@ -3586,27 +3552,20 @@ static GLboolean _glewInit_GL_IBM_multimode_draw_arrays (GLEW_CONTEXT_ARG_DEF_IN
 
   return r;
 }
-#endif /* GL_IBM_multimode_draw_arrays */
 
-/* ------------------------- GL_IBM_rasterpos_clip ------------------------- */
+#endif /* GL_IBM_multimode_draw_arrays */
 
 #ifdef GL_IBM_rasterpos_clip
 
 #endif /* GL_IBM_rasterpos_clip */
 
-/* --------------------------- GL_IBM_static_data -------------------------- */
-
 #ifdef GL_IBM_static_data
 
 #endif /* GL_IBM_static_data */
 
-/* --------------------- GL_IBM_texture_mirrored_repeat -------------------- */
-
 #ifdef GL_IBM_texture_mirrored_repeat
 
 #endif /* GL_IBM_texture_mirrored_repeat */
-
-/* ----------------------- GL_IBM_vertex_array_lists ----------------------- */
 
 #ifdef GL_IBM_vertex_array_lists
 
@@ -3625,21 +3584,16 @@ static GLboolean _glewInit_GL_IBM_vertex_array_lists (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_IBM_vertex_array_lists */
 
-/* -------------------------- GL_INGR_color_clamp -------------------------- */
+#endif /* GL_IBM_vertex_array_lists */
 
 #ifdef GL_INGR_color_clamp
 
 #endif /* GL_INGR_color_clamp */
 
-/* ------------------------- GL_INGR_interlace_read ------------------------ */
-
 #ifdef GL_INGR_interlace_read
 
 #endif /* GL_INGR_interlace_read */
-
-/* ------------------------ GL_INTEL_parallel_arrays ----------------------- */
 
 #ifdef GL_INTEL_parallel_arrays
 
@@ -3654,9 +3608,8 @@ static GLboolean _glewInit_GL_INTEL_parallel_arrays (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_INTEL_parallel_arrays */
 
-/* ------------------------ GL_INTEL_texture_scissor ----------------------- */
+#endif /* GL_INTEL_parallel_arrays */
 
 #ifdef GL_INTEL_texture_scissor
 
@@ -3669,15 +3622,29 @@ static GLboolean _glewInit_GL_INTEL_texture_scissor (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
+
 #endif /* GL_INTEL_texture_scissor */
 
-/* -------------------------- GL_MESA_pack_invert -------------------------- */
+#ifdef GL_KTX_buffer_region
+
+static GLboolean _glewInit_GL_KTX_buffer_region (GLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glBufferRegionEnabledEXT = (PFNGLBUFFERREGIONENABLEDEXTPROC)glewGetProcAddress((const GLubyte*)"glBufferRegionEnabledEXT")) == NULL) || r;
+  r = ((glDeleteBufferRegionEXT = (PFNGLDELETEBUFFERREGIONEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteBufferRegionEXT")) == NULL) || r;
+  r = ((glDrawBufferRegionEXT = (PFNGLDRAWBUFFERREGIONEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawBufferRegionEXT")) == NULL) || r;
+  r = ((glNewBufferRegionEXT = (PFNGLNEWBUFFERREGIONEXTPROC)glewGetProcAddress((const GLubyte*)"glNewBufferRegionEXT")) == NULL) || r;
+  r = ((glReadBufferRegionEXT = (PFNGLREADBUFFERREGIONEXTPROC)glewGetProcAddress((const GLubyte*)"glReadBufferRegionEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GL_KTX_buffer_region */
 
 #ifdef GL_MESA_pack_invert
 
 #endif /* GL_MESA_pack_invert */
-
-/* ------------------------- GL_MESA_resize_buffers ------------------------ */
 
 #ifdef GL_MESA_resize_buffers
 
@@ -3689,9 +3656,8 @@ static GLboolean _glewInit_GL_MESA_resize_buffers (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_MESA_resize_buffers */
 
-/* --------------------------- GL_MESA_window_pos -------------------------- */
+#endif /* GL_MESA_resize_buffers */
 
 #ifdef GL_MESA_window_pos
 
@@ -3726,33 +3692,24 @@ static GLboolean _glewInit_GL_MESA_window_pos (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_MESA_window_pos */
 
-/* ------------------------- GL_MESA_ycbcr_texture ------------------------- */
+#endif /* GL_MESA_window_pos */
 
 #ifdef GL_MESA_ycbcr_texture
 
 #endif /* GL_MESA_ycbcr_texture */
 
-/* --------------------------- GL_NV_blend_square -------------------------- */
-
 #ifdef GL_NV_blend_square
 
 #endif /* GL_NV_blend_square */
-
-/* ----------------------- GL_NV_copy_depth_to_color ----------------------- */
 
 #ifdef GL_NV_copy_depth_to_color
 
 #endif /* GL_NV_copy_depth_to_color */
 
-/* --------------------------- GL_NV_depth_clamp --------------------------- */
-
 #ifdef GL_NV_depth_clamp
 
 #endif /* GL_NV_depth_clamp */
-
-/* ---------------------------- GL_NV_evaluators --------------------------- */
 
 #ifdef GL_NV_evaluators
 
@@ -3772,9 +3729,8 @@ static GLboolean _glewInit_GL_NV_evaluators (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_evaluators */
 
-/* ------------------------------ GL_NV_fence ------------------------------ */
+#endif /* GL_NV_evaluators */
 
 #ifdef GL_NV_fence
 
@@ -3792,21 +3748,16 @@ static GLboolean _glewInit_GL_NV_fence (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_fence */
 
-/* --------------------------- GL_NV_float_buffer -------------------------- */
+#endif /* GL_NV_fence */
 
 #ifdef GL_NV_float_buffer
 
 #endif /* GL_NV_float_buffer */
 
-/* --------------------------- GL_NV_fog_distance -------------------------- */
-
 #ifdef GL_NV_fog_distance
 
 #endif /* GL_NV_fog_distance */
-
-/* ------------------------- GL_NV_fragment_program ------------------------ */
 
 #ifdef GL_NV_fragment_program
 
@@ -3823,9 +3774,16 @@ static GLboolean _glewInit_GL_NV_fragment_program (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
+
 #endif /* GL_NV_fragment_program */
 
-/* ---------------------------- GL_NV_half_float --------------------------- */
+#ifdef GL_NV_fragment_program2
+
+#endif /* GL_NV_fragment_program2 */
+
+#ifdef GL_NV_fragment_program_option
+
+#endif /* GL_NV_fragment_program_option */
 
 #ifdef GL_NV_half_float
 
@@ -3882,21 +3840,16 @@ static GLboolean _glewInit_GL_NV_half_float (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_half_float */
 
-/* ------------------------ GL_NV_light_max_exponent ----------------------- */
+#endif /* GL_NV_half_float */
 
 #ifdef GL_NV_light_max_exponent
 
 #endif /* GL_NV_light_max_exponent */
 
-/* --------------------- GL_NV_multisample_filter_hint --------------------- */
-
 #ifdef GL_NV_multisample_filter_hint
 
 #endif /* GL_NV_multisample_filter_hint */
-
-/* ------------------------- GL_NV_occlusion_query ------------------------- */
 
 #ifdef GL_NV_occlusion_query
 
@@ -3914,15 +3867,12 @@ static GLboolean _glewInit_GL_NV_occlusion_query (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_occlusion_query */
 
-/* ----------------------- GL_NV_packed_depth_stencil ---------------------- */
+#endif /* GL_NV_occlusion_query */
 
 #ifdef GL_NV_packed_depth_stencil
 
 #endif /* GL_NV_packed_depth_stencil */
-
-/* ------------------------- GL_NV_pixel_data_range ------------------------ */
 
 #ifdef GL_NV_pixel_data_range
 
@@ -3935,9 +3885,8 @@ static GLboolean _glewInit_GL_NV_pixel_data_range (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_pixel_data_range */
 
-/* --------------------------- GL_NV_point_sprite -------------------------- */
+#endif /* GL_NV_pixel_data_range */
 
 #ifdef GL_NV_point_sprite
 
@@ -3950,9 +3899,8 @@ static GLboolean _glewInit_GL_NV_point_sprite (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_point_sprite */
 
-/* ------------------------ GL_NV_primitive_restart ------------------------ */
+#endif /* GL_NV_point_sprite */
 
 #ifdef GL_NV_primitive_restart
 
@@ -3965,9 +3913,8 @@ static GLboolean _glewInit_GL_NV_primitive_restart (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_primitive_restart */
 
-/* ------------------------ GL_NV_register_combiners ----------------------- */
+#endif /* GL_NV_primitive_restart */
 
 #ifdef GL_NV_register_combiners
 
@@ -3991,9 +3938,8 @@ static GLboolean _glewInit_GL_NV_register_combiners (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_register_combiners */
 
-/* ----------------------- GL_NV_register_combiners2 ----------------------- */
+#endif /* GL_NV_register_combiners */
 
 #ifdef GL_NV_register_combiners2
 
@@ -4006,63 +3952,44 @@ static GLboolean _glewInit_GL_NV_register_combiners2 (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_register_combiners2 */
 
-/* -------------------------- GL_NV_texgen_emboss -------------------------- */
+#endif /* GL_NV_register_combiners2 */
 
 #ifdef GL_NV_texgen_emboss
 
 #endif /* GL_NV_texgen_emboss */
 
-/* ------------------------ GL_NV_texgen_reflection ------------------------ */
-
 #ifdef GL_NV_texgen_reflection
 
 #endif /* GL_NV_texgen_reflection */
-
-/* --------------------- GL_NV_texture_compression_vtc --------------------- */
 
 #ifdef GL_NV_texture_compression_vtc
 
 #endif /* GL_NV_texture_compression_vtc */
 
-/* ----------------------- GL_NV_texture_env_combine4 ---------------------- */
-
 #ifdef GL_NV_texture_env_combine4
 
 #endif /* GL_NV_texture_env_combine4 */
-
-/* ---------------------- GL_NV_texture_expand_normal ---------------------- */
 
 #ifdef GL_NV_texture_expand_normal
 
 #endif /* GL_NV_texture_expand_normal */
 
-/* ------------------------ GL_NV_texture_rectangle ------------------------ */
-
 #ifdef GL_NV_texture_rectangle
 
 #endif /* GL_NV_texture_rectangle */
-
-/* -------------------------- GL_NV_texture_shader ------------------------- */
 
 #ifdef GL_NV_texture_shader
 
 #endif /* GL_NV_texture_shader */
 
-/* ------------------------- GL_NV_texture_shader2 ------------------------- */
-
 #ifdef GL_NV_texture_shader2
 
 #endif /* GL_NV_texture_shader2 */
 
-/* ------------------------- GL_NV_texture_shader3 ------------------------- */
-
 #ifdef GL_NV_texture_shader3
 
 #endif /* GL_NV_texture_shader3 */
-
-/* ------------------------ GL_NV_vertex_array_range ----------------------- */
 
 #ifdef GL_NV_vertex_array_range
 
@@ -4075,15 +4002,12 @@ static GLboolean _glewInit_GL_NV_vertex_array_range (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_vertex_array_range */
 
-/* ----------------------- GL_NV_vertex_array_range2 ----------------------- */
+#endif /* GL_NV_vertex_array_range */
 
 #ifdef GL_NV_vertex_array_range2
 
 #endif /* GL_NV_vertex_array_range2 */
-
-/* -------------------------- GL_NV_vertex_program ------------------------- */
 
 #ifdef GL_NV_vertex_program
 
@@ -4158,69 +4082,56 @@ static GLboolean _glewInit_GL_NV_vertex_program (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_NV_vertex_program */
 
-/* ------------------------ GL_NV_vertex_program1_1 ------------------------ */
+#endif /* GL_NV_vertex_program */
 
 #ifdef GL_NV_vertex_program1_1
 
 #endif /* GL_NV_vertex_program1_1 */
 
-/* ------------------------- GL_NV_vertex_program2 ------------------------- */
-
 #ifdef GL_NV_vertex_program2
 
 #endif /* GL_NV_vertex_program2 */
 
-/* ---------------------------- GL_OML_interlace --------------------------- */
+#ifdef GL_NV_vertex_program2_option
+
+#endif /* GL_NV_vertex_program2_option */
+
+#ifdef GL_NV_vertex_program3
+
+#endif /* GL_NV_vertex_program3 */
 
 #ifdef GL_OML_interlace
 
 #endif /* GL_OML_interlace */
 
-/* ---------------------------- GL_OML_resample ---------------------------- */
-
 #ifdef GL_OML_resample
 
 #endif /* GL_OML_resample */
-
-/* ---------------------------- GL_OML_subsample --------------------------- */
 
 #ifdef GL_OML_subsample
 
 #endif /* GL_OML_subsample */
 
-/* --------------------------- GL_PGI_misc_hints --------------------------- */
-
 #ifdef GL_PGI_misc_hints
 
 #endif /* GL_PGI_misc_hints */
-
-/* -------------------------- GL_PGI_vertex_hints -------------------------- */
 
 #ifdef GL_PGI_vertex_hints
 
 #endif /* GL_PGI_vertex_hints */
 
-/* ----------------------- GL_REND_screen_coordinates ---------------------- */
-
 #ifdef GL_REND_screen_coordinates
 
 #endif /* GL_REND_screen_coordinates */
-
-/* ------------------------------- GL_S3_s3tc ------------------------------ */
 
 #ifdef GL_S3_s3tc
 
 #endif /* GL_S3_s3tc */
 
-/* -------------------------- GL_SGIS_color_range -------------------------- */
-
 #ifdef GL_SGIS_color_range
 
 #endif /* GL_SGIS_color_range */
-
-/* ------------------------- GL_SGIS_detail_texture ------------------------ */
 
 #ifdef GL_SGIS_detail_texture
 
@@ -4233,9 +4144,8 @@ static GLboolean _glewInit_GL_SGIS_detail_texture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIS_detail_texture */
 
-/* -------------------------- GL_SGIS_fog_function ------------------------- */
+#endif /* GL_SGIS_detail_texture */
 
 #ifdef GL_SGIS_fog_function
 
@@ -4248,15 +4158,12 @@ static GLboolean _glewInit_GL_SGIS_fog_function (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIS_fog_function */
 
-/* ------------------------ GL_SGIS_generate_mipmap ------------------------ */
+#endif /* GL_SGIS_fog_function */
 
 #ifdef GL_SGIS_generate_mipmap
 
 #endif /* GL_SGIS_generate_mipmap */
-
-/* -------------------------- GL_SGIS_multisample -------------------------- */
 
 #ifdef GL_SGIS_multisample
 
@@ -4269,15 +4176,12 @@ static GLboolean _glewInit_GL_SGIS_multisample (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIS_multisample */
 
-/* ------------------------- GL_SGIS_pixel_texture ------------------------- */
+#endif /* GL_SGIS_multisample */
 
 #ifdef GL_SGIS_pixel_texture
 
 #endif /* GL_SGIS_pixel_texture */
-
-/* ------------------------ GL_SGIS_sharpen_texture ------------------------ */
 
 #ifdef GL_SGIS_sharpen_texture
 
@@ -4290,9 +4194,8 @@ static GLboolean _glewInit_GL_SGIS_sharpen_texture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIS_sharpen_texture */
 
-/* --------------------------- GL_SGIS_texture4D --------------------------- */
+#endif /* GL_SGIS_sharpen_texture */
 
 #ifdef GL_SGIS_texture4D
 
@@ -4305,21 +4208,16 @@ static GLboolean _glewInit_GL_SGIS_texture4D (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIS_texture4D */
 
-/* ---------------------- GL_SGIS_texture_border_clamp --------------------- */
+#endif /* GL_SGIS_texture4D */
 
 #ifdef GL_SGIS_texture_border_clamp
 
 #endif /* GL_SGIS_texture_border_clamp */
 
-/* ----------------------- GL_SGIS_texture_edge_clamp ---------------------- */
-
 #ifdef GL_SGIS_texture_edge_clamp
 
 #endif /* GL_SGIS_texture_edge_clamp */
-
-/* ------------------------ GL_SGIS_texture_filter4 ------------------------ */
 
 #ifdef GL_SGIS_texture_filter4
 
@@ -4332,21 +4230,16 @@ static GLboolean _glewInit_GL_SGIS_texture_filter4 (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIS_texture_filter4 */
 
-/* -------------------------- GL_SGIS_texture_lod -------------------------- */
+#endif /* GL_SGIS_texture_filter4 */
 
 #ifdef GL_SGIS_texture_lod
 
 #endif /* GL_SGIS_texture_lod */
 
-/* ------------------------- GL_SGIS_texture_select ------------------------ */
-
 #ifdef GL_SGIS_texture_select
 
 #endif /* GL_SGIS_texture_select */
-
-/* ----------------------------- GL_SGIX_async ----------------------------- */
 
 #ifdef GL_SGIX_async
 
@@ -4363,39 +4256,28 @@ static GLboolean _glewInit_GL_SGIX_async (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_async */
 
-/* ------------------------ GL_SGIX_async_histogram ------------------------ */
+#endif /* GL_SGIX_async */
 
 #ifdef GL_SGIX_async_histogram
 
 #endif /* GL_SGIX_async_histogram */
 
-/* -------------------------- GL_SGIX_async_pixel -------------------------- */
-
 #ifdef GL_SGIX_async_pixel
 
 #endif /* GL_SGIX_async_pixel */
-
-/* ----------------------- GL_SGIX_blend_alpha_minmax ---------------------- */
 
 #ifdef GL_SGIX_blend_alpha_minmax
 
 #endif /* GL_SGIX_blend_alpha_minmax */
 
-/* ---------------------------- GL_SGIX_clipmap ---------------------------- */
-
 #ifdef GL_SGIX_clipmap
 
 #endif /* GL_SGIX_clipmap */
 
-/* ------------------------- GL_SGIX_depth_texture ------------------------- */
-
 #ifdef GL_SGIX_depth_texture
 
 #endif /* GL_SGIX_depth_texture */
-
-/* -------------------------- GL_SGIX_flush_raster ------------------------- */
 
 #ifdef GL_SGIX_flush_raster
 
@@ -4407,15 +4289,12 @@ static GLboolean _glewInit_GL_SGIX_flush_raster (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_flush_raster */
 
-/* --------------------------- GL_SGIX_fog_offset -------------------------- */
+#endif /* GL_SGIX_flush_raster */
 
 #ifdef GL_SGIX_fog_offset
 
 #endif /* GL_SGIX_fog_offset */
-
-/* -------------------------- GL_SGIX_fog_texture -------------------------- */
 
 #ifdef GL_SGIX_fog_texture
 
@@ -4427,9 +4306,8 @@ static GLboolean _glewInit_GL_SGIX_fog_texture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_fog_texture */
 
-/* ------------------- GL_SGIX_fragment_specular_lighting ------------------ */
+#endif /* GL_SGIX_fog_texture */
 
 #ifdef GL_SGIX_fragment_specular_lighting
 
@@ -4457,9 +4335,8 @@ static GLboolean _glewInit_GL_SGIX_fragment_specular_lighting (GLEW_CONTEXT_ARG_
 
   return r;
 }
-#endif /* GL_SGIX_fragment_specular_lighting */
 
-/* --------------------------- GL_SGIX_framezoom --------------------------- */
+#endif /* GL_SGIX_fragment_specular_lighting */
 
 #ifdef GL_SGIX_framezoom
 
@@ -4471,27 +4348,20 @@ static GLboolean _glewInit_GL_SGIX_framezoom (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_framezoom */
 
-/* --------------------------- GL_SGIX_interlace --------------------------- */
+#endif /* GL_SGIX_framezoom */
 
 #ifdef GL_SGIX_interlace
 
 #endif /* GL_SGIX_interlace */
 
-/* ------------------------- GL_SGIX_ir_instrument1 ------------------------ */
-
 #ifdef GL_SGIX_ir_instrument1
 
 #endif /* GL_SGIX_ir_instrument1 */
 
-/* ------------------------- GL_SGIX_list_priority ------------------------- */
-
 #ifdef GL_SGIX_list_priority
 
 #endif /* GL_SGIX_list_priority */
-
-/* ------------------------- GL_SGIX_pixel_texture ------------------------- */
 
 #ifdef GL_SGIX_pixel_texture
 
@@ -4503,15 +4373,12 @@ static GLboolean _glewInit_GL_SGIX_pixel_texture (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_pixel_texture */
 
-/* ----------------------- GL_SGIX_pixel_texture_bits ---------------------- */
+#endif /* GL_SGIX_pixel_texture */
 
 #ifdef GL_SGIX_pixel_texture_bits
 
 #endif /* GL_SGIX_pixel_texture_bits */
-
-/* ------------------------ GL_SGIX_reference_plane ------------------------ */
 
 #ifdef GL_SGIX_reference_plane
 
@@ -4523,27 +4390,20 @@ static GLboolean _glewInit_GL_SGIX_reference_plane (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_reference_plane */
 
-/* ---------------------------- GL_SGIX_resample --------------------------- */
+#endif /* GL_SGIX_reference_plane */
 
 #ifdef GL_SGIX_resample
 
 #endif /* GL_SGIX_resample */
 
-/* ----------------------------- GL_SGIX_shadow ---------------------------- */
-
 #ifdef GL_SGIX_shadow
 
 #endif /* GL_SGIX_shadow */
 
-/* ------------------------- GL_SGIX_shadow_ambient ------------------------ */
-
 #ifdef GL_SGIX_shadow_ambient
 
 #endif /* GL_SGIX_shadow_ambient */
-
-/* ----------------------------- GL_SGIX_sprite ---------------------------- */
 
 #ifdef GL_SGIX_sprite
 
@@ -4558,9 +4418,8 @@ static GLboolean _glewInit_GL_SGIX_sprite (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_sprite */
 
-/* ----------------------- GL_SGIX_tag_sample_buffer ----------------------- */
+#endif /* GL_SGIX_sprite */
 
 #ifdef GL_SGIX_tag_sample_buffer
 
@@ -4572,69 +4431,48 @@ static GLboolean _glewInit_GL_SGIX_tag_sample_buffer (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGIX_tag_sample_buffer */
 
-/* ------------------------ GL_SGIX_texture_add_env ------------------------ */
+#endif /* GL_SGIX_tag_sample_buffer */
 
 #ifdef GL_SGIX_texture_add_env
 
 #endif /* GL_SGIX_texture_add_env */
 
-/* -------------------- GL_SGIX_texture_coordinate_clamp ------------------- */
-
 #ifdef GL_SGIX_texture_coordinate_clamp
 
 #endif /* GL_SGIX_texture_coordinate_clamp */
-
-/* ------------------------ GL_SGIX_texture_lod_bias ----------------------- */
 
 #ifdef GL_SGIX_texture_lod_bias
 
 #endif /* GL_SGIX_texture_lod_bias */
 
-/* ---------------------- GL_SGIX_texture_multi_buffer --------------------- */
-
 #ifdef GL_SGIX_texture_multi_buffer
 
 #endif /* GL_SGIX_texture_multi_buffer */
-
-/* ------------------------- GL_SGIX_texture_range ------------------------- */
 
 #ifdef GL_SGIX_texture_range
 
 #endif /* GL_SGIX_texture_range */
 
-/* ----------------------- GL_SGIX_texture_scale_bias ---------------------- */
-
 #ifdef GL_SGIX_texture_scale_bias
 
 #endif /* GL_SGIX_texture_scale_bias */
-
-/* ------------------------- GL_SGIX_vertex_preclip ------------------------ */
 
 #ifdef GL_SGIX_vertex_preclip
 
 #endif /* GL_SGIX_vertex_preclip */
 
-/* ---------------------- GL_SGIX_vertex_preclip_hint ---------------------- */
-
 #ifdef GL_SGIX_vertex_preclip_hint
 
 #endif /* GL_SGIX_vertex_preclip_hint */
-
-/* ----------------------------- GL_SGIX_ycrcb ----------------------------- */
 
 #ifdef GL_SGIX_ycrcb
 
 #endif /* GL_SGIX_ycrcb */
 
-/* -------------------------- GL_SGI_color_matrix -------------------------- */
-
 #ifdef GL_SGI_color_matrix
 
 #endif /* GL_SGI_color_matrix */
-
-/* --------------------------- GL_SGI_color_table -------------------------- */
 
 #ifdef GL_SGI_color_table
 
@@ -4652,15 +4490,12 @@ static GLboolean _glewInit_GL_SGI_color_table (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SGI_color_table */
 
-/* ----------------------- GL_SGI_texture_color_table ---------------------- */
+#endif /* GL_SGI_color_table */
 
 #ifdef GL_SGI_texture_color_table
 
 #endif /* GL_SGI_texture_color_table */
-
-/* ------------------------- GL_SUNX_constant_data ------------------------- */
 
 #ifdef GL_SUNX_constant_data
 
@@ -4672,15 +4507,12 @@ static GLboolean _glewInit_GL_SUNX_constant_data (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SUNX_constant_data */
 
-/* -------------------- GL_SUN_convolution_border_modes -------------------- */
+#endif /* GL_SUNX_constant_data */
 
 #ifdef GL_SUN_convolution_border_modes
 
 #endif /* GL_SUN_convolution_border_modes */
-
-/* -------------------------- GL_SUN_global_alpha -------------------------- */
 
 #ifdef GL_SUN_global_alpha
 
@@ -4699,15 +4531,12 @@ static GLboolean _glewInit_GL_SUN_global_alpha (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SUN_global_alpha */
 
-/* --------------------------- GL_SUN_mesh_array --------------------------- */
+#endif /* GL_SUN_global_alpha */
 
 #ifdef GL_SUN_mesh_array
 
 #endif /* GL_SUN_mesh_array */
-
-/* ------------------------ GL_SUN_read_video_pixels ----------------------- */
 
 #ifdef GL_SUN_read_video_pixels
 
@@ -4719,15 +4548,12 @@ static GLboolean _glewInit_GL_SUN_read_video_pixels (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SUN_read_video_pixels */
 
-/* --------------------------- GL_SUN_slice_accum -------------------------- */
+#endif /* GL_SUN_read_video_pixels */
 
 #ifdef GL_SUN_slice_accum
 
 #endif /* GL_SUN_slice_accum */
-
-/* -------------------------- GL_SUN_triangle_list ------------------------- */
 
 #ifdef GL_SUN_triangle_list
 
@@ -4745,9 +4571,8 @@ static GLboolean _glewInit_GL_SUN_triangle_list (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SUN_triangle_list */
 
-/* ----------------------------- GL_SUN_vertex ----------------------------- */
+#endif /* GL_SUN_triangle_list */
 
 #ifdef GL_SUN_vertex
 
@@ -4798,21 +4623,16 @@ static GLboolean _glewInit_GL_SUN_vertex (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
-#endif /* GL_SUN_vertex */
 
-/* -------------------------- GL_WIN_phong_shading ------------------------- */
+#endif /* GL_SUN_vertex */
 
 #ifdef GL_WIN_phong_shading
 
 #endif /* GL_WIN_phong_shading */
 
-/* -------------------------- GL_WIN_specular_fog -------------------------- */
-
 #ifdef GL_WIN_specular_fog
 
 #endif /* GL_WIN_specular_fog */
-
-/* ---------------------------- GL_WIN_swap_hint --------------------------- */
 
 #ifdef GL_WIN_swap_hint
 
@@ -4824,851 +4644,10 @@ static GLboolean _glewInit_GL_WIN_swap_hint (GLEW_CONTEXT_ARG_DEF_INIT)
 
   return r;
 }
+
 #endif /* GL_WIN_swap_hint */
 
-#ifdef _WIN32
-
-/* -------------------------- WGL_3DFX_multisample ------------------------- */
-
-#ifdef WGL_3DFX_multisample
-
-#endif /* WGL_3DFX_multisample */
-
-/* ------------------------- WGL_ARB_buffer_region ------------------------- */
-
-#ifdef WGL_ARB_buffer_region
-
-static GLboolean _glewInit_WGL_ARB_buffer_region (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglCreateBufferRegionARB = (PFNWGLCREATEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglCreateBufferRegionARB")) == NULL) || r;
-  r = ((wglDeleteBufferRegionARB = (PFNWGLDELETEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglDeleteBufferRegionARB")) == NULL) || r;
-  r = ((wglRestoreBufferRegionARB = (PFNWGLRESTOREBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglRestoreBufferRegionARB")) == NULL) || r;
-  r = ((wglSaveBufferRegionARB = (PFNWGLSAVEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglSaveBufferRegionARB")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_ARB_buffer_region */
-
-/* ----------------------- WGL_ARB_extensions_string ----------------------- */
-
-#ifdef WGL_ARB_extensions_string
-
-static GLboolean _glewInit_WGL_ARB_extensions_string (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringARB")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_ARB_extensions_string */
-
-/* ----------------------- WGL_ARB_make_current_read ----------------------- */
-
-#ifdef WGL_ARB_make_current_read
-
-static GLboolean _glewInit_WGL_ARB_make_current_read (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetCurrentReadDCARB = (PFNWGLGETCURRENTREADDCARBPROC)glewGetProcAddress((const GLubyte*)"wglGetCurrentReadDCARB")) == NULL) || r;
-  r = ((wglMakeContextCurrentARB = (PFNWGLMAKECONTEXTCURRENTARBPROC)glewGetProcAddress((const GLubyte*)"wglMakeContextCurrentARB")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_ARB_make_current_read */
-
-/* -------------------------- WGL_ARB_multisample -------------------------- */
-
-#ifdef WGL_ARB_multisample
-
-#endif /* WGL_ARB_multisample */
-
-/* ---------------------------- WGL_ARB_pbuffer ---------------------------- */
-
-#ifdef WGL_ARB_pbuffer
-
-static GLboolean _glewInit_WGL_ARB_pbuffer (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglCreatePbufferARB = (PFNWGLCREATEPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglCreatePbufferARB")) == NULL) || r;
-  r = ((wglDestroyPbufferARB = (PFNWGLDESTROYPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglDestroyPbufferARB")) == NULL) || r;
-  r = ((wglGetPbufferDCARB = (PFNWGLGETPBUFFERDCARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPbufferDCARB")) == NULL) || r;
-  r = ((wglQueryPbufferARB = (PFNWGLQUERYPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglQueryPbufferARB")) == NULL) || r;
-  r = ((wglReleasePbufferDCARB = (PFNWGLRELEASEPBUFFERDCARBPROC)glewGetProcAddress((const GLubyte*)"wglReleasePbufferDCARB")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_ARB_pbuffer */
-
-/* -------------------------- WGL_ARB_pixel_format ------------------------- */
-
-#ifdef WGL_ARB_pixel_format
-
-static GLboolean _glewInit_WGL_ARB_pixel_format (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)glewGetProcAddress((const GLubyte*)"wglChoosePixelFormatARB")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribfvARB = (PFNWGLGETPIXELFORMATATTRIBFVARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribfvARB")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribivARB")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_ARB_pixel_format */
-
-/* ------------------------- WGL_ARB_render_texture ------------------------ */
-
-#ifdef WGL_ARB_render_texture
-
-static GLboolean _glewInit_WGL_ARB_render_texture (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglBindTexImageARB = (PFNWGLBINDTEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"wglBindTexImageARB")) == NULL) || r;
-  r = ((wglReleaseTexImageARB = (PFNWGLRELEASETEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"wglReleaseTexImageARB")) == NULL) || r;
-  r = ((wglSetPbufferAttribARB = (PFNWGLSETPBUFFERATTRIBARBPROC)glewGetProcAddress((const GLubyte*)"wglSetPbufferAttribARB")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_ARB_render_texture */
-
-/* ----------------------- WGL_ATI_pixel_format_float ---------------------- */
-
-#ifdef WGL_ATI_pixel_format_float
-
-#endif /* WGL_ATI_pixel_format_float */
-
-/* -------------------------- WGL_EXT_depth_float -------------------------- */
-
-#ifdef WGL_EXT_depth_float
-
-#endif /* WGL_EXT_depth_float */
-
-/* ---------------------- WGL_EXT_display_color_table ---------------------- */
-
-#ifdef WGL_EXT_display_color_table
-
-static GLboolean _glewInit_WGL_EXT_display_color_table (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglBindDisplayColorTableEXT = (PFNWGLBINDDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglBindDisplayColorTableEXT")) == NULL) || r;
-  r = ((wglCreateDisplayColorTableEXT = (PFNWGLCREATEDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglCreateDisplayColorTableEXT")) == NULL) || r;
-  r = ((wglDestroyDisplayColorTableEXT = (PFNWGLDESTROYDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglDestroyDisplayColorTableEXT")) == NULL) || r;
-  r = ((wglLoadDisplayColorTableEXT = (PFNWGLLOADDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglLoadDisplayColorTableEXT")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_EXT_display_color_table */
-
-/* ----------------------- WGL_EXT_extensions_string ----------------------- */
-
-#ifdef WGL_EXT_extensions_string
-
-static GLboolean _glewInit_WGL_EXT_extensions_string (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringEXT")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_EXT_extensions_string */
-
-/* ----------------------- WGL_EXT_make_current_read ----------------------- */
-
-#ifdef WGL_EXT_make_current_read
-
-static GLboolean _glewInit_WGL_EXT_make_current_read (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetCurrentReadDCEXT = (PFNWGLGETCURRENTREADDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetCurrentReadDCEXT")) == NULL) || r;
-  r = ((wglMakeContextCurrentEXT = (PFNWGLMAKECONTEXTCURRENTEXTPROC)glewGetProcAddress((const GLubyte*)"wglMakeContextCurrentEXT")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_EXT_make_current_read */
-
-/* -------------------------- WGL_EXT_multisample -------------------------- */
-
-#ifdef WGL_EXT_multisample
-
-#endif /* WGL_EXT_multisample */
-
-/* ---------------------------- WGL_EXT_pbuffer ---------------------------- */
-
-#ifdef WGL_EXT_pbuffer
-
-static GLboolean _glewInit_WGL_EXT_pbuffer (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglCreatePbufferEXT = (PFNWGLCREATEPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglCreatePbufferEXT")) == NULL) || r;
-  r = ((wglDestroyPbufferEXT = (PFNWGLDESTROYPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglDestroyPbufferEXT")) == NULL) || r;
-  r = ((wglGetPbufferDCEXT = (PFNWGLGETPBUFFERDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPbufferDCEXT")) == NULL) || r;
-  r = ((wglQueryPbufferEXT = (PFNWGLQUERYPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglQueryPbufferEXT")) == NULL) || r;
-  r = ((wglReleasePbufferDCEXT = (PFNWGLRELEASEPBUFFERDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglReleasePbufferDCEXT")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_EXT_pbuffer */
-
-/* -------------------------- WGL_EXT_pixel_format ------------------------- */
-
-#ifdef WGL_EXT_pixel_format
-
-static GLboolean _glewInit_WGL_EXT_pixel_format (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglChoosePixelFormatEXT = (PFNWGLCHOOSEPIXELFORMATEXTPROC)glewGetProcAddress((const GLubyte*)"wglChoosePixelFormatEXT")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribfvEXT = (PFNWGLGETPIXELFORMATATTRIBFVEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribfvEXT")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribivEXT = (PFNWGLGETPIXELFORMATATTRIBIVEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribivEXT")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_EXT_pixel_format */
-
-/* -------------------------- WGL_EXT_swap_control ------------------------- */
-
-#ifdef WGL_EXT_swap_control
-
-static GLboolean _glewInit_WGL_EXT_swap_control (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetSwapIntervalEXT")) == NULL) || r;
-  r = ((wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)glewGetProcAddress((const GLubyte*)"wglSwapIntervalEXT")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_EXT_swap_control */
-
-/* --------------------- WGL_I3D_digital_video_control --------------------- */
-
-#ifdef WGL_I3D_digital_video_control
-
-static GLboolean _glewInit_WGL_I3D_digital_video_control (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetDigitalVideoParametersI3D = (PFNWGLGETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetDigitalVideoParametersI3D")) == NULL) || r;
-  r = ((wglSetDigitalVideoParametersI3D = (PFNWGLSETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetDigitalVideoParametersI3D")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_I3D_digital_video_control */
-
-/* ----------------------------- WGL_I3D_gamma ----------------------------- */
-
-#ifdef WGL_I3D_gamma
-
-static GLboolean _glewInit_WGL_I3D_gamma (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetGammaTableI3D = (PFNWGLGETGAMMATABLEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGammaTableI3D")) == NULL) || r;
-  r = ((wglGetGammaTableParametersI3D = (PFNWGLGETGAMMATABLEPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGammaTableParametersI3D")) == NULL) || r;
-  r = ((wglSetGammaTableI3D = (PFNWGLSETGAMMATABLEI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetGammaTableI3D")) == NULL) || r;
-  r = ((wglSetGammaTableParametersI3D = (PFNWGLSETGAMMATABLEPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetGammaTableParametersI3D")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_I3D_gamma */
-
-/* ---------------------------- WGL_I3D_genlock ---------------------------- */
-
-#ifdef WGL_I3D_genlock
-
-static GLboolean _glewInit_WGL_I3D_genlock (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglDisableGenlockI3D = (PFNWGLDISABLEGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglDisableGenlockI3D")) == NULL) || r;
-  r = ((wglEnableGenlockI3D = (PFNWGLENABLEGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglEnableGenlockI3D")) == NULL) || r;
-  r = ((wglGenlockSampleRateI3D = (PFNWGLGENLOCKSAMPLERATEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSampleRateI3D")) == NULL) || r;
-  r = ((wglGenlockSourceDelayI3D = (PFNWGLGENLOCKSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceDelayI3D")) == NULL) || r;
-  r = ((wglGenlockSourceEdgeI3D = (PFNWGLGENLOCKSOURCEEDGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceEdgeI3D")) == NULL) || r;
-  r = ((wglGenlockSourceI3D = (PFNWGLGENLOCKSOURCEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceI3D")) == NULL) || r;
-  r = ((wglGetGenlockSampleRateI3D = (PFNWGLGETGENLOCKSAMPLERATEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSampleRateI3D")) == NULL) || r;
-  r = ((wglGetGenlockSourceDelayI3D = (PFNWGLGETGENLOCKSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceDelayI3D")) == NULL) || r;
-  r = ((wglGetGenlockSourceEdgeI3D = (PFNWGLGETGENLOCKSOURCEEDGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceEdgeI3D")) == NULL) || r;
-  r = ((wglGetGenlockSourceI3D = (PFNWGLGETGENLOCKSOURCEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceI3D")) == NULL) || r;
-  r = ((wglIsEnabledGenlockI3D = (PFNWGLISENABLEDGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglIsEnabledGenlockI3D")) == NULL) || r;
-  r = ((wglQueryGenlockMaxSourceDelayI3D = (PFNWGLQUERYGENLOCKMAXSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryGenlockMaxSourceDelayI3D")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_I3D_genlock */
-
-/* -------------------------- WGL_I3D_image_buffer ------------------------- */
-
-#ifdef WGL_I3D_image_buffer
-
-static GLboolean _glewInit_WGL_I3D_image_buffer (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglAssociateImageBufferEventsI3D = (PFNWGLASSOCIATEIMAGEBUFFEREVENTSI3DPROC)glewGetProcAddress((const GLubyte*)"wglAssociateImageBufferEventsI3D")) == NULL) || r;
-  r = ((wglCreateImageBufferI3D = (PFNWGLCREATEIMAGEBUFFERI3DPROC)glewGetProcAddress((const GLubyte*)"wglCreateImageBufferI3D")) == NULL) || r;
-  r = ((wglDestroyImageBufferI3D = (PFNWGLDESTROYIMAGEBUFFERI3DPROC)glewGetProcAddress((const GLubyte*)"wglDestroyImageBufferI3D")) == NULL) || r;
-  r = ((wglReleaseImageBufferEventsI3D = (PFNWGLRELEASEIMAGEBUFFEREVENTSI3DPROC)glewGetProcAddress((const GLubyte*)"wglReleaseImageBufferEventsI3D")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_I3D_image_buffer */
-
-/* ------------------------ WGL_I3D_swap_frame_lock ------------------------ */
-
-#ifdef WGL_I3D_swap_frame_lock
-
-static GLboolean _glewInit_WGL_I3D_swap_frame_lock (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglDisableFrameLockI3D = (PFNWGLDISABLEFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglDisableFrameLockI3D")) == NULL) || r;
-  r = ((wglEnableFrameLockI3D = (PFNWGLENABLEFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglEnableFrameLockI3D")) == NULL) || r;
-  r = ((wglIsEnabledFrameLockI3D = (PFNWGLISENABLEDFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglIsEnabledFrameLockI3D")) == NULL) || r;
-  r = ((wglQueryFrameLockMasterI3D = (PFNWGLQUERYFRAMELOCKMASTERI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryFrameLockMasterI3D")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_I3D_swap_frame_lock */
-
-/* ------------------------ WGL_I3D_swap_frame_usage ----------------------- */
-
-#ifdef WGL_I3D_swap_frame_usage
-
-static GLboolean _glewInit_WGL_I3D_swap_frame_usage (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglBeginFrameTrackingI3D = (PFNWGLBEGINFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglBeginFrameTrackingI3D")) == NULL) || r;
-  r = ((wglEndFrameTrackingI3D = (PFNWGLENDFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglEndFrameTrackingI3D")) == NULL) || r;
-  r = ((wglGetFrameUsageI3D = (PFNWGLGETFRAMEUSAGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetFrameUsageI3D")) == NULL) || r;
-  r = ((wglQueryFrameTrackingI3D = (PFNWGLQUERYFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryFrameTrackingI3D")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_I3D_swap_frame_usage */
-
-/* -------------------------- WGL_NV_float_buffer -------------------------- */
-
-#ifdef WGL_NV_float_buffer
-
-#endif /* WGL_NV_float_buffer */
-
-/* ---------------------- WGL_NV_render_depth_texture ---------------------- */
-
-#ifdef WGL_NV_render_depth_texture
-
-#endif /* WGL_NV_render_depth_texture */
-
-/* -------------------- WGL_NV_render_texture_rectangle -------------------- */
-
-#ifdef WGL_NV_render_texture_rectangle
-
-#endif /* WGL_NV_render_texture_rectangle */
-
-/* ----------------------- WGL_NV_vertex_array_range ----------------------- */
-
-#ifdef WGL_NV_vertex_array_range
-
-static GLboolean _glewInit_WGL_NV_vertex_array_range (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglAllocateMemoryNV = (PFNWGLALLOCATEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"wglAllocateMemoryNV")) == NULL) || r;
-  r = ((wglFreeMemoryNV = (PFNWGLFREEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"wglFreeMemoryNV")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_NV_vertex_array_range */
-
-/* -------------------------- WGL_OML_sync_control ------------------------- */
-
-#ifdef WGL_OML_sync_control
-
-static GLboolean _glewInit_WGL_OML_sync_control (WGLEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((wglGetMscRateOML = (PFNWGLGETMSCRATEOMLPROC)glewGetProcAddress((const GLubyte*)"wglGetMscRateOML")) == NULL) || r;
-  r = ((wglGetSyncValuesOML = (PFNWGLGETSYNCVALUESOMLPROC)glewGetProcAddress((const GLubyte*)"wglGetSyncValuesOML")) == NULL) || r;
-  r = ((wglSwapBuffersMscOML = (PFNWGLSWAPBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglSwapBuffersMscOML")) == NULL) || r;
-  r = ((wglSwapLayerBuffersMscOML = (PFNWGLSWAPLAYERBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglSwapLayerBuffersMscOML")) == NULL) || r;
-  r = ((wglWaitForMscOML = (PFNWGLWAITFORMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglWaitForMscOML")) == NULL) || r;
-  r = ((wglWaitForSbcOML = (PFNWGLWAITFORSBCOMLPROC)glewGetProcAddress((const GLubyte*)"wglWaitForSbcOML")) == NULL) || r;
-
-  return r;
-}
-#endif /* WGL_OML_sync_control */
-
-#else /* _UNIX */
-
-
-/* ---------------------------- GLX_VERSION_1_2 ---------------------------- */
-
-#ifdef GLX_VERSION_1_2
-
-static GLboolean _glewInit_GLX_VERSION_1_2 (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXGetCurrentDisplay = (PFNGLXGETCURRENTDISPLAYPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentDisplay")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_VERSION_1_2 */
-
-/* ---------------------------- GLX_VERSION_1_3 ---------------------------- */
-
-#ifdef GLX_VERSION_1_3
-
-static GLboolean _glewInit_GLX_VERSION_1_3 (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glewGetProcAddress((const GLubyte*)"glXChooseFBConfig")) == NULL) || r;
-  r = ((glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glewGetProcAddress((const GLubyte*)"glXCreateNewContext")) == NULL) || r;
-  r = ((glXCreatePbuffer = (PFNGLXCREATEPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glXCreatePbuffer")) == NULL) || r;
-  r = ((glXCreatePixmap = (PFNGLXCREATEPIXMAPPROC)glewGetProcAddress((const GLubyte*)"glXCreatePixmap")) == NULL) || r;
-  r = ((glXCreateWindow = (PFNGLXCREATEWINDOWPROC)glewGetProcAddress((const GLubyte*)"glXCreateWindow")) == NULL) || r;
-  r = ((glXDestroyPbuffer = (PFNGLXDESTROYPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glXDestroyPbuffer")) == NULL) || r;
-  r = ((glXDestroyPixmap = (PFNGLXDESTROYPIXMAPPROC)glewGetProcAddress((const GLubyte*)"glXDestroyPixmap")) == NULL) || r;
-  r = ((glXDestroyWindow = (PFNGLXDESTROYWINDOWPROC)glewGetProcAddress((const GLubyte*)"glXDestroyWindow")) == NULL) || r;
-  r = ((glXGetCurrentReadDrawable = (PFNGLXGETCURRENTREADDRAWABLEPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentReadDrawable")) == NULL) || r;
-  r = ((glXGetFBConfigAttrib = (PFNGLXGETFBCONFIGATTRIBPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigAttrib")) == NULL) || r;
-  r = ((glXGetFBConfigs = (PFNGLXGETFBCONFIGSPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigs")) == NULL) || r;
-  r = ((glXGetSelectedEvent = (PFNGLXGETSELECTEDEVENTPROC)glewGetProcAddress((const GLubyte*)"glXGetSelectedEvent")) == NULL) || r;
-  r = ((glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glewGetProcAddress((const GLubyte*)"glXGetVisualFromFBConfig")) == NULL) || r;
-  r = ((glXMakeContextCurrent = (PFNGLXMAKECONTEXTCURRENTPROC)glewGetProcAddress((const GLubyte*)"glXMakeContextCurrent")) == NULL) || r;
-  r = ((glXQueryContext = (PFNGLXQUERYCONTEXTPROC)glewGetProcAddress((const GLubyte*)"glXQueryContext")) == NULL) || r;
-  r = ((glXQueryDrawable = (PFNGLXQUERYDRAWABLEPROC)glewGetProcAddress((const GLubyte*)"glXQueryDrawable")) == NULL) || r;
-  r = ((glXSelectEvent = (PFNGLXSELECTEVENTPROC)glewGetProcAddress((const GLubyte*)"glXSelectEvent")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_VERSION_1_3 */
-
-/* ---------------------------- GLX_VERSION_1_4 ---------------------------- */
-
-#ifdef GLX_VERSION_1_4
-
-#endif /* GLX_VERSION_1_4 */
-
-/* -------------------------- GLX_3DFX_multisample ------------------------- */
-
-#ifdef GLX_3DFX_multisample
-
-#endif /* GLX_3DFX_multisample */
-
-/* ------------------------ GLX_ARB_get_proc_address ----------------------- */
-
-#ifdef GLX_ARB_get_proc_address
-
-#endif /* GLX_ARB_get_proc_address */
-
-/* -------------------------- GLX_ARB_multisample -------------------------- */
-
-#ifdef GLX_ARB_multisample
-
-#endif /* GLX_ARB_multisample */
-
-/* ----------------------- GLX_ATI_pixel_format_float ---------------------- */
-
-#ifdef GLX_ATI_pixel_format_float
-
-#endif /* GLX_ATI_pixel_format_float */
-
-/* ------------------------- GLX_ATI_render_texture ------------------------ */
-
-#ifdef GLX_ATI_render_texture
-
-static GLboolean _glewInit_GLX_ATI_render_texture (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXBindTexImageATI = (PFNGLXBINDTEXIMAGEATIPROC)glewGetProcAddress((const GLubyte*)"glXBindTexImageATI")) == NULL) || r;
-  r = ((glXDrawableAttribATI = (PFNGLXDRAWABLEATTRIBATIPROC)glewGetProcAddress((const GLubyte*)"glXDrawableAttribATI")) == NULL) || r;
-  r = ((glXReleaseTexImageATI = (PFNGLXRELEASETEXIMAGEATIPROC)glewGetProcAddress((const GLubyte*)"glXReleaseTexImageATI")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_ATI_render_texture */
-
-/* ------------------------- GLX_EXT_import_context ------------------------ */
-
-#ifdef GLX_EXT_import_context
-
-static GLboolean _glewInit_GLX_EXT_import_context (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXFreeContextEXT = (PFNGLXFREECONTEXTEXTPROC)glewGetProcAddress((const GLubyte*)"glXFreeContextEXT")) == NULL) || r;
-  r = ((glXGetContextIDEXT = (PFNGLXGETCONTEXTIDEXTPROC)glewGetProcAddress((const GLubyte*)"glXGetContextIDEXT")) == NULL) || r;
-  r = ((glXImportContextEXT = (PFNGLXIMPORTCONTEXTEXTPROC)glewGetProcAddress((const GLubyte*)"glXImportContextEXT")) == NULL) || r;
-  r = ((glXQueryContextInfoEXT = (PFNGLXQUERYCONTEXTINFOEXTPROC)glewGetProcAddress((const GLubyte*)"glXQueryContextInfoEXT")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_EXT_import_context */
-
-/* -------------------------- GLX_EXT_scene_marker ------------------------- */
-
-#ifdef GLX_EXT_scene_marker
-
-#endif /* GLX_EXT_scene_marker */
-
-/* -------------------------- GLX_EXT_visual_info -------------------------- */
-
-#ifdef GLX_EXT_visual_info
-
-#endif /* GLX_EXT_visual_info */
-
-/* ------------------------- GLX_EXT_visual_rating ------------------------- */
-
-#ifdef GLX_EXT_visual_rating
-
-#endif /* GLX_EXT_visual_rating */
-
-/* ------------------------ GLX_MESA_copy_sub_buffer ----------------------- */
-
-#ifdef GLX_MESA_copy_sub_buffer
-
-static GLboolean _glewInit_GLX_MESA_copy_sub_buffer (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXCopySubBufferMESA = (PFNGLXCOPYSUBBUFFERMESAPROC)glewGetProcAddress((const GLubyte*)"glXCopySubBufferMESA")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_MESA_copy_sub_buffer */
-
-/* ------------------------ GLX_MESA_pixmap_colormap ----------------------- */
-
-#ifdef GLX_MESA_pixmap_colormap
-
-static GLboolean _glewInit_GLX_MESA_pixmap_colormap (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXCreateGLXPixmapMESA = (PFNGLXCREATEGLXPIXMAPMESAPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPixmapMESA")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_MESA_pixmap_colormap */
-
-/* ------------------------ GLX_MESA_release_buffers ----------------------- */
-
-#ifdef GLX_MESA_release_buffers
-
-static GLboolean _glewInit_GLX_MESA_release_buffers (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXReleaseBuffersMESA = (PFNGLXRELEASEBUFFERSMESAPROC)glewGetProcAddress((const GLubyte*)"glXReleaseBuffersMESA")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_MESA_release_buffers */
-
-/* ------------------------- GLX_MESA_set_3dfx_mode ------------------------ */
-
-#ifdef GLX_MESA_set_3dfx_mode
-
-static GLboolean _glewInit_GLX_MESA_set_3dfx_mode (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXSet3DfxModeMESA = (PFNGLXSET3DFXMODEMESAPROC)glewGetProcAddress((const GLubyte*)"glXSet3DfxModeMESA")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_MESA_set_3dfx_mode */
-
-/* -------------------------- GLX_NV_float_buffer -------------------------- */
-
-#ifdef GLX_NV_float_buffer
-
-#endif /* GLX_NV_float_buffer */
-
-/* ----------------------- GLX_NV_vertex_array_range ----------------------- */
-
-#ifdef GLX_NV_vertex_array_range
-
-static GLboolean _glewInit_GLX_NV_vertex_array_range (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXAllocateMemoryNV = (PFNGLXALLOCATEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"glXAllocateMemoryNV")) == NULL) || r;
-  r = ((glXFreeMemoryNV = (PFNGLXFREEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"glXFreeMemoryNV")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_NV_vertex_array_range */
-
-/* -------------------------- GLX_OML_swap_method -------------------------- */
-
-#ifdef GLX_OML_swap_method
-
-#endif /* GLX_OML_swap_method */
-
-/* -------------------------- GLX_OML_sync_control ------------------------- */
-
-#if defined(GLX_OML_sync_control) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-#include <inttypes.h>
-
-static GLboolean _glewInit_GLX_OML_sync_control (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXGetMscRateOML = (PFNGLXGETMSCRATEOMLPROC)glewGetProcAddress((const GLubyte*)"glXGetMscRateOML")) == NULL) || r;
-  r = ((glXGetSyncValuesOML = (PFNGLXGETSYNCVALUESOMLPROC)glewGetProcAddress((const GLubyte*)"glXGetSyncValuesOML")) == NULL) || r;
-  r = ((glXSwapBuffersMscOML = (PFNGLXSWAPBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"glXSwapBuffersMscOML")) == NULL) || r;
-  r = ((glXWaitForMscOML = (PFNGLXWAITFORMSCOMLPROC)glewGetProcAddress((const GLubyte*)"glXWaitForMscOML")) == NULL) || r;
-  r = ((glXWaitForSbcOML = (PFNGLXWAITFORSBCOMLPROC)glewGetProcAddress((const GLubyte*)"glXWaitForSbcOML")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_OML_sync_control */
-
-/* ------------------------ GLX_SGIS_blended_overlay ----------------------- */
-
-#ifdef GLX_SGIS_blended_overlay
-
-#endif /* GLX_SGIS_blended_overlay */
-
-/* -------------------------- GLX_SGIS_color_range ------------------------- */
-
-#ifdef GLX_SGIS_color_range
-
-#endif /* GLX_SGIS_color_range */
-
-/* -------------------------- GLX_SGIS_multisample ------------------------- */
-
-#ifdef GLX_SGIS_multisample
-
-#endif /* GLX_SGIS_multisample */
-
-/* ---------------------- GLX_SGIS_shared_multisample ---------------------- */
-
-#ifdef GLX_SGIS_shared_multisample
-
-#endif /* GLX_SGIS_shared_multisample */
-
-/* --------------------------- GLX_SGIX_fbconfig --------------------------- */
-
-#ifdef GLX_SGIX_fbconfig
-
-static GLboolean _glewInit_GLX_SGIX_fbconfig (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXChooseFBConfigSGIX = (PFNGLXCHOOSEFBCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChooseFBConfigSGIX")) == NULL) || r;
-  r = ((glXCreateContextWithConfigSGIX = (PFNGLXCREATECONTEXTWITHCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateContextWithConfigSGIX")) == NULL) || r;
-  r = ((glXCreateGLXPixmapWithConfigSGIX = (PFNGLXCREATEGLXPIXMAPWITHCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPixmapWithConfigSGIX")) == NULL) || r;
-  r = ((glXGetFBConfigAttribSGIX = (PFNGLXGETFBCONFIGATTRIBSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigAttribSGIX")) == NULL) || r;
-  r = ((glXGetFBConfigFromVisualSGIX = (PFNGLXGETFBCONFIGFROMVISUALSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigFromVisualSGIX")) == NULL) || r;
-  r = ((glXGetVisualFromFBConfigSGIX = (PFNGLXGETVISUALFROMFBCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetVisualFromFBConfigSGIX")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGIX_fbconfig */
-
-/* ---------------------------- GLX_SGIX_pbuffer --------------------------- */
-
-#ifdef GLX_SGIX_pbuffer
-
-static GLboolean _glewInit_GLX_SGIX_pbuffer (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXCreateGLXPbufferSGIX = (PFNGLXCREATEGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPbufferSGIX")) == NULL) || r;
-  r = ((glXDestroyGLXPbufferSGIX = (PFNGLXDESTROYGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXDestroyGLXPbufferSGIX")) == NULL) || r;
-  r = ((glXGetSelectedEventSGIX = (PFNGLXGETSELECTEDEVENTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetSelectedEventSGIX")) == NULL) || r;
-  r = ((glXQueryGLXPbufferSGIX = (PFNGLXQUERYGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryGLXPbufferSGIX")) == NULL) || r;
-  r = ((glXSelectEventSGIX = (PFNGLXSELECTEVENTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXSelectEventSGIX")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGIX_pbuffer */
-
-/* ------------------------- GLX_SGIX_swap_barrier ------------------------- */
-
-#ifdef GLX_SGIX_swap_barrier
-
-static GLboolean _glewInit_GLX_SGIX_swap_barrier (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXBindSwapBarrierSGIX = (PFNGLXBINDSWAPBARRIERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXBindSwapBarrierSGIX")) == NULL) || r;
-  r = ((glXQueryMaxSwapBarriersSGIX = (PFNGLXQUERYMAXSWAPBARRIERSSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryMaxSwapBarriersSGIX")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGIX_swap_barrier */
-
-/* -------------------------- GLX_SGIX_swap_group -------------------------- */
-
-#ifdef GLX_SGIX_swap_group
-
-static GLboolean _glewInit_GLX_SGIX_swap_group (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXJoinSwapGroupSGIX = (PFNGLXJOINSWAPGROUPSGIXPROC)glewGetProcAddress((const GLubyte*)"glXJoinSwapGroupSGIX")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGIX_swap_group */
-
-/* ------------------------- GLX_SGIX_video_resize ------------------------- */
-
-#ifdef GLX_SGIX_video_resize
-
-static GLboolean _glewInit_GLX_SGIX_video_resize (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXBindChannelToWindowSGIX = (PFNGLXBINDCHANNELTOWINDOWSGIXPROC)glewGetProcAddress((const GLubyte*)"glXBindChannelToWindowSGIX")) == NULL) || r;
-  r = ((glXChannelRectSGIX = (PFNGLXCHANNELRECTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChannelRectSGIX")) == NULL) || r;
-  r = ((glXChannelRectSyncSGIX = (PFNGLXCHANNELRECTSYNCSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChannelRectSyncSGIX")) == NULL) || r;
-  r = ((glXQueryChannelDeltasSGIX = (PFNGLXQUERYCHANNELDELTASSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryChannelDeltasSGIX")) == NULL) || r;
-  r = ((glXQueryChannelRectSGIX = (PFNGLXQUERYCHANNELRECTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryChannelRectSGIX")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGIX_video_resize */
-
-/* ---------------------- GLX_SGIX_visual_select_group --------------------- */
-
-#ifdef GLX_SGIX_visual_select_group
-
-#endif /* GLX_SGIX_visual_select_group */
-
-/* ---------------------------- GLX_SGI_cushion ---------------------------- */
-
-#ifdef GLX_SGI_cushion
-
-static GLboolean _glewInit_GLX_SGI_cushion (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXCushionSGI = (PFNGLXCUSHIONSGIPROC)glewGetProcAddress((const GLubyte*)"glXCushionSGI")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGI_cushion */
-
-/* ----------------------- GLX_SGI_make_current_read ----------------------- */
-
-#ifdef GLX_SGI_make_current_read
-
-static GLboolean _glewInit_GLX_SGI_make_current_read (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXGetCurrentReadDrawableSGI = (PFNGLXGETCURRENTREADDRAWABLESGIPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentReadDrawableSGI")) == NULL) || r;
-  r = ((glXMakeCurrentReadSGI = (PFNGLXMAKECURRENTREADSGIPROC)glewGetProcAddress((const GLubyte*)"glXMakeCurrentReadSGI")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGI_make_current_read */
-
-/* -------------------------- GLX_SGI_swap_control ------------------------- */
-
-#ifdef GLX_SGI_swap_control
-
-static GLboolean _glewInit_GLX_SGI_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC)glewGetProcAddress((const GLubyte*)"glXSwapIntervalSGI")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGI_swap_control */
-
-/* --------------------------- GLX_SGI_video_sync -------------------------- */
-
-#ifdef GLX_SGI_video_sync
-
-static GLboolean _glewInit_GLX_SGI_video_sync (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXGetVideoSyncSGI = (PFNGLXGETVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoSyncSGI")) == NULL) || r;
-  r = ((glXWaitVideoSyncSGI = (PFNGLXWAITVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXWaitVideoSyncSGI")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SGI_video_sync */
-
-/* --------------------- GLX_SUN_get_transparent_index --------------------- */
-
-#ifdef GLX_SUN_get_transparent_index
-
-static GLboolean _glewInit_GLX_SUN_get_transparent_index (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXGetTransparentIndexSUN = (PFNGLXGETTRANSPARENTINDEXSUNPROC)glewGetProcAddress((const GLubyte*)"glXGetTransparentIndexSUN")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SUN_get_transparent_index */
-
-/* -------------------------- GLX_SUN_video_resize ------------------------- */
-
-#ifdef GLX_SUN_video_resize
-
-static GLboolean _glewInit_GLX_SUN_video_resize (GLXEW_CONTEXT_ARG_DEF_INIT)
-{
-  GLboolean r = GL_FALSE;
-
-  r = ((glXGetVideoResizeSUN = (PFNGLXGETVIDEORESIZESUNPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoResizeSUN")) == NULL) || r;
-  r = ((glXVideoResizeSUN = (PFNGLXVIDEORESIZESUNPROC)glewGetProcAddress((const GLubyte*)"glXVideoResizeSUN")) == NULL) || r;
-
-  return r;
-}
-#endif /* GLX_SUN_video_resize */
-
-#endif /* _WIN32 */
-
 /* ------------------------------------------------------------------------- */
-
-/*
- * GLEW, just like OpenGL or GLU, does not rely on the standard C library.
- * These functions implement the functionality required in this file.
- */
-
-static GLuint _glewStrLen (const GLubyte* s)
-{
-  GLuint i=0;
-  while (s+i != NULL && s[i] != '\0') i++;
-  return i;
-}
-
-static GLuint _glewStrCLen (const GLubyte* s, GLubyte c)
-{
-  GLuint i=0;
-  while (s+i != NULL && s[i] != '\0' && s[i] != c) i++;
-  return i;
-}
-
-static GLboolean _glewStrSame (const GLubyte* a, const GLubyte* b, GLuint n)
-{
-  GLuint i=0;
-  while (i < n && a+i != NULL && b+i != NULL && a[i] == b[i]) i++;
-  return i == n;
-}
 
 /* 
  * Search for name in the extensions string. Use of strstr()
@@ -5701,57 +4680,91 @@ static
 GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 {
   const GLubyte* s;
-  GLuint i;
-  /* query opengl version */
-  s = glGetString(GL_VERSION);
-  if (!s) return GLEW_ERROR_NO_GL_VERSION;
-  i = _glewStrCLen(s, '.')+1;
-  if (s+i-1 == NULL || s+i == NULL || s[i] < '1')
+  GLuint major, minor;
+  /* check for SiS driver */
+  s = glGetString(GL_RENDERER);
+  if (s && _glewStrSame(s,"SiS",3))
   {
-    return GLEW_ERROR_GL_VERSION_10_ONLY;
-  }
-  else
-  {
-    if (s[i] >= '5')
-    {
-      GLEW_VERSION_1_1 = GL_TRUE;
-      GLEW_VERSION_1_2 = GL_TRUE;
-      GLEW_VERSION_1_3 = GL_TRUE;
-      GLEW_VERSION_1_4 = GL_TRUE;
-      GLEW_VERSION_1_5 = GL_TRUE;
-    }
-    if (s[i] == '4')
-    {
-      GLEW_VERSION_1_1 = GL_TRUE;
-      GLEW_VERSION_1_2 = GL_TRUE;
-      GLEW_VERSION_1_3 = GL_TRUE;
-      GLEW_VERSION_1_4 = GL_TRUE;
-      GLEW_VERSION_1_5 = GL_FALSE;
-    }
-    if (s[i] == '3')
-    {
-      GLEW_VERSION_1_1 = GL_TRUE;
-      GLEW_VERSION_1_2 = GL_TRUE;
-      GLEW_VERSION_1_3 = GL_TRUE;
-      GLEW_VERSION_1_4 = GL_FALSE;
-      GLEW_VERSION_1_5 = GL_FALSE;
-    }
-    if (s[i] == '2')
-    {
-      GLEW_VERSION_1_1 = GL_TRUE;
-      GLEW_VERSION_1_2 = GL_TRUE;
-      GLEW_VERSION_1_3 = GL_FALSE;
-      GLEW_VERSION_1_4 = GL_FALSE;
-      GLEW_VERSION_1_5 = GL_FALSE;
-    }
-    if (s[i] < '2')
-    {
-      GLEW_VERSION_1_1 = GL_TRUE;
+	  GLEW_VERSION_1_1 = GL_TRUE;
       GLEW_VERSION_1_2 = GL_FALSE;
       GLEW_VERSION_1_3 = GL_FALSE;
       GLEW_VERSION_1_4 = GL_FALSE;
       GLEW_VERSION_1_5 = GL_FALSE;
-    }
+      GLEW_VERSION_2_0 = GL_FALSE;
+  }
+  else
+  {
+	/* query opengl version */
+	s = glGetString(GL_VERSION);
+	if (!s) return GLEW_ERROR_NO_GL_VERSION;
+	major = _glewStrCLen(s, '.')-1;
+	minor = _glewStrCLen(s, '.')+1;
+  	if (s+major == NULL
+	  || s+minor-1 == NULL || s+minor == NULL
+	  || (s[major] == 1 && s[minor] < '1'))
+	{
+	  return GLEW_ERROR_GL_VERSION_10_ONLY;
+	}
+	else
+	{
+	  if (s[major] >= '2')
+	  {
+		GLEW_VERSION_1_1 = GL_TRUE;
+		GLEW_VERSION_1_2 = GL_TRUE;
+		GLEW_VERSION_1_3 = GL_TRUE;
+		GLEW_VERSION_1_4 = GL_TRUE;
+		GLEW_VERSION_1_5 = GL_TRUE;
+		GLEW_VERSION_2_0 = GL_TRUE;
+	  }
+	  else
+	  {
+		if (s[minor] >= '5')
+		{
+		  GLEW_VERSION_1_1 = GL_TRUE;
+		  GLEW_VERSION_1_2 = GL_TRUE;
+		  GLEW_VERSION_1_3 = GL_TRUE;
+		  GLEW_VERSION_1_4 = GL_TRUE;
+		  GLEW_VERSION_1_5 = GL_TRUE;
+		  GLEW_VERSION_2_0 = GL_FALSE;
+		}
+	    if (s[minor] == '4')
+		{
+		  GLEW_VERSION_1_1 = GL_TRUE;
+		  GLEW_VERSION_1_2 = GL_TRUE;
+		  GLEW_VERSION_1_3 = GL_TRUE;
+		  GLEW_VERSION_1_4 = GL_TRUE;
+		  GLEW_VERSION_1_5 = GL_FALSE;
+		  GLEW_VERSION_2_0 = GL_FALSE;
+		}
+		if (s[minor] == '3')
+		{
+		  GLEW_VERSION_1_1 = GL_TRUE;
+		  GLEW_VERSION_1_2 = GL_TRUE;
+		  GLEW_VERSION_1_3 = GL_TRUE;
+		  GLEW_VERSION_1_4 = GL_FALSE;
+		  GLEW_VERSION_1_5 = GL_FALSE;
+		  GLEW_VERSION_2_0 = GL_FALSE;
+		}
+		if (s[minor] == '2')
+		{
+		  GLEW_VERSION_1_1 = GL_TRUE;
+		  GLEW_VERSION_1_2 = GL_TRUE;
+		  GLEW_VERSION_1_3 = GL_FALSE;
+		  GLEW_VERSION_1_4 = GL_FALSE;
+		  GLEW_VERSION_1_5 = GL_FALSE;
+		  GLEW_VERSION_2_0 = GL_FALSE;
+		}
+		if (s[minor] < '2')
+		{
+		  GLEW_VERSION_1_1 = GL_TRUE;
+		  GLEW_VERSION_1_2 = GL_FALSE;
+		  GLEW_VERSION_1_3 = GL_FALSE;
+		  GLEW_VERSION_1_4 = GL_FALSE;
+		  GLEW_VERSION_1_5 = GL_FALSE;
+		  GLEW_VERSION_2_0 = GL_FALSE;
+		}
+	  }
+	}
   }
   /* initialize extensions */
 #ifdef GL_VERSION_1_2
@@ -5766,6 +4779,9 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_VERSION_1_5
   if (glewExperimental || GLEW_VERSION_1_5) GLEW_VERSION_1_5 = !_glewInit_GL_VERSION_1_5(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_VERSION_1_5 */
+#ifdef GL_VERSION_2_0
+  if (glewExperimental || GLEW_VERSION_2_0) GLEW_VERSION_2_0 = !_glewInit_GL_VERSION_2_0(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GL_VERSION_2_0 */
 #ifdef GL_3DFX_multisample
   GLEW_3DFX_multisample = glewGetExtension("GL_3DFX_multisample");
 #endif /* GL_3DFX_multisample */
@@ -5790,6 +4806,9 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_APPLE_float_pixels
   GLEW_APPLE_float_pixels = glewGetExtension("GL_APPLE_float_pixels");
 #endif /* GL_APPLE_float_pixels */
+#ifdef GL_APPLE_pixel_buffer
+  GLEW_APPLE_pixel_buffer = glewGetExtension("GL_APPLE_pixel_buffer");
+#endif /* GL_APPLE_pixel_buffer */
 #ifdef GL_APPLE_specular_vector
   GLEW_APPLE_specular_vector = glewGetExtension("GL_APPLE_specular_vector");
 #endif /* GL_APPLE_specular_vector */
@@ -5811,9 +4830,17 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_APPLE_ycbcr_422
   GLEW_APPLE_ycbcr_422 = glewGetExtension("GL_APPLE_ycbcr_422");
 #endif /* GL_APPLE_ycbcr_422 */
+#ifdef GL_ARB_color_buffer_float
+  GLEW_ARB_color_buffer_float = glewGetExtension("GL_ARB_color_buffer_float");
+  if (glewExperimental || GLEW_ARB_color_buffer_float) GLEW_ARB_color_buffer_float = !_glewInit_GL_ARB_color_buffer_float(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GL_ARB_color_buffer_float */
 #ifdef GL_ARB_depth_texture
   GLEW_ARB_depth_texture = glewGetExtension("GL_ARB_depth_texture");
 #endif /* GL_ARB_depth_texture */
+#ifdef GL_ARB_draw_buffers
+  GLEW_ARB_draw_buffers = glewGetExtension("GL_ARB_draw_buffers");
+  if (glewExperimental || GLEW_ARB_draw_buffers) GLEW_ARB_draw_buffers = !_glewInit_GL_ARB_draw_buffers(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GL_ARB_draw_buffers */
 #ifdef GL_ARB_fragment_program
   GLEW_ARB_fragment_program = glewGetExtension("GL_ARB_fragment_program");
 #endif /* GL_ARB_fragment_program */
@@ -5823,6 +4850,9 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_ARB_fragment_shader
   GLEW_ARB_fragment_shader = glewGetExtension("GL_ARB_fragment_shader");
 #endif /* GL_ARB_fragment_shader */
+#ifdef GL_ARB_half_float_pixel
+  GLEW_ARB_half_float_pixel = glewGetExtension("GL_ARB_half_float_pixel");
+#endif /* GL_ARB_half_float_pixel */
 #ifdef GL_ARB_imaging
   GLEW_ARB_imaging = glewGetExtension("GL_ARB_imaging");
   if (glewExperimental || GLEW_ARB_imaging) GLEW_ARB_imaging = !_glewInit_GL_ARB_imaging(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -5843,6 +4873,9 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   GLEW_ARB_occlusion_query = glewGetExtension("GL_ARB_occlusion_query");
   if (glewExperimental || GLEW_ARB_occlusion_query) GLEW_ARB_occlusion_query = !_glewInit_GL_ARB_occlusion_query(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_ARB_occlusion_query */
+#ifdef GL_ARB_pixel_buffer_object
+  GLEW_ARB_pixel_buffer_object = glewGetExtension("GL_ARB_pixel_buffer_object");
+#endif /* GL_ARB_pixel_buffer_object */
 #ifdef GL_ARB_point_parameters
   GLEW_ARB_point_parameters = glewGetExtension("GL_ARB_point_parameters");
   if (glewExperimental || GLEW_ARB_point_parameters) GLEW_ARB_point_parameters = !_glewInit_GL_ARB_point_parameters(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -5885,12 +4918,18 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_ARB_texture_env_dot3
   GLEW_ARB_texture_env_dot3 = glewGetExtension("GL_ARB_texture_env_dot3");
 #endif /* GL_ARB_texture_env_dot3 */
+#ifdef GL_ARB_texture_float
+  GLEW_ARB_texture_float = glewGetExtension("GL_ARB_texture_float");
+#endif /* GL_ARB_texture_float */
 #ifdef GL_ARB_texture_mirrored_repeat
   GLEW_ARB_texture_mirrored_repeat = glewGetExtension("GL_ARB_texture_mirrored_repeat");
 #endif /* GL_ARB_texture_mirrored_repeat */
 #ifdef GL_ARB_texture_non_power_of_two
   GLEW_ARB_texture_non_power_of_two = glewGetExtension("GL_ARB_texture_non_power_of_two");
 #endif /* GL_ARB_texture_non_power_of_two */
+#ifdef GL_ARB_texture_rectangle
+  GLEW_ARB_texture_rectangle = glewGetExtension("GL_ARB_texture_rectangle");
+#endif /* GL_ARB_texture_rectangle */
 #ifdef GL_ARB_transpose_matrix
   GLEW_ARB_transpose_matrix = glewGetExtension("GL_ARB_transpose_matrix");
 #endif /* GL_ARB_transpose_matrix */
@@ -5957,6 +4996,9 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_ATI_text_fragment_shader
   GLEW_ATI_text_fragment_shader = glewGetExtension("GL_ATI_text_fragment_shader");
 #endif /* GL_ATI_text_fragment_shader */
+#ifdef GL_ATI_texture_compression_3dc
+  GLEW_ATI_texture_compression_3dc = glewGetExtension("GL_ATI_texture_compression_3dc");
+#endif /* GL_ATI_texture_compression_3dc */
 #ifdef GL_ATI_texture_env_combine3
   GLEW_ATI_texture_env_combine3 = glewGetExtension("GL_ATI_texture_env_combine3");
 #endif /* GL_ATI_texture_env_combine3 */
@@ -5981,6 +5023,9 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_EXT_422_pixels
   GLEW_EXT_422_pixels = glewGetExtension("GL_EXT_422_pixels");
 #endif /* GL_EXT_422_pixels */
+#ifdef GL_EXT_Cg_shader
+  GLEW_EXT_Cg_shader = glewGetExtension("GL_EXT_Cg_shader");
+#endif /* GL_EXT_Cg_shader */
 #ifdef GL_EXT_abgr
   GLEW_EXT_abgr = glewGetExtension("GL_EXT_abgr");
 #endif /* GL_EXT_abgr */
@@ -6045,6 +5090,7 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #endif /* GL_EXT_depth_bounds_test */
 #ifdef GL_EXT_draw_range_elements
   GLEW_EXT_draw_range_elements = glewGetExtension("GL_EXT_draw_range_elements");
+  if (glewExperimental || GLEW_EXT_draw_range_elements) GLEW_EXT_draw_range_elements = !_glewInit_GL_EXT_draw_range_elements(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_EXT_draw_range_elements */
 #ifdef GL_EXT_fog_coord
   GLEW_EXT_fog_coord = glewGetExtension("GL_EXT_fog_coord");
@@ -6054,6 +5100,10 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   GLEW_EXT_fragment_lighting = glewGetExtension("GL_EXT_fragment_lighting");
   if (glewExperimental || GLEW_EXT_fragment_lighting) GLEW_EXT_fragment_lighting = !_glewInit_GL_EXT_fragment_lighting(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_EXT_fragment_lighting */
+#ifdef GL_EXT_framebuffer_object
+  GLEW_EXT_framebuffer_object = glewGetExtension("GL_EXT_framebuffer_object");
+  if (glewExperimental || GLEW_EXT_framebuffer_object) GLEW_EXT_framebuffer_object = !_glewInit_GL_EXT_framebuffer_object(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GL_EXT_framebuffer_object */
 #ifdef GL_EXT_histogram
   GLEW_EXT_histogram = glewGetExtension("GL_EXT_histogram");
   if (glewExperimental || GLEW_EXT_histogram) GLEW_EXT_histogram = !_glewInit_GL_EXT_histogram(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -6150,6 +5200,9 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   GLEW_EXT_texture3D = glewGetExtension("GL_EXT_texture3D");
   if (glewExperimental || GLEW_EXT_texture3D) GLEW_EXT_texture3D = !_glewInit_GL_EXT_texture3D(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_EXT_texture3D */
+#ifdef GL_EXT_texture_compression_dxt1
+  GLEW_EXT_texture_compression_dxt1 = glewGetExtension("GL_EXT_texture_compression_dxt1");
+#endif /* GL_EXT_texture_compression_dxt1 */
 #ifdef GL_EXT_texture_compression_s3tc
   GLEW_EXT_texture_compression_s3tc = glewGetExtension("GL_EXT_texture_compression_s3tc");
 #endif /* GL_EXT_texture_compression_s3tc */
@@ -6250,6 +5303,10 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   GLEW_INTEL_texture_scissor = glewGetExtension("GL_INTEL_texture_scissor");
   if (glewExperimental || GLEW_INTEL_texture_scissor) GLEW_INTEL_texture_scissor = !_glewInit_GL_INTEL_texture_scissor(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_INTEL_texture_scissor */
+#ifdef GL_KTX_buffer_region
+  GLEW_KTX_buffer_region = glewGetExtension("GL_KTX_buffer_region");
+  if (glewExperimental || GLEW_KTX_buffer_region) GLEW_KTX_buffer_region = !_glewInit_GL_KTX_buffer_region(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GL_KTX_buffer_region */
 #ifdef GL_MESA_pack_invert
   GLEW_MESA_pack_invert = glewGetExtension("GL_MESA_pack_invert");
 #endif /* GL_MESA_pack_invert */
@@ -6291,6 +5348,12 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   GLEW_NV_fragment_program = glewGetExtension("GL_NV_fragment_program");
   if (glewExperimental || GLEW_NV_fragment_program) GLEW_NV_fragment_program = !_glewInit_GL_NV_fragment_program(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_NV_fragment_program */
+#ifdef GL_NV_fragment_program2
+  GLEW_NV_fragment_program2 = glewGetExtension("GL_NV_fragment_program2");
+#endif /* GL_NV_fragment_program2 */
+#ifdef GL_NV_fragment_program_option
+  GLEW_NV_fragment_program_option = glewGetExtension("GL_NV_fragment_program_option");
+#endif /* GL_NV_fragment_program_option */
 #ifdef GL_NV_half_float
   GLEW_NV_half_float = glewGetExtension("GL_NV_half_float");
   if (glewExperimental || GLEW_NV_half_float) GLEW_NV_half_float = !_glewInit_GL_NV_half_float(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -6372,6 +5435,12 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GL_NV_vertex_program2
   GLEW_NV_vertex_program2 = glewGetExtension("GL_NV_vertex_program2");
 #endif /* GL_NV_vertex_program2 */
+#ifdef GL_NV_vertex_program2_option
+  GLEW_NV_vertex_program2_option = glewGetExtension("GL_NV_vertex_program2_option");
+#endif /* GL_NV_vertex_program2_option */
+#ifdef GL_NV_vertex_program3
+  GLEW_NV_vertex_program3 = glewGetExtension("GL_NV_vertex_program3");
+#endif /* GL_NV_vertex_program3 */
 #ifdef GL_OML_interlace
   GLEW_OML_interlace = glewGetExtension("GL_OML_interlace");
 #endif /* GL_OML_interlace */
@@ -6589,12 +5658,494 @@ GLenum glewContextInit (GLEW_CONTEXT_ARG_DEF_LIST)
   GLEW_WIN_swap_hint = glewGetExtension("GL_WIN_swap_hint");
   if (glewExperimental || GLEW_WIN_swap_hint) GLEW_WIN_swap_hint = !_glewInit_GL_WIN_swap_hint(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GL_WIN_swap_hint */
+
   return GLEW_OK;
 }
 
-/* ------------------------------------------------------------------------- */
 
-#ifdef _WIN32
+#if defined(_WIN32)
+
+#if !defined(GLEW_MX)
+
+PFNWGLCREATEBUFFERREGIONARBPROC __wglewCreateBufferRegionARB = NULL;
+PFNWGLDELETEBUFFERREGIONARBPROC __wglewDeleteBufferRegionARB = NULL;
+PFNWGLRESTOREBUFFERREGIONARBPROC __wglewRestoreBufferRegionARB = NULL;
+PFNWGLSAVEBUFFERREGIONARBPROC __wglewSaveBufferRegionARB = NULL;
+
+PFNWGLGETEXTENSIONSSTRINGARBPROC __wglewGetExtensionsStringARB = NULL;
+
+PFNWGLGETCURRENTREADDCARBPROC __wglewGetCurrentReadDCARB = NULL;
+PFNWGLMAKECONTEXTCURRENTARBPROC __wglewMakeContextCurrentARB = NULL;
+
+PFNWGLCREATEPBUFFERARBPROC __wglewCreatePbufferARB = NULL;
+PFNWGLDESTROYPBUFFERARBPROC __wglewDestroyPbufferARB = NULL;
+PFNWGLGETPBUFFERDCARBPROC __wglewGetPbufferDCARB = NULL;
+PFNWGLQUERYPBUFFERARBPROC __wglewQueryPbufferARB = NULL;
+PFNWGLRELEASEPBUFFERDCARBPROC __wglewReleasePbufferDCARB = NULL;
+
+PFNWGLCHOOSEPIXELFORMATARBPROC __wglewChoosePixelFormatARB = NULL;
+PFNWGLGETPIXELFORMATATTRIBFVARBPROC __wglewGetPixelFormatAttribfvARB = NULL;
+PFNWGLGETPIXELFORMATATTRIBIVARBPROC __wglewGetPixelFormatAttribivARB = NULL;
+
+PFNWGLBINDTEXIMAGEARBPROC __wglewBindTexImageARB = NULL;
+PFNWGLRELEASETEXIMAGEARBPROC __wglewReleaseTexImageARB = NULL;
+PFNWGLSETPBUFFERATTRIBARBPROC __wglewSetPbufferAttribARB = NULL;
+
+PFNWGLBINDDISPLAYCOLORTABLEEXTPROC __wglewBindDisplayColorTableEXT = NULL;
+PFNWGLCREATEDISPLAYCOLORTABLEEXTPROC __wglewCreateDisplayColorTableEXT = NULL;
+PFNWGLDESTROYDISPLAYCOLORTABLEEXTPROC __wglewDestroyDisplayColorTableEXT = NULL;
+PFNWGLLOADDISPLAYCOLORTABLEEXTPROC __wglewLoadDisplayColorTableEXT = NULL;
+
+PFNWGLGETEXTENSIONSSTRINGEXTPROC __wglewGetExtensionsStringEXT = NULL;
+
+PFNWGLGETCURRENTREADDCEXTPROC __wglewGetCurrentReadDCEXT = NULL;
+PFNWGLMAKECONTEXTCURRENTEXTPROC __wglewMakeContextCurrentEXT = NULL;
+
+PFNWGLCREATEPBUFFEREXTPROC __wglewCreatePbufferEXT = NULL;
+PFNWGLDESTROYPBUFFEREXTPROC __wglewDestroyPbufferEXT = NULL;
+PFNWGLGETPBUFFERDCEXTPROC __wglewGetPbufferDCEXT = NULL;
+PFNWGLQUERYPBUFFEREXTPROC __wglewQueryPbufferEXT = NULL;
+PFNWGLRELEASEPBUFFERDCEXTPROC __wglewReleasePbufferDCEXT = NULL;
+
+PFNWGLCHOOSEPIXELFORMATEXTPROC __wglewChoosePixelFormatEXT = NULL;
+PFNWGLGETPIXELFORMATATTRIBFVEXTPROC __wglewGetPixelFormatAttribfvEXT = NULL;
+PFNWGLGETPIXELFORMATATTRIBIVEXTPROC __wglewGetPixelFormatAttribivEXT = NULL;
+
+PFNWGLGETSWAPINTERVALEXTPROC __wglewGetSwapIntervalEXT = NULL;
+PFNWGLSWAPINTERVALEXTPROC __wglewSwapIntervalEXT = NULL;
+
+PFNWGLGETDIGITALVIDEOPARAMETERSI3DPROC __wglewGetDigitalVideoParametersI3D = NULL;
+PFNWGLSETDIGITALVIDEOPARAMETERSI3DPROC __wglewSetDigitalVideoParametersI3D = NULL;
+
+PFNWGLGETGAMMATABLEI3DPROC __wglewGetGammaTableI3D = NULL;
+PFNWGLGETGAMMATABLEPARAMETERSI3DPROC __wglewGetGammaTableParametersI3D = NULL;
+PFNWGLSETGAMMATABLEI3DPROC __wglewSetGammaTableI3D = NULL;
+PFNWGLSETGAMMATABLEPARAMETERSI3DPROC __wglewSetGammaTableParametersI3D = NULL;
+
+PFNWGLDISABLEGENLOCKI3DPROC __wglewDisableGenlockI3D = NULL;
+PFNWGLENABLEGENLOCKI3DPROC __wglewEnableGenlockI3D = NULL;
+PFNWGLGENLOCKSAMPLERATEI3DPROC __wglewGenlockSampleRateI3D = NULL;
+PFNWGLGENLOCKSOURCEDELAYI3DPROC __wglewGenlockSourceDelayI3D = NULL;
+PFNWGLGENLOCKSOURCEEDGEI3DPROC __wglewGenlockSourceEdgeI3D = NULL;
+PFNWGLGENLOCKSOURCEI3DPROC __wglewGenlockSourceI3D = NULL;
+PFNWGLGETGENLOCKSAMPLERATEI3DPROC __wglewGetGenlockSampleRateI3D = NULL;
+PFNWGLGETGENLOCKSOURCEDELAYI3DPROC __wglewGetGenlockSourceDelayI3D = NULL;
+PFNWGLGETGENLOCKSOURCEEDGEI3DPROC __wglewGetGenlockSourceEdgeI3D = NULL;
+PFNWGLGETGENLOCKSOURCEI3DPROC __wglewGetGenlockSourceI3D = NULL;
+PFNWGLISENABLEDGENLOCKI3DPROC __wglewIsEnabledGenlockI3D = NULL;
+PFNWGLQUERYGENLOCKMAXSOURCEDELAYI3DPROC __wglewQueryGenlockMaxSourceDelayI3D = NULL;
+
+PFNWGLASSOCIATEIMAGEBUFFEREVENTSI3DPROC __wglewAssociateImageBufferEventsI3D = NULL;
+PFNWGLCREATEIMAGEBUFFERI3DPROC __wglewCreateImageBufferI3D = NULL;
+PFNWGLDESTROYIMAGEBUFFERI3DPROC __wglewDestroyImageBufferI3D = NULL;
+PFNWGLRELEASEIMAGEBUFFEREVENTSI3DPROC __wglewReleaseImageBufferEventsI3D = NULL;
+
+PFNWGLDISABLEFRAMELOCKI3DPROC __wglewDisableFrameLockI3D = NULL;
+PFNWGLENABLEFRAMELOCKI3DPROC __wglewEnableFrameLockI3D = NULL;
+PFNWGLISENABLEDFRAMELOCKI3DPROC __wglewIsEnabledFrameLockI3D = NULL;
+PFNWGLQUERYFRAMELOCKMASTERI3DPROC __wglewQueryFrameLockMasterI3D = NULL;
+
+PFNWGLBEGINFRAMETRACKINGI3DPROC __wglewBeginFrameTrackingI3D = NULL;
+PFNWGLENDFRAMETRACKINGI3DPROC __wglewEndFrameTrackingI3D = NULL;
+PFNWGLGETFRAMEUSAGEI3DPROC __wglewGetFrameUsageI3D = NULL;
+PFNWGLQUERYFRAMETRACKINGI3DPROC __wglewQueryFrameTrackingI3D = NULL;
+
+PFNWGLALLOCATEMEMORYNVPROC __wglewAllocateMemoryNV = NULL;
+PFNWGLFREEMEMORYNVPROC __wglewFreeMemoryNV = NULL;
+
+PFNWGLGETMSCRATEOMLPROC __wglewGetMscRateOML = NULL;
+PFNWGLGETSYNCVALUESOMLPROC __wglewGetSyncValuesOML = NULL;
+PFNWGLSWAPBUFFERSMSCOMLPROC __wglewSwapBuffersMscOML = NULL;
+PFNWGLSWAPLAYERBUFFERSMSCOMLPROC __wglewSwapLayerBuffersMscOML = NULL;
+PFNWGLWAITFORMSCOMLPROC __wglewWaitForMscOML = NULL;
+PFNWGLWAITFORSBCOMLPROC __wglewWaitForSbcOML = NULL;
+GLboolean __WGLEW_3DFX_multisample = GL_FALSE;
+GLboolean __WGLEW_ARB_buffer_region = GL_FALSE;
+GLboolean __WGLEW_ARB_extensions_string = GL_FALSE;
+GLboolean __WGLEW_ARB_make_current_read = GL_FALSE;
+GLboolean __WGLEW_ARB_multisample = GL_FALSE;
+GLboolean __WGLEW_ARB_pbuffer = GL_FALSE;
+GLboolean __WGLEW_ARB_pixel_format = GL_FALSE;
+GLboolean __WGLEW_ARB_pixel_format_float = GL_FALSE;
+GLboolean __WGLEW_ARB_render_texture = GL_FALSE;
+GLboolean __WGLEW_ATI_pixel_format_float = GL_FALSE;
+GLboolean __WGLEW_ATI_render_texture_rectangle = GL_FALSE;
+GLboolean __WGLEW_EXT_depth_float = GL_FALSE;
+GLboolean __WGLEW_EXT_display_color_table = GL_FALSE;
+GLboolean __WGLEW_EXT_extensions_string = GL_FALSE;
+GLboolean __WGLEW_EXT_make_current_read = GL_FALSE;
+GLboolean __WGLEW_EXT_multisample = GL_FALSE;
+GLboolean __WGLEW_EXT_pbuffer = GL_FALSE;
+GLboolean __WGLEW_EXT_pixel_format = GL_FALSE;
+GLboolean __WGLEW_EXT_swap_control = GL_FALSE;
+GLboolean __WGLEW_I3D_digital_video_control = GL_FALSE;
+GLboolean __WGLEW_I3D_gamma = GL_FALSE;
+GLboolean __WGLEW_I3D_genlock = GL_FALSE;
+GLboolean __WGLEW_I3D_image_buffer = GL_FALSE;
+GLboolean __WGLEW_I3D_swap_frame_lock = GL_FALSE;
+GLboolean __WGLEW_I3D_swap_frame_usage = GL_FALSE;
+GLboolean __WGLEW_NV_float_buffer = GL_FALSE;
+GLboolean __WGLEW_NV_render_depth_texture = GL_FALSE;
+GLboolean __WGLEW_NV_render_texture_rectangle = GL_FALSE;
+GLboolean __WGLEW_NV_vertex_array_range = GL_FALSE;
+GLboolean __WGLEW_OML_sync_control = GL_FALSE;
+
+#endif /* !GLEW_MX */
+
+#ifdef WGL_3DFX_multisample
+
+#endif /* WGL_3DFX_multisample */
+
+#ifdef WGL_ARB_buffer_region
+
+static GLboolean _glewInit_WGL_ARB_buffer_region (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglCreateBufferRegionARB = (PFNWGLCREATEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglCreateBufferRegionARB")) == NULL) || r;
+  r = ((wglDeleteBufferRegionARB = (PFNWGLDELETEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglDeleteBufferRegionARB")) == NULL) || r;
+  r = ((wglRestoreBufferRegionARB = (PFNWGLRESTOREBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglRestoreBufferRegionARB")) == NULL) || r;
+  r = ((wglSaveBufferRegionARB = (PFNWGLSAVEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglSaveBufferRegionARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_ARB_buffer_region */
+
+#ifdef WGL_ARB_extensions_string
+
+static GLboolean _glewInit_WGL_ARB_extensions_string (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_ARB_extensions_string */
+
+#ifdef WGL_ARB_make_current_read
+
+static GLboolean _glewInit_WGL_ARB_make_current_read (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetCurrentReadDCARB = (PFNWGLGETCURRENTREADDCARBPROC)glewGetProcAddress((const GLubyte*)"wglGetCurrentReadDCARB")) == NULL) || r;
+  r = ((wglMakeContextCurrentARB = (PFNWGLMAKECONTEXTCURRENTARBPROC)glewGetProcAddress((const GLubyte*)"wglMakeContextCurrentARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_ARB_make_current_read */
+
+#ifdef WGL_ARB_multisample
+
+#endif /* WGL_ARB_multisample */
+
+#ifdef WGL_ARB_pbuffer
+
+static GLboolean _glewInit_WGL_ARB_pbuffer (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglCreatePbufferARB = (PFNWGLCREATEPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglCreatePbufferARB")) == NULL) || r;
+  r = ((wglDestroyPbufferARB = (PFNWGLDESTROYPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglDestroyPbufferARB")) == NULL) || r;
+  r = ((wglGetPbufferDCARB = (PFNWGLGETPBUFFERDCARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPbufferDCARB")) == NULL) || r;
+  r = ((wglQueryPbufferARB = (PFNWGLQUERYPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglQueryPbufferARB")) == NULL) || r;
+  r = ((wglReleasePbufferDCARB = (PFNWGLRELEASEPBUFFERDCARBPROC)glewGetProcAddress((const GLubyte*)"wglReleasePbufferDCARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_ARB_pbuffer */
+
+#ifdef WGL_ARB_pixel_format
+
+static GLboolean _glewInit_WGL_ARB_pixel_format (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)glewGetProcAddress((const GLubyte*)"wglChoosePixelFormatARB")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribfvARB = (PFNWGLGETPIXELFORMATATTRIBFVARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribfvARB")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribivARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_ARB_pixel_format */
+
+#ifdef WGL_ARB_pixel_format_float
+
+#endif /* WGL_ARB_pixel_format_float */
+
+#ifdef WGL_ARB_render_texture
+
+static GLboolean _glewInit_WGL_ARB_render_texture (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglBindTexImageARB = (PFNWGLBINDTEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"wglBindTexImageARB")) == NULL) || r;
+  r = ((wglReleaseTexImageARB = (PFNWGLRELEASETEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"wglReleaseTexImageARB")) == NULL) || r;
+  r = ((wglSetPbufferAttribARB = (PFNWGLSETPBUFFERATTRIBARBPROC)glewGetProcAddress((const GLubyte*)"wglSetPbufferAttribARB")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_ARB_render_texture */
+
+#ifdef WGL_ATI_pixel_format_float
+
+#endif /* WGL_ATI_pixel_format_float */
+
+#ifdef WGL_ATI_render_texture_rectangle
+
+#endif /* WGL_ATI_render_texture_rectangle */
+
+#ifdef WGL_EXT_depth_float
+
+#endif /* WGL_EXT_depth_float */
+
+#ifdef WGL_EXT_display_color_table
+
+static GLboolean _glewInit_WGL_EXT_display_color_table (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglBindDisplayColorTableEXT = (PFNWGLBINDDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglBindDisplayColorTableEXT")) == NULL) || r;
+  r = ((wglCreateDisplayColorTableEXT = (PFNWGLCREATEDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglCreateDisplayColorTableEXT")) == NULL) || r;
+  r = ((wglDestroyDisplayColorTableEXT = (PFNWGLDESTROYDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglDestroyDisplayColorTableEXT")) == NULL) || r;
+  r = ((wglLoadDisplayColorTableEXT = (PFNWGLLOADDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglLoadDisplayColorTableEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_EXT_display_color_table */
+
+#ifdef WGL_EXT_extensions_string
+
+static GLboolean _glewInit_WGL_EXT_extensions_string (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_EXT_extensions_string */
+
+#ifdef WGL_EXT_make_current_read
+
+static GLboolean _glewInit_WGL_EXT_make_current_read (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetCurrentReadDCEXT = (PFNWGLGETCURRENTREADDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetCurrentReadDCEXT")) == NULL) || r;
+  r = ((wglMakeContextCurrentEXT = (PFNWGLMAKECONTEXTCURRENTEXTPROC)glewGetProcAddress((const GLubyte*)"wglMakeContextCurrentEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_EXT_make_current_read */
+
+#ifdef WGL_EXT_multisample
+
+#endif /* WGL_EXT_multisample */
+
+#ifdef WGL_EXT_pbuffer
+
+static GLboolean _glewInit_WGL_EXT_pbuffer (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglCreatePbufferEXT = (PFNWGLCREATEPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglCreatePbufferEXT")) == NULL) || r;
+  r = ((wglDestroyPbufferEXT = (PFNWGLDESTROYPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglDestroyPbufferEXT")) == NULL) || r;
+  r = ((wglGetPbufferDCEXT = (PFNWGLGETPBUFFERDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPbufferDCEXT")) == NULL) || r;
+  r = ((wglQueryPbufferEXT = (PFNWGLQUERYPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglQueryPbufferEXT")) == NULL) || r;
+  r = ((wglReleasePbufferDCEXT = (PFNWGLRELEASEPBUFFERDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglReleasePbufferDCEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_EXT_pbuffer */
+
+#ifdef WGL_EXT_pixel_format
+
+static GLboolean _glewInit_WGL_EXT_pixel_format (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglChoosePixelFormatEXT = (PFNWGLCHOOSEPIXELFORMATEXTPROC)glewGetProcAddress((const GLubyte*)"wglChoosePixelFormatEXT")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribfvEXT = (PFNWGLGETPIXELFORMATATTRIBFVEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribfvEXT")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribivEXT = (PFNWGLGETPIXELFORMATATTRIBIVEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribivEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_EXT_pixel_format */
+
+#ifdef WGL_EXT_swap_control
+
+static GLboolean _glewInit_WGL_EXT_swap_control (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetSwapIntervalEXT")) == NULL) || r;
+  r = ((wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)glewGetProcAddress((const GLubyte*)"wglSwapIntervalEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_EXT_swap_control */
+
+#ifdef WGL_I3D_digital_video_control
+
+static GLboolean _glewInit_WGL_I3D_digital_video_control (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetDigitalVideoParametersI3D = (PFNWGLGETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetDigitalVideoParametersI3D")) == NULL) || r;
+  r = ((wglSetDigitalVideoParametersI3D = (PFNWGLSETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetDigitalVideoParametersI3D")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_I3D_digital_video_control */
+
+#ifdef WGL_I3D_gamma
+
+static GLboolean _glewInit_WGL_I3D_gamma (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetGammaTableI3D = (PFNWGLGETGAMMATABLEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGammaTableI3D")) == NULL) || r;
+  r = ((wglGetGammaTableParametersI3D = (PFNWGLGETGAMMATABLEPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGammaTableParametersI3D")) == NULL) || r;
+  r = ((wglSetGammaTableI3D = (PFNWGLSETGAMMATABLEI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetGammaTableI3D")) == NULL) || r;
+  r = ((wglSetGammaTableParametersI3D = (PFNWGLSETGAMMATABLEPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetGammaTableParametersI3D")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_I3D_gamma */
+
+#ifdef WGL_I3D_genlock
+
+static GLboolean _glewInit_WGL_I3D_genlock (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglDisableGenlockI3D = (PFNWGLDISABLEGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglDisableGenlockI3D")) == NULL) || r;
+  r = ((wglEnableGenlockI3D = (PFNWGLENABLEGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglEnableGenlockI3D")) == NULL) || r;
+  r = ((wglGenlockSampleRateI3D = (PFNWGLGENLOCKSAMPLERATEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSampleRateI3D")) == NULL) || r;
+  r = ((wglGenlockSourceDelayI3D = (PFNWGLGENLOCKSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceDelayI3D")) == NULL) || r;
+  r = ((wglGenlockSourceEdgeI3D = (PFNWGLGENLOCKSOURCEEDGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceEdgeI3D")) == NULL) || r;
+  r = ((wglGenlockSourceI3D = (PFNWGLGENLOCKSOURCEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceI3D")) == NULL) || r;
+  r = ((wglGetGenlockSampleRateI3D = (PFNWGLGETGENLOCKSAMPLERATEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSampleRateI3D")) == NULL) || r;
+  r = ((wglGetGenlockSourceDelayI3D = (PFNWGLGETGENLOCKSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceDelayI3D")) == NULL) || r;
+  r = ((wglGetGenlockSourceEdgeI3D = (PFNWGLGETGENLOCKSOURCEEDGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceEdgeI3D")) == NULL) || r;
+  r = ((wglGetGenlockSourceI3D = (PFNWGLGETGENLOCKSOURCEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceI3D")) == NULL) || r;
+  r = ((wglIsEnabledGenlockI3D = (PFNWGLISENABLEDGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglIsEnabledGenlockI3D")) == NULL) || r;
+  r = ((wglQueryGenlockMaxSourceDelayI3D = (PFNWGLQUERYGENLOCKMAXSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryGenlockMaxSourceDelayI3D")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_I3D_genlock */
+
+#ifdef WGL_I3D_image_buffer
+
+static GLboolean _glewInit_WGL_I3D_image_buffer (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglAssociateImageBufferEventsI3D = (PFNWGLASSOCIATEIMAGEBUFFEREVENTSI3DPROC)glewGetProcAddress((const GLubyte*)"wglAssociateImageBufferEventsI3D")) == NULL) || r;
+  r = ((wglCreateImageBufferI3D = (PFNWGLCREATEIMAGEBUFFERI3DPROC)glewGetProcAddress((const GLubyte*)"wglCreateImageBufferI3D")) == NULL) || r;
+  r = ((wglDestroyImageBufferI3D = (PFNWGLDESTROYIMAGEBUFFERI3DPROC)glewGetProcAddress((const GLubyte*)"wglDestroyImageBufferI3D")) == NULL) || r;
+  r = ((wglReleaseImageBufferEventsI3D = (PFNWGLRELEASEIMAGEBUFFEREVENTSI3DPROC)glewGetProcAddress((const GLubyte*)"wglReleaseImageBufferEventsI3D")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_I3D_image_buffer */
+
+#ifdef WGL_I3D_swap_frame_lock
+
+static GLboolean _glewInit_WGL_I3D_swap_frame_lock (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglDisableFrameLockI3D = (PFNWGLDISABLEFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglDisableFrameLockI3D")) == NULL) || r;
+  r = ((wglEnableFrameLockI3D = (PFNWGLENABLEFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglEnableFrameLockI3D")) == NULL) || r;
+  r = ((wglIsEnabledFrameLockI3D = (PFNWGLISENABLEDFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglIsEnabledFrameLockI3D")) == NULL) || r;
+  r = ((wglQueryFrameLockMasterI3D = (PFNWGLQUERYFRAMELOCKMASTERI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryFrameLockMasterI3D")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_I3D_swap_frame_lock */
+
+#ifdef WGL_I3D_swap_frame_usage
+
+static GLboolean _glewInit_WGL_I3D_swap_frame_usage (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglBeginFrameTrackingI3D = (PFNWGLBEGINFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglBeginFrameTrackingI3D")) == NULL) || r;
+  r = ((wglEndFrameTrackingI3D = (PFNWGLENDFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglEndFrameTrackingI3D")) == NULL) || r;
+  r = ((wglGetFrameUsageI3D = (PFNWGLGETFRAMEUSAGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetFrameUsageI3D")) == NULL) || r;
+  r = ((wglQueryFrameTrackingI3D = (PFNWGLQUERYFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryFrameTrackingI3D")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_I3D_swap_frame_usage */
+
+#ifdef WGL_NV_float_buffer
+
+#endif /* WGL_NV_float_buffer */
+
+#ifdef WGL_NV_render_depth_texture
+
+#endif /* WGL_NV_render_depth_texture */
+
+#ifdef WGL_NV_render_texture_rectangle
+
+#endif /* WGL_NV_render_texture_rectangle */
+
+#ifdef WGL_NV_vertex_array_range
+
+static GLboolean _glewInit_WGL_NV_vertex_array_range (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglAllocateMemoryNV = (PFNWGLALLOCATEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"wglAllocateMemoryNV")) == NULL) || r;
+  r = ((wglFreeMemoryNV = (PFNWGLFREEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"wglFreeMemoryNV")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_NV_vertex_array_range */
+
+#ifdef WGL_OML_sync_control
+
+static GLboolean _glewInit_WGL_OML_sync_control (WGLEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((wglGetMscRateOML = (PFNWGLGETMSCRATEOMLPROC)glewGetProcAddress((const GLubyte*)"wglGetMscRateOML")) == NULL) || r;
+  r = ((wglGetSyncValuesOML = (PFNWGLGETSYNCVALUESOMLPROC)glewGetProcAddress((const GLubyte*)"wglGetSyncValuesOML")) == NULL) || r;
+  r = ((wglSwapBuffersMscOML = (PFNWGLSWAPBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglSwapBuffersMscOML")) == NULL) || r;
+  r = ((wglSwapLayerBuffersMscOML = (PFNWGLSWAPLAYERBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglSwapLayerBuffersMscOML")) == NULL) || r;
+  r = ((wglWaitForMscOML = (PFNWGLWAITFORMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglWaitForMscOML")) == NULL) || r;
+  r = ((wglWaitForSbcOML = (PFNWGLWAITFORSBCOMLPROC)glewGetProcAddress((const GLubyte*)"wglWaitForSbcOML")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* WGL_OML_sync_control */
+
+/* ------------------------------------------------------------------------- */
 
 static PFNWGLGETEXTENSIONSSTRINGARBPROC _wglewGetExtensionsStringARB = NULL;
 static PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglewGetExtensionsStringEXT = NULL;
@@ -6622,9 +6173,6 @@ GLboolean wglewGetExtension (const char* name)
   return GL_FALSE;
 }
 
-#ifndef GLEW_MX
-static
-#endif
 GLenum wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
 {
   GLboolean crippled;
@@ -6661,6 +6209,9 @@ GLenum wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
   WGLEW_ARB_pixel_format = wglewGetExtension("WGL_ARB_pixel_format");
   if (glewExperimental || WGLEW_ARB_pixel_format|| crippled) WGLEW_ARB_pixel_format= !_glewInit_WGL_ARB_pixel_format(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* WGL_ARB_pixel_format */
+#ifdef WGL_ARB_pixel_format_float
+  WGLEW_ARB_pixel_format_float = wglewGetExtension("WGL_ARB_pixel_format_float");
+#endif /* WGL_ARB_pixel_format_float */
 #ifdef WGL_ARB_render_texture
   WGLEW_ARB_render_texture = wglewGetExtension("WGL_ARB_render_texture");
   if (glewExperimental || WGLEW_ARB_render_texture|| crippled) WGLEW_ARB_render_texture= !_glewInit_WGL_ARB_render_texture(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -6668,6 +6219,9 @@ GLenum wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
 #ifdef WGL_ATI_pixel_format_float
   WGLEW_ATI_pixel_format_float = wglewGetExtension("WGL_ATI_pixel_format_float");
 #endif /* WGL_ATI_pixel_format_float */
+#ifdef WGL_ATI_render_texture_rectangle
+  WGLEW_ATI_render_texture_rectangle = wglewGetExtension("WGL_ATI_render_texture_rectangle");
+#endif /* WGL_ATI_render_texture_rectangle */
 #ifdef WGL_EXT_depth_float
   WGLEW_EXT_depth_float = wglewGetExtension("WGL_EXT_depth_float");
 #endif /* WGL_EXT_depth_float */
@@ -6739,18 +6293,553 @@ GLenum wglewContextInit (WGLEW_CONTEXT_ARG_DEF_LIST)
   WGLEW_OML_sync_control = wglewGetExtension("WGL_OML_sync_control");
   if (glewExperimental || WGLEW_OML_sync_control|| crippled) WGLEW_OML_sync_control= !_glewInit_WGL_OML_sync_control(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* WGL_OML_sync_control */
+
   return GLEW_OK;
 }
 
-#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX) /* _UNIX */
+#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+
+PFNGLXGETCURRENTDISPLAYPROC __glewXGetCurrentDisplay = NULL;
+
+PFNGLXCHOOSEFBCONFIGPROC __glewXChooseFBConfig = NULL;
+PFNGLXCREATENEWCONTEXTPROC __glewXCreateNewContext = NULL;
+PFNGLXCREATEPBUFFERPROC __glewXCreatePbuffer = NULL;
+PFNGLXCREATEPIXMAPPROC __glewXCreatePixmap = NULL;
+PFNGLXCREATEWINDOWPROC __glewXCreateWindow = NULL;
+PFNGLXDESTROYPBUFFERPROC __glewXDestroyPbuffer = NULL;
+PFNGLXDESTROYPIXMAPPROC __glewXDestroyPixmap = NULL;
+PFNGLXDESTROYWINDOWPROC __glewXDestroyWindow = NULL;
+PFNGLXGETCURRENTREADDRAWABLEPROC __glewXGetCurrentReadDrawable = NULL;
+PFNGLXGETFBCONFIGATTRIBPROC __glewXGetFBConfigAttrib = NULL;
+PFNGLXGETFBCONFIGSPROC __glewXGetFBConfigs = NULL;
+PFNGLXGETSELECTEDEVENTPROC __glewXGetSelectedEvent = NULL;
+PFNGLXGETVISUALFROMFBCONFIGPROC __glewXGetVisualFromFBConfig = NULL;
+PFNGLXMAKECONTEXTCURRENTPROC __glewXMakeContextCurrent = NULL;
+PFNGLXQUERYCONTEXTPROC __glewXQueryContext = NULL;
+PFNGLXQUERYDRAWABLEPROC __glewXQueryDrawable = NULL;
+PFNGLXSELECTEVENTPROC __glewXSelectEvent = NULL;
+
+PFNGLXBINDTEXIMAGEATIPROC __glewXBindTexImageATI = NULL;
+PFNGLXDRAWABLEATTRIBATIPROC __glewXDrawableAttribATI = NULL;
+PFNGLXRELEASETEXIMAGEATIPROC __glewXReleaseTexImageATI = NULL;
+
+PFNGLXFREECONTEXTEXTPROC __glewXFreeContextEXT = NULL;
+PFNGLXGETCONTEXTIDEXTPROC __glewXGetContextIDEXT = NULL;
+PFNGLXIMPORTCONTEXTEXTPROC __glewXImportContextEXT = NULL;
+PFNGLXQUERYCONTEXTINFOEXTPROC __glewXQueryContextInfoEXT = NULL;
+
+PFNGLXGETAGPOFFSETMESAPROC __glewXGetAGPOffsetMESA = NULL;
+
+PFNGLXCOPYSUBBUFFERMESAPROC __glewXCopySubBufferMESA = NULL;
+
+PFNGLXCREATEGLXPIXMAPMESAPROC __glewXCreateGLXPixmapMESA = NULL;
+
+PFNGLXRELEASEBUFFERSMESAPROC __glewXReleaseBuffersMESA = NULL;
+
+PFNGLXSET3DFXMODEMESAPROC __glewXSet3DfxModeMESA = NULL;
+
+PFNGLXALLOCATEMEMORYNVPROC __glewXAllocateMemoryNV = NULL;
+PFNGLXFREEMEMORYNVPROC __glewXFreeMemoryNV = NULL;
+
+#ifdef GLX_OML_sync_control
+PFNGLXGETMSCRATEOMLPROC __glewXGetMscRateOML = NULL;
+PFNGLXGETSYNCVALUESOMLPROC __glewXGetSyncValuesOML = NULL;
+PFNGLXSWAPBUFFERSMSCOMLPROC __glewXSwapBuffersMscOML = NULL;
+PFNGLXWAITFORMSCOMLPROC __glewXWaitForMscOML = NULL;
+PFNGLXWAITFORSBCOMLPROC __glewXWaitForSbcOML = NULL;
+#endif
+
+PFNGLXCHOOSEFBCONFIGSGIXPROC __glewXChooseFBConfigSGIX = NULL;
+PFNGLXCREATECONTEXTWITHCONFIGSGIXPROC __glewXCreateContextWithConfigSGIX = NULL;
+PFNGLXCREATEGLXPIXMAPWITHCONFIGSGIXPROC __glewXCreateGLXPixmapWithConfigSGIX = NULL;
+PFNGLXGETFBCONFIGATTRIBSGIXPROC __glewXGetFBConfigAttribSGIX = NULL;
+PFNGLXGETFBCONFIGFROMVISUALSGIXPROC __glewXGetFBConfigFromVisualSGIX = NULL;
+PFNGLXGETVISUALFROMFBCONFIGSGIXPROC __glewXGetVisualFromFBConfigSGIX = NULL;
+
+PFNGLXCREATEGLXPBUFFERSGIXPROC __glewXCreateGLXPbufferSGIX = NULL;
+PFNGLXDESTROYGLXPBUFFERSGIXPROC __glewXDestroyGLXPbufferSGIX = NULL;
+PFNGLXGETSELECTEDEVENTSGIXPROC __glewXGetSelectedEventSGIX = NULL;
+PFNGLXQUERYGLXPBUFFERSGIXPROC __glewXQueryGLXPbufferSGIX = NULL;
+PFNGLXSELECTEVENTSGIXPROC __glewXSelectEventSGIX = NULL;
+
+PFNGLXBINDSWAPBARRIERSGIXPROC __glewXBindSwapBarrierSGIX = NULL;
+PFNGLXQUERYMAXSWAPBARRIERSSGIXPROC __glewXQueryMaxSwapBarriersSGIX = NULL;
+
+PFNGLXJOINSWAPGROUPSGIXPROC __glewXJoinSwapGroupSGIX = NULL;
+
+PFNGLXBINDCHANNELTOWINDOWSGIXPROC __glewXBindChannelToWindowSGIX = NULL;
+PFNGLXCHANNELRECTSGIXPROC __glewXChannelRectSGIX = NULL;
+PFNGLXCHANNELRECTSYNCSGIXPROC __glewXChannelRectSyncSGIX = NULL;
+PFNGLXQUERYCHANNELDELTASSGIXPROC __glewXQueryChannelDeltasSGIX = NULL;
+PFNGLXQUERYCHANNELRECTSGIXPROC __glewXQueryChannelRectSGIX = NULL;
+
+PFNGLXCUSHIONSGIPROC __glewXCushionSGI = NULL;
+
+PFNGLXGETCURRENTREADDRAWABLESGIPROC __glewXGetCurrentReadDrawableSGI = NULL;
+PFNGLXMAKECURRENTREADSGIPROC __glewXMakeCurrentReadSGI = NULL;
+
+PFNGLXSWAPINTERVALSGIPROC __glewXSwapIntervalSGI = NULL;
+
+PFNGLXGETVIDEOSYNCSGIPROC __glewXGetVideoSyncSGI = NULL;
+PFNGLXWAITVIDEOSYNCSGIPROC __glewXWaitVideoSyncSGI = NULL;
+
+PFNGLXGETTRANSPARENTINDEXSUNPROC __glewXGetTransparentIndexSUN = NULL;
+
+PFNGLXGETVIDEORESIZESUNPROC __glewXGetVideoResizeSUN = NULL;
+PFNGLXVIDEORESIZESUNPROC __glewXVideoResizeSUN = NULL;
+
+#if !defined(GLEW_MX)
+
+GLboolean __GLXEW_VERSION_1_0 = GL_FALSE;
+GLboolean __GLXEW_VERSION_1_1 = GL_FALSE;
+GLboolean __GLXEW_VERSION_1_2 = GL_FALSE;
+GLboolean __GLXEW_VERSION_1_3 = GL_FALSE;
+GLboolean __GLXEW_VERSION_1_4 = GL_FALSE;
+GLboolean __GLXEW_3DFX_multisample = GL_FALSE;
+GLboolean __GLXEW_ARB_fbconfig_float = GL_FALSE;
+GLboolean __GLXEW_ARB_get_proc_address = GL_FALSE;
+GLboolean __GLXEW_ARB_multisample = GL_FALSE;
+GLboolean __GLXEW_ATI_pixel_format_float = GL_FALSE;
+GLboolean __GLXEW_ATI_render_texture = GL_FALSE;
+GLboolean __GLXEW_EXT_import_context = GL_FALSE;
+GLboolean __GLXEW_EXT_scene_marker = GL_FALSE;
+GLboolean __GLXEW_EXT_visual_info = GL_FALSE;
+GLboolean __GLXEW_EXT_visual_rating = GL_FALSE;
+GLboolean __GLXEW_MESA_agp_offset = GL_FALSE;
+GLboolean __GLXEW_MESA_copy_sub_buffer = GL_FALSE;
+GLboolean __GLXEW_MESA_pixmap_colormap = GL_FALSE;
+GLboolean __GLXEW_MESA_release_buffers = GL_FALSE;
+GLboolean __GLXEW_MESA_set_3dfx_mode = GL_FALSE;
+GLboolean __GLXEW_NV_float_buffer = GL_FALSE;
+GLboolean __GLXEW_NV_vertex_array_range = GL_FALSE;
+GLboolean __GLXEW_OML_swap_method = GL_FALSE;
+#ifdef GLX_OML_sync_control
+GLboolean __GLXEW_OML_sync_control = GL_FALSE;
+#endif
+GLboolean __GLXEW_SGIS_blended_overlay = GL_FALSE;
+GLboolean __GLXEW_SGIS_color_range = GL_FALSE;
+GLboolean __GLXEW_SGIS_multisample = GL_FALSE;
+GLboolean __GLXEW_SGIS_shared_multisample = GL_FALSE;
+GLboolean __GLXEW_SGIX_fbconfig = GL_FALSE;
+GLboolean __GLXEW_SGIX_pbuffer = GL_FALSE;
+GLboolean __GLXEW_SGIX_swap_barrier = GL_FALSE;
+GLboolean __GLXEW_SGIX_swap_group = GL_FALSE;
+GLboolean __GLXEW_SGIX_video_resize = GL_FALSE;
+GLboolean __GLXEW_SGIX_visual_select_group = GL_FALSE;
+GLboolean __GLXEW_SGI_cushion = GL_FALSE;
+GLboolean __GLXEW_SGI_make_current_read = GL_FALSE;
+GLboolean __GLXEW_SGI_swap_control = GL_FALSE;
+GLboolean __GLXEW_SGI_video_sync = GL_FALSE;
+GLboolean __GLXEW_SUN_get_transparent_index = GL_FALSE;
+GLboolean __GLXEW_SUN_video_resize = GL_FALSE;
+
+#endif /* !GLEW_MX */
+
+#ifdef GLX_VERSION_1_2
+
+static GLboolean _glewInit_GLX_VERSION_1_2 (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetCurrentDisplay = (PFNGLXGETCURRENTDISPLAYPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentDisplay")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_VERSION_1_2 */
+
+#ifdef GLX_VERSION_1_3
+
+static GLboolean _glewInit_GLX_VERSION_1_3 (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glewGetProcAddress((const GLubyte*)"glXChooseFBConfig")) == NULL) || r;
+  r = ((glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glewGetProcAddress((const GLubyte*)"glXCreateNewContext")) == NULL) || r;
+  r = ((glXCreatePbuffer = (PFNGLXCREATEPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glXCreatePbuffer")) == NULL) || r;
+  r = ((glXCreatePixmap = (PFNGLXCREATEPIXMAPPROC)glewGetProcAddress((const GLubyte*)"glXCreatePixmap")) == NULL) || r;
+  r = ((glXCreateWindow = (PFNGLXCREATEWINDOWPROC)glewGetProcAddress((const GLubyte*)"glXCreateWindow")) == NULL) || r;
+  r = ((glXDestroyPbuffer = (PFNGLXDESTROYPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glXDestroyPbuffer")) == NULL) || r;
+  r = ((glXDestroyPixmap = (PFNGLXDESTROYPIXMAPPROC)glewGetProcAddress((const GLubyte*)"glXDestroyPixmap")) == NULL) || r;
+  r = ((glXDestroyWindow = (PFNGLXDESTROYWINDOWPROC)glewGetProcAddress((const GLubyte*)"glXDestroyWindow")) == NULL) || r;
+  r = ((glXGetCurrentReadDrawable = (PFNGLXGETCURRENTREADDRAWABLEPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentReadDrawable")) == NULL) || r;
+  r = ((glXGetFBConfigAttrib = (PFNGLXGETFBCONFIGATTRIBPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigAttrib")) == NULL) || r;
+  r = ((glXGetFBConfigs = (PFNGLXGETFBCONFIGSPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigs")) == NULL) || r;
+  r = ((glXGetSelectedEvent = (PFNGLXGETSELECTEDEVENTPROC)glewGetProcAddress((const GLubyte*)"glXGetSelectedEvent")) == NULL) || r;
+  r = ((glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glewGetProcAddress((const GLubyte*)"glXGetVisualFromFBConfig")) == NULL) || r;
+  r = ((glXMakeContextCurrent = (PFNGLXMAKECONTEXTCURRENTPROC)glewGetProcAddress((const GLubyte*)"glXMakeContextCurrent")) == NULL) || r;
+  r = ((glXQueryContext = (PFNGLXQUERYCONTEXTPROC)glewGetProcAddress((const GLubyte*)"glXQueryContext")) == NULL) || r;
+  r = ((glXQueryDrawable = (PFNGLXQUERYDRAWABLEPROC)glewGetProcAddress((const GLubyte*)"glXQueryDrawable")) == NULL) || r;
+  r = ((glXSelectEvent = (PFNGLXSELECTEVENTPROC)glewGetProcAddress((const GLubyte*)"glXSelectEvent")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_VERSION_1_3 */
+
+#ifdef GLX_VERSION_1_4
+
+#endif /* GLX_VERSION_1_4 */
+
+#ifdef GLX_3DFX_multisample
+
+#endif /* GLX_3DFX_multisample */
+
+#ifdef GLX_ARB_fbconfig_float
+
+#endif /* GLX_ARB_fbconfig_float */
+
+#ifdef GLX_ARB_get_proc_address
+
+#endif /* GLX_ARB_get_proc_address */
+
+#ifdef GLX_ARB_multisample
+
+#endif /* GLX_ARB_multisample */
+
+#ifdef GLX_ATI_pixel_format_float
+
+#endif /* GLX_ATI_pixel_format_float */
+
+#ifdef GLX_ATI_render_texture
+
+static GLboolean _glewInit_GLX_ATI_render_texture (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXBindTexImageATI = (PFNGLXBINDTEXIMAGEATIPROC)glewGetProcAddress((const GLubyte*)"glXBindTexImageATI")) == NULL) || r;
+  r = ((glXDrawableAttribATI = (PFNGLXDRAWABLEATTRIBATIPROC)glewGetProcAddress((const GLubyte*)"glXDrawableAttribATI")) == NULL) || r;
+  r = ((glXReleaseTexImageATI = (PFNGLXRELEASETEXIMAGEATIPROC)glewGetProcAddress((const GLubyte*)"glXReleaseTexImageATI")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_ATI_render_texture */
+
+#ifdef GLX_EXT_import_context
+
+static GLboolean _glewInit_GLX_EXT_import_context (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXFreeContextEXT = (PFNGLXFREECONTEXTEXTPROC)glewGetProcAddress((const GLubyte*)"glXFreeContextEXT")) == NULL) || r;
+  r = ((glXGetContextIDEXT = (PFNGLXGETCONTEXTIDEXTPROC)glewGetProcAddress((const GLubyte*)"glXGetContextIDEXT")) == NULL) || r;
+  r = ((glXImportContextEXT = (PFNGLXIMPORTCONTEXTEXTPROC)glewGetProcAddress((const GLubyte*)"glXImportContextEXT")) == NULL) || r;
+  r = ((glXQueryContextInfoEXT = (PFNGLXQUERYCONTEXTINFOEXTPROC)glewGetProcAddress((const GLubyte*)"glXQueryContextInfoEXT")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_EXT_import_context */
+
+#ifdef GLX_EXT_scene_marker
+
+#endif /* GLX_EXT_scene_marker */
+
+#ifdef GLX_EXT_visual_info
+
+#endif /* GLX_EXT_visual_info */
+
+#ifdef GLX_EXT_visual_rating
+
+#endif /* GLX_EXT_visual_rating */
+
+#ifdef GLX_MESA_agp_offset
+
+static GLboolean _glewInit_GLX_MESA_agp_offset (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetAGPOffsetMESA = (PFNGLXGETAGPOFFSETMESAPROC)glewGetProcAddress((const GLubyte*)"glXGetAGPOffsetMESA")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_MESA_agp_offset */
+
+#ifdef GLX_MESA_copy_sub_buffer
+
+static GLboolean _glewInit_GLX_MESA_copy_sub_buffer (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXCopySubBufferMESA = (PFNGLXCOPYSUBBUFFERMESAPROC)glewGetProcAddress((const GLubyte*)"glXCopySubBufferMESA")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_MESA_copy_sub_buffer */
+
+#ifdef GLX_MESA_pixmap_colormap
+
+static GLboolean _glewInit_GLX_MESA_pixmap_colormap (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXCreateGLXPixmapMESA = (PFNGLXCREATEGLXPIXMAPMESAPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPixmapMESA")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_MESA_pixmap_colormap */
+
+#ifdef GLX_MESA_release_buffers
+
+static GLboolean _glewInit_GLX_MESA_release_buffers (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXReleaseBuffersMESA = (PFNGLXRELEASEBUFFERSMESAPROC)glewGetProcAddress((const GLubyte*)"glXReleaseBuffersMESA")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_MESA_release_buffers */
+
+#ifdef GLX_MESA_set_3dfx_mode
+
+static GLboolean _glewInit_GLX_MESA_set_3dfx_mode (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXSet3DfxModeMESA = (PFNGLXSET3DFXMODEMESAPROC)glewGetProcAddress((const GLubyte*)"glXSet3DfxModeMESA")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_MESA_set_3dfx_mode */
+
+#ifdef GLX_NV_float_buffer
+
+#endif /* GLX_NV_float_buffer */
+
+#ifdef GLX_NV_vertex_array_range
+
+static GLboolean _glewInit_GLX_NV_vertex_array_range (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXAllocateMemoryNV = (PFNGLXALLOCATEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"glXAllocateMemoryNV")) == NULL) || r;
+  r = ((glXFreeMemoryNV = (PFNGLXFREEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"glXFreeMemoryNV")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_NV_vertex_array_range */
+
+#ifdef GLX_OML_swap_method
+
+#endif /* GLX_OML_swap_method */
+
+#if defined(GLX_OML_sync_control) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#include <inttypes.h>
+
+static GLboolean _glewInit_GLX_OML_sync_control (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetMscRateOML = (PFNGLXGETMSCRATEOMLPROC)glewGetProcAddress((const GLubyte*)"glXGetMscRateOML")) == NULL) || r;
+  r = ((glXGetSyncValuesOML = (PFNGLXGETSYNCVALUESOMLPROC)glewGetProcAddress((const GLubyte*)"glXGetSyncValuesOML")) == NULL) || r;
+  r = ((glXSwapBuffersMscOML = (PFNGLXSWAPBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"glXSwapBuffersMscOML")) == NULL) || r;
+  r = ((glXWaitForMscOML = (PFNGLXWAITFORMSCOMLPROC)glewGetProcAddress((const GLubyte*)"glXWaitForMscOML")) == NULL) || r;
+  r = ((glXWaitForSbcOML = (PFNGLXWAITFORSBCOMLPROC)glewGetProcAddress((const GLubyte*)"glXWaitForSbcOML")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_OML_sync_control */
+
+#ifdef GLX_SGIS_blended_overlay
+
+#endif /* GLX_SGIS_blended_overlay */
+
+#ifdef GLX_SGIS_color_range
+
+#endif /* GLX_SGIS_color_range */
+
+#ifdef GLX_SGIS_multisample
+
+#endif /* GLX_SGIS_multisample */
+
+#ifdef GLX_SGIS_shared_multisample
+
+#endif /* GLX_SGIS_shared_multisample */
+
+#ifdef GLX_SGIX_fbconfig
+
+static GLboolean _glewInit_GLX_SGIX_fbconfig (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXChooseFBConfigSGIX = (PFNGLXCHOOSEFBCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChooseFBConfigSGIX")) == NULL) || r;
+  r = ((glXCreateContextWithConfigSGIX = (PFNGLXCREATECONTEXTWITHCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateContextWithConfigSGIX")) == NULL) || r;
+  r = ((glXCreateGLXPixmapWithConfigSGIX = (PFNGLXCREATEGLXPIXMAPWITHCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPixmapWithConfigSGIX")) == NULL) || r;
+  r = ((glXGetFBConfigAttribSGIX = (PFNGLXGETFBCONFIGATTRIBSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigAttribSGIX")) == NULL) || r;
+  r = ((glXGetFBConfigFromVisualSGIX = (PFNGLXGETFBCONFIGFROMVISUALSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigFromVisualSGIX")) == NULL) || r;
+  r = ((glXGetVisualFromFBConfigSGIX = (PFNGLXGETVISUALFROMFBCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetVisualFromFBConfigSGIX")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGIX_fbconfig */
+
+#ifdef GLX_SGIX_pbuffer
+
+static GLboolean _glewInit_GLX_SGIX_pbuffer (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXCreateGLXPbufferSGIX = (PFNGLXCREATEGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPbufferSGIX")) == NULL) || r;
+  r = ((glXDestroyGLXPbufferSGIX = (PFNGLXDESTROYGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXDestroyGLXPbufferSGIX")) == NULL) || r;
+  r = ((glXGetSelectedEventSGIX = (PFNGLXGETSELECTEDEVENTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetSelectedEventSGIX")) == NULL) || r;
+  r = ((glXQueryGLXPbufferSGIX = (PFNGLXQUERYGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryGLXPbufferSGIX")) == NULL) || r;
+  r = ((glXSelectEventSGIX = (PFNGLXSELECTEVENTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXSelectEventSGIX")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGIX_pbuffer */
+
+#ifdef GLX_SGIX_swap_barrier
+
+static GLboolean _glewInit_GLX_SGIX_swap_barrier (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXBindSwapBarrierSGIX = (PFNGLXBINDSWAPBARRIERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXBindSwapBarrierSGIX")) == NULL) || r;
+  r = ((glXQueryMaxSwapBarriersSGIX = (PFNGLXQUERYMAXSWAPBARRIERSSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryMaxSwapBarriersSGIX")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGIX_swap_barrier */
+
+#ifdef GLX_SGIX_swap_group
+
+static GLboolean _glewInit_GLX_SGIX_swap_group (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXJoinSwapGroupSGIX = (PFNGLXJOINSWAPGROUPSGIXPROC)glewGetProcAddress((const GLubyte*)"glXJoinSwapGroupSGIX")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGIX_swap_group */
+
+#ifdef GLX_SGIX_video_resize
+
+static GLboolean _glewInit_GLX_SGIX_video_resize (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXBindChannelToWindowSGIX = (PFNGLXBINDCHANNELTOWINDOWSGIXPROC)glewGetProcAddress((const GLubyte*)"glXBindChannelToWindowSGIX")) == NULL) || r;
+  r = ((glXChannelRectSGIX = (PFNGLXCHANNELRECTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChannelRectSGIX")) == NULL) || r;
+  r = ((glXChannelRectSyncSGIX = (PFNGLXCHANNELRECTSYNCSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChannelRectSyncSGIX")) == NULL) || r;
+  r = ((glXQueryChannelDeltasSGIX = (PFNGLXQUERYCHANNELDELTASSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryChannelDeltasSGIX")) == NULL) || r;
+  r = ((glXQueryChannelRectSGIX = (PFNGLXQUERYCHANNELRECTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryChannelRectSGIX")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGIX_video_resize */
+
+#ifdef GLX_SGIX_visual_select_group
+
+#endif /* GLX_SGIX_visual_select_group */
+
+#ifdef GLX_SGI_cushion
+
+static GLboolean _glewInit_GLX_SGI_cushion (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXCushionSGI = (PFNGLXCUSHIONSGIPROC)glewGetProcAddress((const GLubyte*)"glXCushionSGI")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGI_cushion */
+
+#ifdef GLX_SGI_make_current_read
+
+static GLboolean _glewInit_GLX_SGI_make_current_read (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetCurrentReadDrawableSGI = (PFNGLXGETCURRENTREADDRAWABLESGIPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentReadDrawableSGI")) == NULL) || r;
+  r = ((glXMakeCurrentReadSGI = (PFNGLXMAKECURRENTREADSGIPROC)glewGetProcAddress((const GLubyte*)"glXMakeCurrentReadSGI")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGI_make_current_read */
+
+#ifdef GLX_SGI_swap_control
+
+static GLboolean _glewInit_GLX_SGI_swap_control (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC)glewGetProcAddress((const GLubyte*)"glXSwapIntervalSGI")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGI_swap_control */
+
+#ifdef GLX_SGI_video_sync
+
+static GLboolean _glewInit_GLX_SGI_video_sync (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetVideoSyncSGI = (PFNGLXGETVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoSyncSGI")) == NULL) || r;
+  r = ((glXWaitVideoSyncSGI = (PFNGLXWAITVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXWaitVideoSyncSGI")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SGI_video_sync */
+
+#ifdef GLX_SUN_get_transparent_index
+
+static GLboolean _glewInit_GLX_SUN_get_transparent_index (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetTransparentIndexSUN = (PFNGLXGETTRANSPARENTINDEXSUNPROC)glewGetProcAddress((const GLubyte*)"glXGetTransparentIndexSUN")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SUN_get_transparent_index */
+
+#ifdef GLX_SUN_video_resize
+
+static GLboolean _glewInit_GLX_SUN_video_resize (GLXEW_CONTEXT_ARG_DEF_INIT)
+{
+  GLboolean r = GL_FALSE;
+
+  r = ((glXGetVideoResizeSUN = (PFNGLXGETVIDEORESIZESUNPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoResizeSUN")) == NULL) || r;
+  r = ((glXVideoResizeSUN = (PFNGLXVIDEORESIZESUNPROC)glewGetProcAddress((const GLubyte*)"glXVideoResizeSUN")) == NULL) || r;
+
+  return r;
+}
+
+#endif /* GLX_SUN_video_resize */
+
+/* ------------------------------------------------------------------------ */
 
 GLboolean glxewGetExtension (const char* name)
 {    
   GLubyte* p;
   GLubyte* end;
   GLuint len = _glewStrLen((const GLubyte*)name);
-  if (glXQueryExtensionsString == NULL || glXGetCurrentDisplay == NULL) return GL_FALSE;
-  p = (GLubyte*)glXQueryExtensionsString(glXGetCurrentDisplay(), DefaultScreen(glXGetCurrentDisplay()));
+/*   if (glXQueryExtensionsString == NULL || glXGetCurrentDisplay == NULL) return GL_FALSE; */
+/*   p = (GLubyte*)glXQueryExtensionsString(glXGetCurrentDisplay(), DefaultScreen(glXGetCurrentDisplay())); */
+  if (glXGetClientString == NULL || glXGetCurrentDisplay == NULL) return GL_FALSE;
+  p = (GLubyte*)glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
   if (0 == p) return GL_FALSE;
   end = p + _glewStrLen(p);
   while (p < end)
@@ -6762,36 +6851,34 @@ GLboolean glxewGetExtension (const char* name)
   return GL_FALSE;
 }
 
-#ifndef GLEW_MX
-static
-#endif
 GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
 {
   int major, minor;
   /* initialize core GLX 1.2 */
   if (_glewInit_GLX_VERSION_1_2(GLEW_CONTEXT_ARG_VAR_INIT)) return GLEW_ERROR_GLX_VERSION_11_ONLY;
   /* initialize flags */
-  GLXEW_VERSION_1_0 = GL_FALSE;
-  GLXEW_VERSION_1_1 = GL_FALSE;
-  GLXEW_VERSION_1_2 = GL_FALSE;
-  GLXEW_VERSION_1_3 = GL_FALSE;
-  GLXEW_VERSION_1_4 = GL_FALSE;
+  GLXEW_VERSION_1_0 = GL_TRUE;
+  GLXEW_VERSION_1_1 = GL_TRUE;
+  GLXEW_VERSION_1_2 = GL_TRUE;
+  GLXEW_VERSION_1_3 = GL_TRUE;
+  GLXEW_VERSION_1_4 = GL_TRUE;
   /* query GLX version */
   glXQueryVersion(glXGetCurrentDisplay(), &major, &minor);
-  switch (minor)
+  if (major == 1 && minor <= 3)
   {
-    case 4:
-    GLXEW_VERSION_1_4 = GL_TRUE;
-    case 3:
-    GLXEW_VERSION_1_3 = GL_TRUE;
-    case 2:
-    GLXEW_VERSION_1_2 = GL_TRUE;
-    GLXEW_VERSION_1_1 = GL_TRUE;
-    GLXEW_VERSION_1_0 = GL_TRUE;
-    break;
-    default:
-    return GLEW_ERROR_GLX_VERSION_11_ONLY;
-    break;
+    switch (minor)
+    {
+      case 3:
+      GLXEW_VERSION_1_4 = GL_FALSE;
+      break;
+      case 2:
+      GLXEW_VERSION_1_4 = GL_FALSE;
+      GLXEW_VERSION_1_3 = GL_FALSE;
+      break;
+      default:
+      return GLEW_ERROR_GLX_VERSION_11_ONLY;
+      break;
+    }
   }
   /* initialize extensions */
 #ifdef GLX_VERSION_1_3
@@ -6800,6 +6887,9 @@ GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GLX_3DFX_multisample
   GLXEW_3DFX_multisample = glxewGetExtension("GLX_3DFX_multisample");
 #endif /* GLX_3DFX_multisample */
+#ifdef GLX_ARB_fbconfig_float
+  GLXEW_ARB_fbconfig_float = glxewGetExtension("GLX_ARB_fbconfig_float");
+#endif /* GLX_ARB_fbconfig_float */
 #ifdef GLX_ARB_get_proc_address
   GLXEW_ARB_get_proc_address = glxewGetExtension("GLX_ARB_get_proc_address");
 #endif /* GLX_ARB_get_proc_address */
@@ -6826,6 +6916,10 @@ GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
 #ifdef GLX_EXT_visual_rating
   GLXEW_EXT_visual_rating = glxewGetExtension("GLX_EXT_visual_rating");
 #endif /* GLX_EXT_visual_rating */
+#ifdef GLX_MESA_agp_offset
+  GLXEW_MESA_agp_offset = glxewGetExtension("GLX_MESA_agp_offset");
+  if (glewExperimental || GLXEW_MESA_agp_offset) GLXEW_MESA_agp_offset = !_glewInit_GLX_MESA_agp_offset(GLEW_CONTEXT_ARG_VAR_INIT);
+#endif /* GLX_MESA_agp_offset */
 #ifdef GLX_MESA_copy_sub_buffer
   GLXEW_MESA_copy_sub_buffer = glxewGetExtension("GLX_MESA_copy_sub_buffer");
   if (glewExperimental || GLXEW_MESA_copy_sub_buffer) GLXEW_MESA_copy_sub_buffer = !_glewInit_GLX_MESA_copy_sub_buffer(GLEW_CONTEXT_ARG_VAR_INIT);
@@ -6916,10 +7010,11 @@ GLenum glxewContextInit (GLXEW_CONTEXT_ARG_DEF_LIST)
   GLXEW_SUN_video_resize = glxewGetExtension("GLX_SUN_video_resize");
   if (glewExperimental || GLXEW_SUN_video_resize) GLXEW_SUN_video_resize = !_glewInit_GLX_SUN_video_resize(GLEW_CONTEXT_ARG_VAR_INIT);
 #endif /* GLX_SUN_video_resize */
+
   return GLEW_OK;
 }
 
-#endif /* _WIN32 */
+#endif /* !__APPLE__ || GLEW_APPLE_GLX */
 
 /* ------------------------------------------------------------------------ */
 
@@ -6942,7 +7037,7 @@ const GLubyte* glewGetString (GLenum name)
   static const GLubyte* _glewString[] =
   {
     (const GLubyte*)NULL,
-    (const GLubyte*)"1.2.2"
+    (const GLubyte*)"1.3.2"
   };
   const int max_string = sizeof(_glewString)/sizeof(*_glewString) - 1;
   return _glewString[(int)name > max_string ? 0 : (int)name];
@@ -6952,7 +7047,13 @@ const GLubyte* glewGetString (GLenum name)
 
 GLboolean glewExperimental = GL_FALSE;
 
-#ifndef GLEW_MX
+#if !defined(GLEW_MX)
+
+#if defined(_WIN32)
+extern GLenum wglewContextInit (void);
+#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX) /* _UNIX */
+extern GLenum glxewContextInit (void);
+#endif /* _WIN32 */
 
 GLenum glewInit ()
 {
@@ -6967,8 +7068,2499 @@ GLenum glewInit ()
 #endif /* _WIN32 */
 }
 
+#endif /* !GLEW_MX */
+#ifdef GLEW_MX
+GLboolean glewContextIsSupported (GLEWContext* ctx, const char* name)
 #else
-
-
+GLboolean glewIsSupported (const char* name)
 #endif
+{
+  GLubyte* pos = (GLubyte*)name;
+  GLuint len = _glewStrLen(pos);
+  GLboolean ret = GL_TRUE;
+  while (ret && len > 0)
+  {
+    if (_glewStrSame1(&pos, &len, (const GLubyte*)"GL_", 3))
+    {
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"VERSION_", 8))
+      {
+#ifdef GL_VERSION_1_2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_2", 3))
+        {
+          ret = GLEW_VERSION_1_2;
+          continue;
+        }
+#endif
+#ifdef GL_VERSION_1_3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_3", 3))
+        {
+          ret = GLEW_VERSION_1_3;
+          continue;
+        }
+#endif
+#ifdef GL_VERSION_1_4
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_4", 3))
+        {
+          ret = GLEW_VERSION_1_4;
+          continue;
+        }
+#endif
+#ifdef GL_VERSION_1_5
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_5", 3))
+        {
+          ret = GLEW_VERSION_1_5;
+          continue;
+        }
+#endif
+#ifdef GL_VERSION_2_0
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"2_0", 3))
+        {
+          ret = GLEW_VERSION_2_0;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"3DFX_", 5))
+      {
+#ifdef GL_3DFX_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = GLEW_3DFX_multisample;
+          continue;
+        }
+#endif
+#ifdef GL_3DFX_tbuffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"tbuffer", 7))
+        {
+          ret = GLEW_3DFX_tbuffer;
+          continue;
+        }
+#endif
+#ifdef GL_3DFX_texture_compression_FXT1
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_compression_FXT1", 24))
+        {
+          ret = GLEW_3DFX_texture_compression_FXT1;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"APPLE_", 6))
+      {
+#ifdef GL_APPLE_client_storage
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"client_storage", 14))
+        {
+          ret = GLEW_APPLE_client_storage;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_element_array
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"element_array", 13))
+        {
+          ret = GLEW_APPLE_element_array;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_fence
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fence", 5))
+        {
+          ret = GLEW_APPLE_fence;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_float_pixels
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"float_pixels", 12))
+        {
+          ret = GLEW_APPLE_float_pixels;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_pixel_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_buffer", 12))
+        {
+          ret = GLEW_APPLE_pixel_buffer;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_specular_vector
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"specular_vector", 15))
+        {
+          ret = GLEW_APPLE_specular_vector;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_texture_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_range", 13))
+        {
+          ret = GLEW_APPLE_texture_range;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_transform_hint
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"transform_hint", 14))
+        {
+          ret = GLEW_APPLE_transform_hint;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_vertex_array_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_object", 19))
+        {
+          ret = GLEW_APPLE_vertex_array_object;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_vertex_array_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_range", 18))
+        {
+          ret = GLEW_APPLE_vertex_array_range;
+          continue;
+        }
+#endif
+#ifdef GL_APPLE_ycbcr_422
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"ycbcr_422", 9))
+        {
+          ret = GLEW_APPLE_ycbcr_422;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ARB_", 4))
+      {
+#ifdef GL_ARB_color_buffer_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"color_buffer_float", 18))
+        {
+          ret = GLEW_ARB_color_buffer_float;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_depth_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"depth_texture", 13))
+        {
+          ret = GLEW_ARB_depth_texture;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_draw_buffers
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"draw_buffers", 12))
+        {
+          ret = GLEW_ARB_draw_buffers;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_fragment_program
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_program", 16))
+        {
+          ret = GLEW_ARB_fragment_program;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_fragment_program_shadow
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_program_shadow", 23))
+        {
+          ret = GLEW_ARB_fragment_program_shadow;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_fragment_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_shader", 15))
+        {
+          ret = GLEW_ARB_fragment_shader;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_half_float_pixel
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"half_float_pixel", 16))
+        {
+          ret = GLEW_ARB_half_float_pixel;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_imaging
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"imaging", 7))
+        {
+          ret = GLEW_ARB_imaging;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_matrix_palette
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"matrix_palette", 14))
+        {
+          ret = GLEW_ARB_matrix_palette;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = GLEW_ARB_multisample;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_multitexture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multitexture", 12))
+        {
+          ret = GLEW_ARB_multitexture;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_occlusion_query
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"occlusion_query", 15))
+        {
+          ret = GLEW_ARB_occlusion_query;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_pixel_buffer_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_buffer_object", 19))
+        {
+          ret = GLEW_ARB_pixel_buffer_object;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_point_parameters
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"point_parameters", 16))
+        {
+          ret = GLEW_ARB_point_parameters;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_point_sprite
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"point_sprite", 12))
+        {
+          ret = GLEW_ARB_point_sprite;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_shader_objects
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shader_objects", 14))
+        {
+          ret = GLEW_ARB_shader_objects;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_shading_language_100
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shading_language_100", 20))
+        {
+          ret = GLEW_ARB_shading_language_100;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_shadow
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shadow", 6))
+        {
+          ret = GLEW_ARB_shadow;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_shadow_ambient
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shadow_ambient", 14))
+        {
+          ret = GLEW_ARB_shadow_ambient;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_border_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_border_clamp", 20))
+        {
+          ret = GLEW_ARB_texture_border_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_compression
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_compression", 19))
+        {
+          ret = GLEW_ARB_texture_compression;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_cube_map
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_cube_map", 16))
+        {
+          ret = GLEW_ARB_texture_cube_map;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_env_add
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_add", 15))
+        {
+          ret = GLEW_ARB_texture_env_add;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_env_combine
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_combine", 19))
+        {
+          ret = GLEW_ARB_texture_env_combine;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_env_crossbar
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_crossbar", 20))
+        {
+          ret = GLEW_ARB_texture_env_crossbar;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_env_dot3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_dot3", 16))
+        {
+          ret = GLEW_ARB_texture_env_dot3;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_float", 13))
+        {
+          ret = GLEW_ARB_texture_float;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_mirrored_repeat
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_mirrored_repeat", 23))
+        {
+          ret = GLEW_ARB_texture_mirrored_repeat;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_non_power_of_two
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_non_power_of_two", 24))
+        {
+          ret = GLEW_ARB_texture_non_power_of_two;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_texture_rectangle
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_rectangle", 17))
+        {
+          ret = GLEW_ARB_texture_rectangle;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_transpose_matrix
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"transpose_matrix", 16))
+        {
+          ret = GLEW_ARB_transpose_matrix;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_vertex_blend
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_blend", 12))
+        {
+          ret = GLEW_ARB_vertex_blend;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_vertex_buffer_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_buffer_object", 20))
+        {
+          ret = GLEW_ARB_vertex_buffer_object;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_vertex_program
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_program", 14))
+        {
+          ret = GLEW_ARB_vertex_program;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_vertex_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_shader", 13))
+        {
+          ret = GLEW_ARB_vertex_shader;
+          continue;
+        }
+#endif
+#ifdef GL_ARB_window_pos
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"window_pos", 10))
+        {
+          ret = GLEW_ARB_window_pos;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ATIX_", 5))
+      {
+#ifdef GL_ATIX_point_sprites
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"point_sprites", 13))
+        {
+          ret = GLEW_ATIX_point_sprites;
+          continue;
+        }
+#endif
+#ifdef GL_ATIX_texture_env_combine3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_combine3", 20))
+        {
+          ret = GLEW_ATIX_texture_env_combine3;
+          continue;
+        }
+#endif
+#ifdef GL_ATIX_texture_env_route
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_route", 17))
+        {
+          ret = GLEW_ATIX_texture_env_route;
+          continue;
+        }
+#endif
+#ifdef GL_ATIX_vertex_shader_output_point_size
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_shader_output_point_size", 31))
+        {
+          ret = GLEW_ATIX_vertex_shader_output_point_size;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ATI_", 4))
+      {
+#ifdef GL_ATI_draw_buffers
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"draw_buffers", 12))
+        {
+          ret = GLEW_ATI_draw_buffers;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_element_array
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"element_array", 13))
+        {
+          ret = GLEW_ATI_element_array;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_envmap_bumpmap
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"envmap_bumpmap", 14))
+        {
+          ret = GLEW_ATI_envmap_bumpmap;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_fragment_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_shader", 15))
+        {
+          ret = GLEW_ATI_fragment_shader;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_map_object_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"map_object_buffer", 17))
+        {
+          ret = GLEW_ATI_map_object_buffer;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_pn_triangles
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pn_triangles", 12))
+        {
+          ret = GLEW_ATI_pn_triangles;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_separate_stencil
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"separate_stencil", 16))
+        {
+          ret = GLEW_ATI_separate_stencil;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_text_fragment_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"text_fragment_shader", 20))
+        {
+          ret = GLEW_ATI_text_fragment_shader;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_texture_compression_3dc
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_compression_3dc", 23))
+        {
+          ret = GLEW_ATI_texture_compression_3dc;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_texture_env_combine3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_combine3", 20))
+        {
+          ret = GLEW_ATI_texture_env_combine3;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_texture_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_float", 13))
+        {
+          ret = GLEW_ATI_texture_float;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_texture_mirror_once
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_mirror_once", 19))
+        {
+          ret = GLEW_ATI_texture_mirror_once;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_vertex_array_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_object", 19))
+        {
+          ret = GLEW_ATI_vertex_array_object;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_vertex_attrib_array_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_attrib_array_object", 26))
+        {
+          ret = GLEW_ATI_vertex_attrib_array_object;
+          continue;
+        }
+#endif
+#ifdef GL_ATI_vertex_streams
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_streams", 14))
+        {
+          ret = GLEW_ATI_vertex_streams;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"EXT_", 4))
+      {
+#ifdef GL_EXT_422_pixels
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"422_pixels", 10))
+        {
+          ret = GLEW_EXT_422_pixels;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_Cg_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"Cg_shader", 9))
+        {
+          ret = GLEW_EXT_Cg_shader;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_abgr
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"abgr", 4))
+        {
+          ret = GLEW_EXT_abgr;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_bgra
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"bgra", 4))
+        {
+          ret = GLEW_EXT_bgra;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_blend_color
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_color", 11))
+        {
+          ret = GLEW_EXT_blend_color;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_blend_equation_separate
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_equation_separate", 23))
+        {
+          ret = GLEW_EXT_blend_equation_separate;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_blend_func_separate
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_func_separate", 19))
+        {
+          ret = GLEW_EXT_blend_func_separate;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_blend_logic_op
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_logic_op", 14))
+        {
+          ret = GLEW_EXT_blend_logic_op;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_blend_minmax
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_minmax", 12))
+        {
+          ret = GLEW_EXT_blend_minmax;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_blend_subtract
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_subtract", 14))
+        {
+          ret = GLEW_EXT_blend_subtract;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_clip_volume_hint
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"clip_volume_hint", 16))
+        {
+          ret = GLEW_EXT_clip_volume_hint;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_cmyka
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"cmyka", 5))
+        {
+          ret = GLEW_EXT_cmyka;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_color_subtable
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"color_subtable", 14))
+        {
+          ret = GLEW_EXT_color_subtable;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_compiled_vertex_array
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"compiled_vertex_array", 21))
+        {
+          ret = GLEW_EXT_compiled_vertex_array;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_convolution
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"convolution", 11))
+        {
+          ret = GLEW_EXT_convolution;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_coordinate_frame
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"coordinate_frame", 16))
+        {
+          ret = GLEW_EXT_coordinate_frame;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_copy_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"copy_texture", 12))
+        {
+          ret = GLEW_EXT_copy_texture;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_cull_vertex
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"cull_vertex", 11))
+        {
+          ret = GLEW_EXT_cull_vertex;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_depth_bounds_test
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"depth_bounds_test", 17))
+        {
+          ret = GLEW_EXT_depth_bounds_test;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_draw_range_elements
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"draw_range_elements", 19))
+        {
+          ret = GLEW_EXT_draw_range_elements;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_fog_coord
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fog_coord", 9))
+        {
+          ret = GLEW_EXT_fog_coord;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_fragment_lighting
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_lighting", 17))
+        {
+          ret = GLEW_EXT_fragment_lighting;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_framebuffer_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"framebuffer_object", 18))
+        {
+          ret = GLEW_EXT_framebuffer_object;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_histogram
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"histogram", 9))
+        {
+          ret = GLEW_EXT_histogram;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_index_array_formats
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"index_array_formats", 19))
+        {
+          ret = GLEW_EXT_index_array_formats;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_index_func
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"index_func", 10))
+        {
+          ret = GLEW_EXT_index_func;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_index_material
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"index_material", 14))
+        {
+          ret = GLEW_EXT_index_material;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_index_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"index_texture", 13))
+        {
+          ret = GLEW_EXT_index_texture;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_light_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"light_texture", 13))
+        {
+          ret = GLEW_EXT_light_texture;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_misc_attribute
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"misc_attribute", 14))
+        {
+          ret = GLEW_EXT_misc_attribute;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_multi_draw_arrays
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multi_draw_arrays", 17))
+        {
+          ret = GLEW_EXT_multi_draw_arrays;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = GLEW_EXT_multisample;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_packed_pixels
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"packed_pixels", 13))
+        {
+          ret = GLEW_EXT_packed_pixels;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_paletted_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"paletted_texture", 16))
+        {
+          ret = GLEW_EXT_paletted_texture;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_pixel_buffer_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_buffer_object", 19))
+        {
+          ret = GLEW_EXT_pixel_buffer_object;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_pixel_transform
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_transform", 15))
+        {
+          ret = GLEW_EXT_pixel_transform;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_pixel_transform_color_table
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_transform_color_table", 27))
+        {
+          ret = GLEW_EXT_pixel_transform_color_table;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_point_parameters
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"point_parameters", 16))
+        {
+          ret = GLEW_EXT_point_parameters;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_polygon_offset
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"polygon_offset", 14))
+        {
+          ret = GLEW_EXT_polygon_offset;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_rescale_normal
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"rescale_normal", 14))
+        {
+          ret = GLEW_EXT_rescale_normal;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_scene_marker
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"scene_marker", 12))
+        {
+          ret = GLEW_EXT_scene_marker;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_secondary_color
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"secondary_color", 15))
+        {
+          ret = GLEW_EXT_secondary_color;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_separate_specular_color
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"separate_specular_color", 23))
+        {
+          ret = GLEW_EXT_separate_specular_color;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_shadow_funcs
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shadow_funcs", 12))
+        {
+          ret = GLEW_EXT_shadow_funcs;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_shared_texture_palette
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shared_texture_palette", 22))
+        {
+          ret = GLEW_EXT_shared_texture_palette;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_stencil_two_side
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"stencil_two_side", 16))
+        {
+          ret = GLEW_EXT_stencil_two_side;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_stencil_wrap
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"stencil_wrap", 12))
+        {
+          ret = GLEW_EXT_stencil_wrap;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_subtexture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"subtexture", 10))
+        {
+          ret = GLEW_EXT_subtexture;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture", 7))
+        {
+          ret = GLEW_EXT_texture;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture3D
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture3D", 9))
+        {
+          ret = GLEW_EXT_texture3D;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_compression_dxt1
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_compression_dxt1", 24))
+        {
+          ret = GLEW_EXT_texture_compression_dxt1;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_compression_s3tc
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_compression_s3tc", 24))
+        {
+          ret = GLEW_EXT_texture_compression_s3tc;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_cube_map
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_cube_map", 16))
+        {
+          ret = GLEW_EXT_texture_cube_map;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_edge_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_edge_clamp", 18))
+        {
+          ret = GLEW_EXT_texture_edge_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_env
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env", 11))
+        {
+          ret = GLEW_EXT_texture_env;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_env_add
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_add", 15))
+        {
+          ret = GLEW_EXT_texture_env_add;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_env_combine
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_combine", 19))
+        {
+          ret = GLEW_EXT_texture_env_combine;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_env_dot3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_dot3", 16))
+        {
+          ret = GLEW_EXT_texture_env_dot3;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_filter_anisotropic
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_filter_anisotropic", 26))
+        {
+          ret = GLEW_EXT_texture_filter_anisotropic;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_lod_bias
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_lod_bias", 16))
+        {
+          ret = GLEW_EXT_texture_lod_bias;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_mirror_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_mirror_clamp", 20))
+        {
+          ret = GLEW_EXT_texture_mirror_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_object
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_object", 14))
+        {
+          ret = GLEW_EXT_texture_object;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_perturb_normal
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_perturb_normal", 22))
+        {
+          ret = GLEW_EXT_texture_perturb_normal;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_texture_rectangle
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_rectangle", 17))
+        {
+          ret = GLEW_EXT_texture_rectangle;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_vertex_array
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array", 12))
+        {
+          ret = GLEW_EXT_vertex_array;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_vertex_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_shader", 13))
+        {
+          ret = GLEW_EXT_vertex_shader;
+          continue;
+        }
+#endif
+#ifdef GL_EXT_vertex_weighting
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_weighting", 16))
+        {
+          ret = GLEW_EXT_vertex_weighting;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"HP_", 3))
+      {
+#ifdef GL_HP_convolution_border_modes
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"convolution_border_modes", 24))
+        {
+          ret = GLEW_HP_convolution_border_modes;
+          continue;
+        }
+#endif
+#ifdef GL_HP_image_transform
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"image_transform", 15))
+        {
+          ret = GLEW_HP_image_transform;
+          continue;
+        }
+#endif
+#ifdef GL_HP_occlusion_test
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"occlusion_test", 14))
+        {
+          ret = GLEW_HP_occlusion_test;
+          continue;
+        }
+#endif
+#ifdef GL_HP_texture_lighting
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_lighting", 16))
+        {
+          ret = GLEW_HP_texture_lighting;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"IBM_", 4))
+      {
+#ifdef GL_IBM_cull_vertex
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"cull_vertex", 11))
+        {
+          ret = GLEW_IBM_cull_vertex;
+          continue;
+        }
+#endif
+#ifdef GL_IBM_multimode_draw_arrays
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multimode_draw_arrays", 21))
+        {
+          ret = GLEW_IBM_multimode_draw_arrays;
+          continue;
+        }
+#endif
+#ifdef GL_IBM_rasterpos_clip
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"rasterpos_clip", 14))
+        {
+          ret = GLEW_IBM_rasterpos_clip;
+          continue;
+        }
+#endif
+#ifdef GL_IBM_static_data
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"static_data", 11))
+        {
+          ret = GLEW_IBM_static_data;
+          continue;
+        }
+#endif
+#ifdef GL_IBM_texture_mirrored_repeat
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_mirrored_repeat", 23))
+        {
+          ret = GLEW_IBM_texture_mirrored_repeat;
+          continue;
+        }
+#endif
+#ifdef GL_IBM_vertex_array_lists
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_lists", 18))
+        {
+          ret = GLEW_IBM_vertex_array_lists;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"INGR_", 5))
+      {
+#ifdef GL_INGR_color_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"color_clamp", 11))
+        {
+          ret = GLEW_INGR_color_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_INGR_interlace_read
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"interlace_read", 14))
+        {
+          ret = GLEW_INGR_interlace_read;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"INTEL_", 6))
+      {
+#ifdef GL_INTEL_parallel_arrays
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"parallel_arrays", 15))
+        {
+          ret = GLEW_INTEL_parallel_arrays;
+          continue;
+        }
+#endif
+#ifdef GL_INTEL_texture_scissor
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_scissor", 15))
+        {
+          ret = GLEW_INTEL_texture_scissor;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"KTX_", 4))
+      {
+#ifdef GL_KTX_buffer_region
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"buffer_region", 13))
+        {
+          ret = GLEW_KTX_buffer_region;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"MESA_", 5))
+      {
+#ifdef GL_MESA_pack_invert
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pack_invert", 11))
+        {
+          ret = GLEW_MESA_pack_invert;
+          continue;
+        }
+#endif
+#ifdef GL_MESA_resize_buffers
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"resize_buffers", 14))
+        {
+          ret = GLEW_MESA_resize_buffers;
+          continue;
+        }
+#endif
+#ifdef GL_MESA_window_pos
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"window_pos", 10))
+        {
+          ret = GLEW_MESA_window_pos;
+          continue;
+        }
+#endif
+#ifdef GL_MESA_ycbcr_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"ycbcr_texture", 13))
+        {
+          ret = GLEW_MESA_ycbcr_texture;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"NV_", 3))
+      {
+#ifdef GL_NV_blend_square
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_square", 12))
+        {
+          ret = GLEW_NV_blend_square;
+          continue;
+        }
+#endif
+#ifdef GL_NV_copy_depth_to_color
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"copy_depth_to_color", 19))
+        {
+          ret = GLEW_NV_copy_depth_to_color;
+          continue;
+        }
+#endif
+#ifdef GL_NV_depth_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"depth_clamp", 11))
+        {
+          ret = GLEW_NV_depth_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_NV_evaluators
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"evaluators", 10))
+        {
+          ret = GLEW_NV_evaluators;
+          continue;
+        }
+#endif
+#ifdef GL_NV_fence
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fence", 5))
+        {
+          ret = GLEW_NV_fence;
+          continue;
+        }
+#endif
+#ifdef GL_NV_float_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"float_buffer", 12))
+        {
+          ret = GLEW_NV_float_buffer;
+          continue;
+        }
+#endif
+#ifdef GL_NV_fog_distance
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fog_distance", 12))
+        {
+          ret = GLEW_NV_fog_distance;
+          continue;
+        }
+#endif
+#ifdef GL_NV_fragment_program
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_program", 16))
+        {
+          ret = GLEW_NV_fragment_program;
+          continue;
+        }
+#endif
+#ifdef GL_NV_fragment_program2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_program2", 17))
+        {
+          ret = GLEW_NV_fragment_program2;
+          continue;
+        }
+#endif
+#ifdef GL_NV_fragment_program_option
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_program_option", 23))
+        {
+          ret = GLEW_NV_fragment_program_option;
+          continue;
+        }
+#endif
+#ifdef GL_NV_half_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"half_float", 10))
+        {
+          ret = GLEW_NV_half_float;
+          continue;
+        }
+#endif
+#ifdef GL_NV_light_max_exponent
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"light_max_exponent", 18))
+        {
+          ret = GLEW_NV_light_max_exponent;
+          continue;
+        }
+#endif
+#ifdef GL_NV_multisample_filter_hint
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample_filter_hint", 23))
+        {
+          ret = GLEW_NV_multisample_filter_hint;
+          continue;
+        }
+#endif
+#ifdef GL_NV_occlusion_query
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"occlusion_query", 15))
+        {
+          ret = GLEW_NV_occlusion_query;
+          continue;
+        }
+#endif
+#ifdef GL_NV_packed_depth_stencil
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"packed_depth_stencil", 20))
+        {
+          ret = GLEW_NV_packed_depth_stencil;
+          continue;
+        }
+#endif
+#ifdef GL_NV_pixel_data_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_data_range", 16))
+        {
+          ret = GLEW_NV_pixel_data_range;
+          continue;
+        }
+#endif
+#ifdef GL_NV_point_sprite
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"point_sprite", 12))
+        {
+          ret = GLEW_NV_point_sprite;
+          continue;
+        }
+#endif
+#ifdef GL_NV_primitive_restart
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"primitive_restart", 17))
+        {
+          ret = GLEW_NV_primitive_restart;
+          continue;
+        }
+#endif
+#ifdef GL_NV_register_combiners
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"register_combiners", 18))
+        {
+          ret = GLEW_NV_register_combiners;
+          continue;
+        }
+#endif
+#ifdef GL_NV_register_combiners2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"register_combiners2", 19))
+        {
+          ret = GLEW_NV_register_combiners2;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texgen_emboss
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texgen_emboss", 13))
+        {
+          ret = GLEW_NV_texgen_emboss;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texgen_reflection
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texgen_reflection", 17))
+        {
+          ret = GLEW_NV_texgen_reflection;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texture_compression_vtc
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_compression_vtc", 23))
+        {
+          ret = GLEW_NV_texture_compression_vtc;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texture_env_combine4
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_env_combine4", 20))
+        {
+          ret = GLEW_NV_texture_env_combine4;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texture_expand_normal
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_expand_normal", 21))
+        {
+          ret = GLEW_NV_texture_expand_normal;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texture_rectangle
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_rectangle", 17))
+        {
+          ret = GLEW_NV_texture_rectangle;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texture_shader
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_shader", 14))
+        {
+          ret = GLEW_NV_texture_shader;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texture_shader2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_shader2", 15))
+        {
+          ret = GLEW_NV_texture_shader2;
+          continue;
+        }
+#endif
+#ifdef GL_NV_texture_shader3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_shader3", 15))
+        {
+          ret = GLEW_NV_texture_shader3;
+          continue;
+        }
+#endif
+#ifdef GL_NV_vertex_array_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_range", 18))
+        {
+          ret = GLEW_NV_vertex_array_range;
+          continue;
+        }
+#endif
+#ifdef GL_NV_vertex_array_range2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_range2", 19))
+        {
+          ret = GLEW_NV_vertex_array_range2;
+          continue;
+        }
+#endif
+#ifdef GL_NV_vertex_program
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_program", 14))
+        {
+          ret = GLEW_NV_vertex_program;
+          continue;
+        }
+#endif
+#ifdef GL_NV_vertex_program1_1
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_program1_1", 17))
+        {
+          ret = GLEW_NV_vertex_program1_1;
+          continue;
+        }
+#endif
+#ifdef GL_NV_vertex_program2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_program2", 15))
+        {
+          ret = GLEW_NV_vertex_program2;
+          continue;
+        }
+#endif
+#ifdef GL_NV_vertex_program2_option
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_program2_option", 22))
+        {
+          ret = GLEW_NV_vertex_program2_option;
+          continue;
+        }
+#endif
+#ifdef GL_NV_vertex_program3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_program3", 15))
+        {
+          ret = GLEW_NV_vertex_program3;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"OML_", 4))
+      {
+#ifdef GL_OML_interlace
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"interlace", 9))
+        {
+          ret = GLEW_OML_interlace;
+          continue;
+        }
+#endif
+#ifdef GL_OML_resample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"resample", 8))
+        {
+          ret = GLEW_OML_resample;
+          continue;
+        }
+#endif
+#ifdef GL_OML_subsample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"subsample", 9))
+        {
+          ret = GLEW_OML_subsample;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"PGI_", 4))
+      {
+#ifdef GL_PGI_misc_hints
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"misc_hints", 10))
+        {
+          ret = GLEW_PGI_misc_hints;
+          continue;
+        }
+#endif
+#ifdef GL_PGI_vertex_hints
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_hints", 12))
+        {
+          ret = GLEW_PGI_vertex_hints;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"REND_", 5))
+      {
+#ifdef GL_REND_screen_coordinates
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"screen_coordinates", 18))
+        {
+          ret = GLEW_REND_screen_coordinates;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"S3_", 3))
+      {
+#ifdef GL_S3_s3tc
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"s3tc", 4))
+        {
+          ret = GLEW_S3_s3tc;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGIS_", 5))
+      {
+#ifdef GL_SGIS_color_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"color_range", 11))
+        {
+          ret = GLEW_SGIS_color_range;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_detail_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"detail_texture", 14))
+        {
+          ret = GLEW_SGIS_detail_texture;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_fog_function
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fog_function", 12))
+        {
+          ret = GLEW_SGIS_fog_function;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_generate_mipmap
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"generate_mipmap", 15))
+        {
+          ret = GLEW_SGIS_generate_mipmap;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = GLEW_SGIS_multisample;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_pixel_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_texture", 13))
+        {
+          ret = GLEW_SGIS_pixel_texture;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_sharpen_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"sharpen_texture", 15))
+        {
+          ret = GLEW_SGIS_sharpen_texture;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_texture4D
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture4D", 9))
+        {
+          ret = GLEW_SGIS_texture4D;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_texture_border_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_border_clamp", 20))
+        {
+          ret = GLEW_SGIS_texture_border_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_texture_edge_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_edge_clamp", 18))
+        {
+          ret = GLEW_SGIS_texture_edge_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_texture_filter4
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_filter4", 15))
+        {
+          ret = GLEW_SGIS_texture_filter4;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_texture_lod
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_lod", 11))
+        {
+          ret = GLEW_SGIS_texture_lod;
+          continue;
+        }
+#endif
+#ifdef GL_SGIS_texture_select
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_select", 14))
+        {
+          ret = GLEW_SGIS_texture_select;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGIX_", 5))
+      {
+#ifdef GL_SGIX_async
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"async", 5))
+        {
+          ret = GLEW_SGIX_async;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_async_histogram
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"async_histogram", 15))
+        {
+          ret = GLEW_SGIX_async_histogram;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_async_pixel
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"async_pixel", 11))
+        {
+          ret = GLEW_SGIX_async_pixel;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_blend_alpha_minmax
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blend_alpha_minmax", 18))
+        {
+          ret = GLEW_SGIX_blend_alpha_minmax;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_clipmap
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"clipmap", 7))
+        {
+          ret = GLEW_SGIX_clipmap;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_depth_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"depth_texture", 13))
+        {
+          ret = GLEW_SGIX_depth_texture;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_flush_raster
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"flush_raster", 12))
+        {
+          ret = GLEW_SGIX_flush_raster;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_fog_offset
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fog_offset", 10))
+        {
+          ret = GLEW_SGIX_fog_offset;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_fog_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fog_texture", 11))
+        {
+          ret = GLEW_SGIX_fog_texture;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_fragment_specular_lighting
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fragment_specular_lighting", 26))
+        {
+          ret = GLEW_SGIX_fragment_specular_lighting;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_framezoom
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"framezoom", 9))
+        {
+          ret = GLEW_SGIX_framezoom;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_interlace
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"interlace", 9))
+        {
+          ret = GLEW_SGIX_interlace;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_ir_instrument1
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"ir_instrument1", 14))
+        {
+          ret = GLEW_SGIX_ir_instrument1;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_list_priority
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"list_priority", 13))
+        {
+          ret = GLEW_SGIX_list_priority;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_pixel_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_texture", 13))
+        {
+          ret = GLEW_SGIX_pixel_texture;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_pixel_texture_bits
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_texture_bits", 18))
+        {
+          ret = GLEW_SGIX_pixel_texture_bits;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_reference_plane
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"reference_plane", 15))
+        {
+          ret = GLEW_SGIX_reference_plane;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_resample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"resample", 8))
+        {
+          ret = GLEW_SGIX_resample;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_shadow
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shadow", 6))
+        {
+          ret = GLEW_SGIX_shadow;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_shadow_ambient
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shadow_ambient", 14))
+        {
+          ret = GLEW_SGIX_shadow_ambient;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_sprite
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"sprite", 6))
+        {
+          ret = GLEW_SGIX_sprite;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_tag_sample_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"tag_sample_buffer", 17))
+        {
+          ret = GLEW_SGIX_tag_sample_buffer;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_texture_add_env
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_add_env", 15))
+        {
+          ret = GLEW_SGIX_texture_add_env;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_texture_coordinate_clamp
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_coordinate_clamp", 24))
+        {
+          ret = GLEW_SGIX_texture_coordinate_clamp;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_texture_lod_bias
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_lod_bias", 16))
+        {
+          ret = GLEW_SGIX_texture_lod_bias;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_texture_multi_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_multi_buffer", 20))
+        {
+          ret = GLEW_SGIX_texture_multi_buffer;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_texture_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_range", 13))
+        {
+          ret = GLEW_SGIX_texture_range;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_texture_scale_bias
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_scale_bias", 18))
+        {
+          ret = GLEW_SGIX_texture_scale_bias;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_vertex_preclip
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_preclip", 14))
+        {
+          ret = GLEW_SGIX_vertex_preclip;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_vertex_preclip_hint
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_preclip_hint", 19))
+        {
+          ret = GLEW_SGIX_vertex_preclip_hint;
+          continue;
+        }
+#endif
+#ifdef GL_SGIX_ycrcb
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"ycrcb", 5))
+        {
+          ret = GLEW_SGIX_ycrcb;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGI_", 4))
+      {
+#ifdef GL_SGI_color_matrix
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"color_matrix", 12))
+        {
+          ret = GLEW_SGI_color_matrix;
+          continue;
+        }
+#endif
+#ifdef GL_SGI_color_table
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"color_table", 11))
+        {
+          ret = GLEW_SGI_color_table;
+          continue;
+        }
+#endif
+#ifdef GL_SGI_texture_color_table
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"texture_color_table", 19))
+        {
+          ret = GLEW_SGI_texture_color_table;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SUNX_", 5))
+      {
+#ifdef GL_SUNX_constant_data
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"constant_data", 13))
+        {
+          ret = GLEW_SUNX_constant_data;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SUN_", 4))
+      {
+#ifdef GL_SUN_convolution_border_modes
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"convolution_border_modes", 24))
+        {
+          ret = GLEW_SUN_convolution_border_modes;
+          continue;
+        }
+#endif
+#ifdef GL_SUN_global_alpha
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"global_alpha", 12))
+        {
+          ret = GLEW_SUN_global_alpha;
+          continue;
+        }
+#endif
+#ifdef GL_SUN_mesh_array
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"mesh_array", 10))
+        {
+          ret = GLEW_SUN_mesh_array;
+          continue;
+        }
+#endif
+#ifdef GL_SUN_read_video_pixels
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"read_video_pixels", 17))
+        {
+          ret = GLEW_SUN_read_video_pixels;
+          continue;
+        }
+#endif
+#ifdef GL_SUN_slice_accum
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"slice_accum", 11))
+        {
+          ret = GLEW_SUN_slice_accum;
+          continue;
+        }
+#endif
+#ifdef GL_SUN_triangle_list
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"triangle_list", 13))
+        {
+          ret = GLEW_SUN_triangle_list;
+          continue;
+        }
+#endif
+#ifdef GL_SUN_vertex
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex", 6))
+        {
+          ret = GLEW_SUN_vertex;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"WIN_", 4))
+      {
+#ifdef GL_WIN_phong_shading
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"phong_shading", 13))
+        {
+          ret = GLEW_WIN_phong_shading;
+          continue;
+        }
+#endif
+#ifdef GL_WIN_specular_fog
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"specular_fog", 12))
+        {
+          ret = GLEW_WIN_specular_fog;
+          continue;
+        }
+#endif
+#ifdef GL_WIN_swap_hint
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_hint", 9))
+        {
+          ret = GLEW_WIN_swap_hint;
+          continue;
+        }
+#endif
+      }
+    }
+    ret = (len == 0);
+  }
+  return ret;
+}
 
+#if defined(_WIN32)
+
+#if defined(GLEW_MX)
+GLboolean wglewContextIsSupported (WGLEWContext* ctx, const char* name)
+#else
+GLboolean wglewIsSupported (const char* name)
+#endif
+{
+  GLubyte* pos = (GLubyte*)name;
+  GLuint len = _glewStrLen(pos);
+  GLboolean ret = GL_TRUE;
+  while (ret && len > 0)
+  {
+    if (_glewStrSame1(&pos, &len, (const GLubyte*)"WGL_", 4))
+    {
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"3DFX_", 5))
+      {
+#ifdef WGL_3DFX_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = WGLEW_3DFX_multisample;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ARB_", 4))
+      {
+#ifdef WGL_ARB_buffer_region
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"buffer_region", 13))
+        {
+          ret = WGLEW_ARB_buffer_region;
+          continue;
+        }
+#endif
+#ifdef WGL_ARB_extensions_string
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"extensions_string", 17))
+        {
+          ret = WGLEW_ARB_extensions_string;
+          continue;
+        }
+#endif
+#ifdef WGL_ARB_make_current_read
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"make_current_read", 17))
+        {
+          ret = WGLEW_ARB_make_current_read;
+          continue;
+        }
+#endif
+#ifdef WGL_ARB_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = WGLEW_ARB_multisample;
+          continue;
+        }
+#endif
+#ifdef WGL_ARB_pbuffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pbuffer", 7))
+        {
+          ret = WGLEW_ARB_pbuffer;
+          continue;
+        }
+#endif
+#ifdef WGL_ARB_pixel_format
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_format", 12))
+        {
+          ret = WGLEW_ARB_pixel_format;
+          continue;
+        }
+#endif
+#ifdef WGL_ARB_pixel_format_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_format_float", 18))
+        {
+          ret = WGLEW_ARB_pixel_format_float;
+          continue;
+        }
+#endif
+#ifdef WGL_ARB_render_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"render_texture", 14))
+        {
+          ret = WGLEW_ARB_render_texture;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ATI_", 4))
+      {
+#ifdef WGL_ATI_pixel_format_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_format_float", 18))
+        {
+          ret = WGLEW_ATI_pixel_format_float;
+          continue;
+        }
+#endif
+#ifdef WGL_ATI_render_texture_rectangle
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"render_texture_rectangle", 24))
+        {
+          ret = WGLEW_ATI_render_texture_rectangle;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"EXT_", 4))
+      {
+#ifdef WGL_EXT_depth_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"depth_float", 11))
+        {
+          ret = WGLEW_EXT_depth_float;
+          continue;
+        }
+#endif
+#ifdef WGL_EXT_display_color_table
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"display_color_table", 19))
+        {
+          ret = WGLEW_EXT_display_color_table;
+          continue;
+        }
+#endif
+#ifdef WGL_EXT_extensions_string
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"extensions_string", 17))
+        {
+          ret = WGLEW_EXT_extensions_string;
+          continue;
+        }
+#endif
+#ifdef WGL_EXT_make_current_read
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"make_current_read", 17))
+        {
+          ret = WGLEW_EXT_make_current_read;
+          continue;
+        }
+#endif
+#ifdef WGL_EXT_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = WGLEW_EXT_multisample;
+          continue;
+        }
+#endif
+#ifdef WGL_EXT_pbuffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pbuffer", 7))
+        {
+          ret = WGLEW_EXT_pbuffer;
+          continue;
+        }
+#endif
+#ifdef WGL_EXT_pixel_format
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_format", 12))
+        {
+          ret = WGLEW_EXT_pixel_format;
+          continue;
+        }
+#endif
+#ifdef WGL_EXT_swap_control
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_control", 12))
+        {
+          ret = WGLEW_EXT_swap_control;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"I3D_", 4))
+      {
+#ifdef WGL_I3D_digital_video_control
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"digital_video_control", 21))
+        {
+          ret = WGLEW_I3D_digital_video_control;
+          continue;
+        }
+#endif
+#ifdef WGL_I3D_gamma
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"gamma", 5))
+        {
+          ret = WGLEW_I3D_gamma;
+          continue;
+        }
+#endif
+#ifdef WGL_I3D_genlock
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"genlock", 7))
+        {
+          ret = WGLEW_I3D_genlock;
+          continue;
+        }
+#endif
+#ifdef WGL_I3D_image_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"image_buffer", 12))
+        {
+          ret = WGLEW_I3D_image_buffer;
+          continue;
+        }
+#endif
+#ifdef WGL_I3D_swap_frame_lock
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_frame_lock", 15))
+        {
+          ret = WGLEW_I3D_swap_frame_lock;
+          continue;
+        }
+#endif
+#ifdef WGL_I3D_swap_frame_usage
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_frame_usage", 16))
+        {
+          ret = WGLEW_I3D_swap_frame_usage;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"NV_", 3))
+      {
+#ifdef WGL_NV_float_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"float_buffer", 12))
+        {
+          ret = WGLEW_NV_float_buffer;
+          continue;
+        }
+#endif
+#ifdef WGL_NV_render_depth_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"render_depth_texture", 20))
+        {
+          ret = WGLEW_NV_render_depth_texture;
+          continue;
+        }
+#endif
+#ifdef WGL_NV_render_texture_rectangle
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"render_texture_rectangle", 24))
+        {
+          ret = WGLEW_NV_render_texture_rectangle;
+          continue;
+        }
+#endif
+#ifdef WGL_NV_vertex_array_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_range", 18))
+        {
+          ret = WGLEW_NV_vertex_array_range;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"OML_", 4))
+      {
+#ifdef WGL_OML_sync_control
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"sync_control", 12))
+        {
+          ret = WGLEW_OML_sync_control;
+          continue;
+        }
+#endif
+      }
+    }
+    ret = (len == 0);
+  }
+  return ret;
+}
+
+#elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX)
+
+#if defined(GLEW_MX)
+GLboolean glxewContextIsSupported (GLXEWContext* ctx, const char* name)
+#else
+GLboolean glxewIsSupported (const char* name)
+#endif
+{
+  GLubyte* pos = (GLubyte*)name;
+  GLuint len = _glewStrLen(pos);
+  GLboolean ret = GL_TRUE;
+  while (ret && len > 0)
+  {
+    if(_glewStrSame1(&pos, &len, (const GLubyte*)"GLX_", 4))
+    {
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"VERSION_", 8))
+      {
+#ifdef GLX_VERSION_1_2
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_2", 3))
+        {
+          ret = GLXEW_VERSION_1_2;
+          continue;
+        }
+#endif
+#ifdef GLX_VERSION_1_3
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_3", 3))
+        {
+          ret = GLXEW_VERSION_1_3;
+          continue;
+        }
+#endif
+#ifdef GLX_VERSION_1_4
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"1_4", 3))
+        {
+          ret = GLXEW_VERSION_1_4;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"3DFX_", 5))
+      {
+#ifdef GLX_3DFX_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = GLXEW_3DFX_multisample;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ARB_", 4))
+      {
+#ifdef GLX_ARB_fbconfig_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fbconfig_float", 14))
+        {
+          ret = GLXEW_ARB_fbconfig_float;
+          continue;
+        }
+#endif
+#ifdef GLX_ARB_get_proc_address
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"get_proc_address", 16))
+        {
+          ret = GLXEW_ARB_get_proc_address;
+          continue;
+        }
+#endif
+#ifdef GLX_ARB_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = GLXEW_ARB_multisample;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"ATI_", 4))
+      {
+#ifdef GLX_ATI_pixel_format_float
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixel_format_float", 18))
+        {
+          ret = GLXEW_ATI_pixel_format_float;
+          continue;
+        }
+#endif
+#ifdef GLX_ATI_render_texture
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"render_texture", 14))
+        {
+          ret = GLXEW_ATI_render_texture;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"EXT_", 4))
+      {
+#ifdef GLX_EXT_import_context
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"import_context", 14))
+        {
+          ret = GLXEW_EXT_import_context;
+          continue;
+        }
+#endif
+#ifdef GLX_EXT_scene_marker
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"scene_marker", 12))
+        {
+          ret = GLXEW_EXT_scene_marker;
+          continue;
+        }
+#endif
+#ifdef GLX_EXT_visual_info
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"visual_info", 11))
+        {
+          ret = GLXEW_EXT_visual_info;
+          continue;
+        }
+#endif
+#ifdef GLX_EXT_visual_rating
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"visual_rating", 13))
+        {
+          ret = GLXEW_EXT_visual_rating;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"MESA_", 5))
+      {
+#ifdef GLX_MESA_agp_offset
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"agp_offset", 10))
+        {
+          ret = GLXEW_MESA_agp_offset;
+          continue;
+        }
+#endif
+#ifdef GLX_MESA_copy_sub_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"copy_sub_buffer", 15))
+        {
+          ret = GLXEW_MESA_copy_sub_buffer;
+          continue;
+        }
+#endif
+#ifdef GLX_MESA_pixmap_colormap
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pixmap_colormap", 15))
+        {
+          ret = GLXEW_MESA_pixmap_colormap;
+          continue;
+        }
+#endif
+#ifdef GLX_MESA_release_buffers
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"release_buffers", 15))
+        {
+          ret = GLXEW_MESA_release_buffers;
+          continue;
+        }
+#endif
+#ifdef GLX_MESA_set_3dfx_mode
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"set_3dfx_mode", 13))
+        {
+          ret = GLXEW_MESA_set_3dfx_mode;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"NV_", 3))
+      {
+#ifdef GLX_NV_float_buffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"float_buffer", 12))
+        {
+          ret = GLXEW_NV_float_buffer;
+          continue;
+        }
+#endif
+#ifdef GLX_NV_vertex_array_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"vertex_array_range", 18))
+        {
+          ret = GLXEW_NV_vertex_array_range;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"OML_", 4))
+      {
+#ifdef GLX_OML_swap_method
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_method", 11))
+        {
+          ret = GLXEW_OML_swap_method;
+          continue;
+        }
+#endif
+#if defined(GLX_OML_sync_control) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#include <inttypes.h>
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"sync_control", 12))
+        {
+          ret = GLXEW_OML_sync_control;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGIS_", 5))
+      {
+#ifdef GLX_SGIS_blended_overlay
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"blended_overlay", 15))
+        {
+          ret = GLXEW_SGIS_blended_overlay;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIS_color_range
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"color_range", 11))
+        {
+          ret = GLXEW_SGIS_color_range;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIS_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"multisample", 11))
+        {
+          ret = GLXEW_SGIS_multisample;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIS_shared_multisample
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"shared_multisample", 18))
+        {
+          ret = GLXEW_SGIS_shared_multisample;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGIX_", 5))
+      {
+#ifdef GLX_SGIX_fbconfig
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"fbconfig", 8))
+        {
+          ret = GLXEW_SGIX_fbconfig;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIX_pbuffer
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"pbuffer", 7))
+        {
+          ret = GLXEW_SGIX_pbuffer;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIX_swap_barrier
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_barrier", 12))
+        {
+          ret = GLXEW_SGIX_swap_barrier;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIX_swap_group
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_group", 10))
+        {
+          ret = GLXEW_SGIX_swap_group;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIX_video_resize
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"video_resize", 12))
+        {
+          ret = GLXEW_SGIX_video_resize;
+          continue;
+        }
+#endif
+#ifdef GLX_SGIX_visual_select_group
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"visual_select_group", 19))
+        {
+          ret = GLXEW_SGIX_visual_select_group;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SGI_", 4))
+      {
+#ifdef GLX_SGI_cushion
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"cushion", 7))
+        {
+          ret = GLXEW_SGI_cushion;
+          continue;
+        }
+#endif
+#ifdef GLX_SGI_make_current_read
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"make_current_read", 17))
+        {
+          ret = GLXEW_SGI_make_current_read;
+          continue;
+        }
+#endif
+#ifdef GLX_SGI_swap_control
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"swap_control", 12))
+        {
+          ret = GLXEW_SGI_swap_control;
+          continue;
+        }
+#endif
+#ifdef GLX_SGI_video_sync
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"video_sync", 10))
+        {
+          ret = GLXEW_SGI_video_sync;
+          continue;
+        }
+#endif
+      }
+      if (_glewStrSame2(&pos, &len, (const GLubyte*)"SUN_", 4))
+      {
+#ifdef GLX_SUN_get_transparent_index
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"get_transparent_index", 21))
+        {
+          ret = GLXEW_SUN_get_transparent_index;
+          continue;
+        }
+#endif
+#ifdef GLX_SUN_video_resize
+        if (_glewStrSame3(&pos, &len, (const GLubyte*)"video_resize", 12))
+        {
+          ret = GLXEW_SUN_video_resize;
+          continue;
+        }
+#endif
+      }
+    }
+    ret = (len == 0);
+  }
+  return ret;
+}
+
+#endif /* _WIN32 */

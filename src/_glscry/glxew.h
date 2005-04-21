@@ -1,7 +1,7 @@
 /*
 ** The OpenGL Extension Wrangler Library
-** Copyright (C) 2004, 2003, 2002, Milan Ikits <milan ikits[at]ieee org>
-** Copyright (C) 2004, 2003, 2002, Marcelo E. Magallon <mmagallo[at]debian org>
+** Copyright (C) 2002-2005, Milan Ikits <milan ikits[]ieee org>
+** Copyright (C) 2002-2005, Marcelo E. Magallon <mmagallo[]debian org>
 ** Copyright (C) 2002, Lev Povalahev
 ** All rights reserved.
 ** 
@@ -57,11 +57,12 @@
 #endif
 
 #define __glxext_h_
+#define __GLX_glx_h__
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xmd.h>
-#include "glew.h"
+#include <GL/glew.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -288,6 +289,18 @@ extern void ( * glXGetProcAddress (const GLubyte *procName)) (void);
 
 #endif /* GLX_3DFX_multisample */
 
+/* ------------------------- GLX_ARB_fbconfig_float ------------------------ */
+
+#ifndef GLX_ARB_fbconfig_float
+#define GLX_ARB_fbconfig_float 1
+
+#define GLX_RGBA_FLOAT_BIT 0x00000004
+#define GLX_RGBA_FLOAT_TYPE 0x20B9
+
+#define GLXEW_ARB_fbconfig_float GLXEW_GET_VAR(__GLXEW_ARB_fbconfig_float)
+
+#endif /* GLX_ARB_fbconfig_float */
+
 /* ------------------------ GLX_ARB_get_proc_address ----------------------- */
 
 #ifndef GLX_ARB_get_proc_address
@@ -447,6 +460,19 @@ typedef int ( * PFNGLXQUERYCONTEXTINFOEXTPROC) (Display* dpy, GLXContext context
 #define GLXEW_EXT_visual_rating GLXEW_GET_VAR(__GLXEW_EXT_visual_rating)
 
 #endif /* GLX_EXT_visual_rating */
+
+/* -------------------------- GLX_MESA_agp_offset -------------------------- */
+
+#ifndef GLX_MESA_agp_offset
+#define GLX_MESA_agp_offset 1
+
+typedef unsigned int ( * PFNGLXGETAGPOFFSETMESAPROC) (const void* pointer);
+
+#define glXGetAGPOffsetMESA GLXEW_GET_FUN(__glewXGetAGPOffsetMESA)
+
+#define GLXEW_MESA_agp_offset GLXEW_GET_VAR(__GLXEW_MESA_agp_offset)
+
+#endif /* GLX_MESA_agp_offset */
 
 /* ------------------------ GLX_MESA_copy_sub_buffer ----------------------- */
 
@@ -894,6 +920,8 @@ extern PFNGLXGETCONTEXTIDEXTPROC __glewXGetContextIDEXT;
 extern PFNGLXIMPORTCONTEXTEXTPROC __glewXImportContextEXT;
 extern PFNGLXQUERYCONTEXTINFOEXTPROC __glewXQueryContextInfoEXT;
 
+extern PFNGLXGETAGPOFFSETMESAPROC __glewXGetAGPOffsetMESA;
+
 extern PFNGLXCOPYSUBBUFFERMESAPROC __glewXCopySubBufferMESA;
 
 extern PFNGLXCREATEGLXPIXMAPMESAPROC __glewXCreateGLXPixmapMESA;
@@ -963,6 +991,7 @@ GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_2;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_3;
 GLXEW_EXPORT GLboolean __GLXEW_VERSION_1_4;
 GLXEW_EXPORT GLboolean __GLXEW_3DFX_multisample;
+GLXEW_EXPORT GLboolean __GLXEW_ARB_fbconfig_float;
 GLXEW_EXPORT GLboolean __GLXEW_ARB_get_proc_address;
 GLXEW_EXPORT GLboolean __GLXEW_ARB_multisample;
 GLXEW_EXPORT GLboolean __GLXEW_ATI_pixel_format_float;
@@ -971,6 +1000,7 @@ GLXEW_EXPORT GLboolean __GLXEW_EXT_import_context;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_scene_marker;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_visual_info;
 GLXEW_EXPORT GLboolean __GLXEW_EXT_visual_rating;
+GLXEW_EXPORT GLboolean __GLXEW_MESA_agp_offset;
 GLXEW_EXPORT GLboolean __GLXEW_MESA_copy_sub_buffer;
 GLXEW_EXPORT GLboolean __GLXEW_MESA_pixmap_colormap;
 GLXEW_EXPORT GLboolean __GLXEW_MESA_release_buffers;
@@ -1006,6 +1036,10 @@ GLXEW_EXPORT GLboolean __GLXEW_SUN_video_resize;
 
 typedef struct GLXEWContextStruct GLXEWContext;
 extern GLenum glxewContextInit (GLXEWContext* ctx);
+extern GLboolean glxewContextIsSupported (GLXEWContext* ctx, const char* name);
+
+#define glxewInit() glxewContextInit(glxewGetContext())
+#define glxewIsSupported(x) glxewContextIsSupported(glxewGetContext(), x)
 
 #define GLXEW_GET_VAR(x) glxewGetContext()->x
 #define GLXEW_GET_FUN(x) x
@@ -1014,6 +1048,8 @@ extern GLenum glxewContextInit (GLXEWContext* ctx);
 
 #define GLXEW_GET_VAR(x) x
 #define GLXEW_GET_FUN(x) x
+
+extern GLboolean glxewIsSupported (const char* name);
 
 #endif /* GLEW_MX */
 

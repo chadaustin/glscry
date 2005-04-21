@@ -20,6 +20,13 @@
 
 namespace scry {
 
+
+    short  myabs(short s)  { return abs(s);  }
+    int    myabs(int i)    { return abs(i);  }
+    float  myabs(float f)  { return fabs(f); }
+    double myabs(double d) { return fabs(d); }
+
+
     template<GLenum primitiveType, typename dataType>
     struct CoverageCalculator;
 
@@ -50,8 +57,8 @@ namespace scry {
 
             Uint64 total = 0;
             for (size_t i = 0; (i + 1) < vertexCount; i += 2, v += 2 * size) {
-                total += Uint64(std::max(fabs(v[0] - v[size]),
-                                            fabs(v[1] - v[size + 1])));
+                total += Uint64(std::max(myabs(v[0] - v[size]),
+                                         myabs(v[1] - v[size + 1])));
             }
             return total;
         }
@@ -76,8 +83,8 @@ namespace scry {
             Uint64 total = 0;
             Vec last(v[0], v[1]); v += size;
             for (size_t i = 1; i < vertexCount; ++i, v += size) {
-                total += Uint64(std::max(fabs(v[0] - last[0]),
-                                            fabs(v[1] - last[1])));
+                total += Uint64(std::max(myabs(v[0] - last[0]),
+                                         myabs(v[1] - last[1])));
                 last = Vec(v[0], v[1]);
             }
             return total;
@@ -104,12 +111,12 @@ namespace scry {
             Vec last(v[0], v[1]);
             Vec first(last);
             for (size_t i = 1; i < vertexCount; ++i, v += size) {
-                total += Uint64(std::max(fabs(v[0] - last[0]),
-                                            fabs(v[1] - last[1])));
+                total += Uint64(std::max(myabs(v[0] - last[0]),
+                                         myabs(v[1] - last[1])));
                 last = Vec(v[0], v[1]);
             }
-            total += Uint64(std::max(fabs(first[0] - last[0]),
-                                        fabs(first[1] - last[1])));
+            total += Uint64(std::max(myabs(first[0] - last[0]),
+                                     myabs(first[1] - last[1])));
             return total;
         }
     };
@@ -124,7 +131,7 @@ namespace scry {
         float ab = b[0] * a[1] - a[0] * b[1];
         float bc = c[0] * b[1] - b[0] * c[1];
         float ac = a[0] * c[1] - c[0] * a[1];
-        return Uint64(fabs(ab + bc + ac) / 2);
+        return Uint64(myabs(ab + bc + ac) / 2);
     }
 
 
@@ -319,9 +326,11 @@ namespace scry {
             typename GLType<type>::Result>(size, vertexCount, data)
 
         switch (dataType) {
+            SCRY_SPECIALIZE_DATA_TYPE(GL_SHORT);
+            SCRY_SPECIALIZE_DATA_TYPE(GL_INT);
             SCRY_SPECIALIZE_DATA_TYPE(GL_FLOAT);
             SCRY_SPECIALIZE_DATA_TYPE(GL_DOUBLE);
-            default: throw std::runtime_error("Unknown data type");
+            default: throw std::runtime_error("Coverage: unknown data type");
         }
     }
 
