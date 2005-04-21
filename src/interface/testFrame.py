@@ -87,27 +87,8 @@ class wxFrame1(wxFrame):
         parent.Append("Lines")
         parent.Append("Points")
         parent.Append("LinesPoints")
-        parent.Append("Impulses")
-        parent.Append("Dots")
-        parent.Append("Steps")
-        parent.Append("FSteps")
-        parent.Append("HiSteps")
-        parent.Append("Errorbars")
-        parent.Append("XErrorbars")
-        parent.Append("YErrorbars")
-        parent.Append("XYErrorbars")
-        parent.Append("ErrorLines")
-        parent.Append("XErrorLines")
-        parent.Append("YErrorLines")
-        parent.Append("XYErrorLines")
         parent.Append("Boxes")
-        parent.Append("FilledCurves")
-        parent.Append("BoxErrorBars")
-        parent.Append("BoxXYErrorBars")
-        parent.Append("FinanceBars")
-        parent.Append("CandleSticks")
-        parent.Append("Vectors")
-            
+                    
     def _init_utils(self):
         # generated method, don't edit
         self.menuBar1 = wxMenuBar()
@@ -257,31 +238,31 @@ class wxFrame1(wxFrame):
         g = Gnuplot.Gnuplot(debug=1)
         g("set yrange [0:*]")
         g("set terminal png")
-        g("set logscale x")
         g("set size 2,2")
         g('set output "new_test.png"')
         datastyle = "lines"
         if self.data_style.GetSelection() != -1:
             datastyle = self.data_style.GetStringSelection()
             datastyle = datastyle.lower()
+        if self.data_style.GetSelection() != 3:
+            g("set logscale x")
         datacom = "set data style " + datastyle
         g(datacom)
         #-#------get datafile------#-#
         selected = self.treeCtrl1.GetSelections()
         size = len(selected)
         count = 0;
-        run = 0;
+        path = range(size)
+        # Combine selected files into one list
         while count < size:
-            path = self.treeCtrl1.GetPyData(selected[count])
+            path[count] = self.treeCtrl1.GetPyData(selected[count])
             count = count + 1
-            if run == 0:
-                self.SetGraphLabel(path, g)
-                self.GraphData(path, g, run)
-                run = run + 1
-            else:
-                self.GraphData(path, g, run)
-        time.sleep(0.7)
-        img = wxBitmap(r".\new_test.png", wxBITMAP_TYPE_PNG)
+        # Set up the graph and plot data
+        self.GetXtics(path, g)
+        self.SetGraphLabel(path, g)
+        self.GraphData(path, g)
+        time.sleep(.7)
+        img = wxBitmap(r"new_test.png", wxBITMAP_TYPE_PNG)
         resizedimg = img
         toobig = false
         height = img.GetHeight()
@@ -296,14 +277,37 @@ class wxFrame1(wxFrame):
             self.staticBitmap1.SetBitmap(resizedimg)
         else:
             self.staticBitmap1.SetBitmap(img)
-    
+    # Get xtics for the graph
+    def GetXtics(self, path, graph):
+        #use the first path to set xtics
+        file = eval(open(path[0]).read())
+        size = len(file['Test']['GraphLines'][0]['ResultSet'])
+        xtics = range(size)
+        count = 0
+        while count < size:
+             xtics[count] = file['Test']['GraphLines'][0]['ResultSet'][count]['Name']
+             count = count + 1
+        count = 0
+        xcom = "set xtics ("
+        while count < size:
+            xcom = xcom + "\"" + "%s" % (xtics[count])
+            xcom = xcom + "\" "
+            if self.data_style.GetSelection() == 3:
+                xcom = xcom + " " + "%s" % (count)
+            else:
+                xcom = xcom + " " + "%s" % (xtics[count])
+            if count < size - 1:
+                xcom = xcom + ", "
+            count = count + 1
+        xcom = xcom + ")"
+        graph(xcom)
     # Set up the graph                
     def SetGraphLabel(self, path, graph):
         choice = self.data_type.GetSelection()
         if choice == -1:
             choice = 0
-        # load info from .testresult file
-        file = eval(open(path).read())
+        # load info from first .testresult file in path[]
+        file = eval(open(path[0]).read())
         Y =file['Test']['GraphLines'][0]['ResultSet'][0]['Results'][choice]['Units']
         graph.ylabel(Y)
         # set the title
@@ -316,38 +320,56 @@ class wxFrame1(wxFrame):
         graph.title(Gtitle)
     
     # Graph the data            
-    def GraphData(self, path, graph, run):
-        file = eval(open(path).read())
+    def GraphData(self, path, graph):
+        numfiles = len(path)
+        print numfiles
+        file = range(numfiles)
+        filecount = 0
+        while filecount < numfiles:
+            file[filecount] = eval(open(path[filecount]).read())
+            filecount = filecount + 1
         choice = self.data_type.GetSelection()
         if choice == -1:
             choice = 0
-        size = len(file['Test']['GraphLines'][0]['ResultSet'])
+        filecount = 0
+        size = len(file[0]['Test']['GraphLines'][0]['ResultSet'])
         count = 0
         resultcount = 0
-        numresults = len(file['Test']['GraphLines'])
-        if run == 0:
-            plotcom = "plot "
-        else:
-            plotcom = "replot "
-        while resultcount < numresults:
-            title = file['Test']['GraphLines'][resultcount]['Title']
-            plotcom = plotcom + "'-' title '%s'" % (title)
-            if resultcount < numresults - 1:
-                plotcom = plotcom + ","
-            resultcount = resultcount + 1
+        numresults = len(file[0]['Test']['GraphLines'])
+        plotcom = "plot "
+        while filecount < numfiles:
+            while resultcount < numresults:
+                title = file[filecount]['Test']['GraphLines'][resultcount]['Title']
+                if filecount == 0:
+                    plotcom = plotcom + "'-' title '%s'" % (title)
+                    if resultcount < numresults - 1:
+                        plotcom = plotcom + ","
+                else:
+                    plotcom = plotcom + ",'-' title '%s'" % (title)
+                resultcount = resultcount + 1
+            resultcount = 0
+            filecount = filecount + 1
         graph(plotcom)
         resultcount = 0
-        while resultcount < numresults:
-            while count < size:
-                name =file['Test']['GraphLines'][resultcount]['ResultSet'][count]['Name']
-                result =file['Test']['GraphLines'][resultcount]['ResultSet'][count]['Results'][choice]['Value']
-                # graph it
-                graph("%s %f" % (name, result))
-                count = count + 1
-            graph("e\n")
-            time.sleep(0.1)
-            count = 0
-            resultcount = resultcount + 1
+        filecount = 0
+        while filecount < numfiles:
+            while resultcount < numresults:
+                while count < size:
+                    name =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Name']
+                    result =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Results'][choice]['Value']
+                    # graph it
+                    if self.data_style.GetSelection() != 3:
+                        graph("%s %f" % (name, result))
+                    else:
+                        graph("%s %f" % (count, result))
+                    count = count + 1
+                graph("e\n")
+                time.sleep(0.1)
+                count = 0
+                resultcount = resultcount + 1
+            resultcount = 0
+            filecount = filecount + 1
+        graph("e\n")
         graph("exit")
         graph("exit")
     
@@ -357,10 +379,6 @@ class wxFrame1(wxFrame):
         img = wxBitmap(r".\new_test.png", wxBITMAP_TYPE_PNG)
         height = img.GetHeight()
         width = img.GetWidth()
-        # 2,2: 1280 X 960
-        # 1,1:  640 X 480
-        print width
-        print height
         self.wxExpFrame1 = wxFrame(self, id=wxID_WXEXPFRAME1, name='',
             pos=wxPoint(175, 144), size=wxSize(768, 530),
             style=wxDEFAULT_FRAME_STYLE, title="Generated Image")
