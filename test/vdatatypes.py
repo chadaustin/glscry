@@ -102,4 +102,4 @@ lines = [
     run('vdatatype_vbo', VertexBufferObjectTest,  'Vertex Buffers') ]
 
 generateGraph('vdatatype_all_vertexrate', lines, 'VertexRate')
-generateGraph('vdatatype_all_datarate',   lines, 'VertexRate')
+generateGraph('vdatatype_all_datarate',   lines, 'DataRate')
