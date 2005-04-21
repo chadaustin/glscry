@@ -332,7 +332,6 @@ class wxFrame1(wxFrame):
         if choice == -1:
             choice = 0
         filecount = 0
-        size = len(file[0]['Test']['GraphLines'][0]['ResultSet'])
         count = 0
         resultcount = 0
         numresults = len(file[0]['Test']['GraphLines'])
@@ -353,6 +352,7 @@ class wxFrame1(wxFrame):
         resultcount = 0
         filecount = 0
         while filecount < numfiles:
+            size = len(file[filecount]['Test']['GraphLines'][0]['ResultSet'])
             while resultcount < numresults:
                 while count < size:
                     name =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Name']
