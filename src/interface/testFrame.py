@@ -189,7 +189,7 @@ class wxFrame1(wxFrame):
         
     def __init__(self, parent):
         self._init_ctrls(parent)
-    
+
     # Build the tree from the chosen directory
     def BuildFolder(self, event):
         dlg = wxDirDialog(self)
@@ -239,13 +239,11 @@ class wxFrame1(wxFrame):
         g("set yrange [0:*]")
         g("set terminal png")
         g("set size 2,2")
-        g('set output "new_test.png"')
+        g('set output "temp.png"')
         datastyle = "lines"
         if self.data_style.GetSelection() != -1:
             datastyle = self.data_style.GetStringSelection()
             datastyle = datastyle.lower()
-        if self.data_style.GetSelection() != 3:
-            g("set logscale x")
         datacom = "set data style " + datastyle
         g(datacom)
         #-#------get datafile------#-#
@@ -262,7 +260,7 @@ class wxFrame1(wxFrame):
         self.SetGraphLabel(path, g)
         self.GraphData(path, g)
         time.sleep(.7)
-        img = wxBitmap(r"new_test.png", wxBITMAP_TYPE_PNG)
+        img = wxBitmap(r"temp.png", wxBITMAP_TYPE_PNG)
         resizedimg = img
         toobig = false
         height = img.GetHeight()
@@ -279,23 +277,47 @@ class wxFrame1(wxFrame):
             self.staticBitmap1.SetBitmap(img)
     # Get xtics for the graph
     def GetXtics(self, path, graph):
-        #use the first path to set xtics
-        file = eval(open(path[0]).read())
-        size = len(file['Test']['GraphLines'][0]['ResultSet'])
-        xtics = range(size)
+        numfiles = len(path)
+        file = range(numfiles)
+        filecount = 0
+        # make a list of xtics in each file
+        combinedtics = range(numfiles)
+        while filecount < numfiles:
+            file[filecount] = eval(open(path[filecount]).read())
+            size = len(file[filecount]['Test']['GraphLines'][0]['ResultSet'])
+            xtics = range(size)
+            # set xtics from file
+            count = 0
+            while count < size:
+                xtics[count] = file[filecount]['Test']['GraphLines'][0]['ResultSet'][count]['Name']
+                count = count + 1
+            combinedtics[filecount] = xtics
+            filecount = filecount + 1
+        # append each value of xtics in combined xtics to sortedtics
+        sortedtics = range(0)
+        filecount = 0
+        while filecount < numfiles:
+            size = len(combinedtics[filecount])
+            count = 0
+            while count < size:
+                # add xtic to sortedtics if it is not already there
+                if self.data_style.GetSelection() != 3:
+                    xtic = int(combinedtics[filecount][count])
+                else:
+                    xtic = combinedtics[filecount][count]
+                if xtic not in sortedtics:
+                    sortedtics.append(xtic)
+                count = count + 1
+            filecount = filecount + 1
+        # now sort sortedtics and set the xtics
+        sortedtics.sort()
         count = 0
-        while count < size:
-             xtics[count] = file['Test']['GraphLines'][0]['ResultSet'][count]['Name']
-             count = count + 1
-        count = 0
+        size = len(sortedtics)
         xcom = "set xtics ("
         while count < size:
-            xcom = xcom + "\"" + "%s" % (xtics[count])
+            xcom = xcom + "\"" + "%s" % (sortedtics[count])
             xcom = xcom + "\" "
-            if self.data_style.GetSelection() == 3:
-                xcom = xcom + " " + "%s" % (count)
-            else:
-                xcom = xcom + " " + "%s" % (xtics[count])
+            xcom = xcom + " " + "%s" % (count)
             if count < size - 1:
                 xcom = xcom + ", "
             count = count + 1
@@ -306,23 +328,51 @@ class wxFrame1(wxFrame):
         choice = self.data_type.GetSelection()
         if choice == -1:
             choice = 0
-        # load info from first .testresult file in path[]
-        file = eval(open(path[0]).read())
-        Y =file['Test']['GraphLines'][0]['ResultSet'][0]['Results'][choice]['Units']
-        graph.ylabel(Y)
+        # check title of each file, and set a multi-line title if they differ
+        numfiles = len(path)
+        file = range(numfiles)
+        filecount = 0
+        ylabels = range(0)
+        titles = range(0)
+        newlbl = ""
+        newtitle = ""
+        while filecount < numfiles:
+            file[filecount] = eval(open(path[filecount]).read())
+            y = file[filecount]['Test']['GraphLines'][0]['ResultSet'][0]['Results'][choice]['Units']
+            if y not in ylabels:
+                ylabels.append(y)
+            # get the title
+            version = file[filecount]['GLScry Version']
+            host = file[filecount]['System']['Host']
+            vendor = file[filecount]['System']['OpenGL Vendor']
+            renderer = file[filecount]['System']['OpenGL Renderer']
+            glversion = file[filecount]['System']['OpenGL Version']
+            Gtitle = version + " :: " + host + " :: " + vendor + " :: " + renderer +" :: " + glversion
+            if Gtitle not in titles:
+                titles.append(Gtitle)
+            filecount = filecount + 1
+        # assemble the label from ylabels
+        count = 0
+        size = len(ylabels)
+        while count < size:
+            newlbl = newlbl + ylabels[count]
+            if count < size - 1:
+                newlbl = newlbl + ", "
+            count = count + 1
+        graph.ylabel(newlbl)
         # set the title
-        version = file['GLScry Version']
-        host = file['System']['Host']
-        vendor = file['System']['OpenGL Vendor']
-        renderer = file['System']['OpenGL Renderer']
-        glversion = file['System']['OpenGL Version']
-        Gtitle = version + " :: " + host + " :: " + vendor + " :: " + renderer +" :: " + glversion
-        graph.title(Gtitle)
+        size = len(titles)
+        count = 0
+        while count < size:
+            newtitle = newtitle + titles[count]
+            if count < size - 1:
+                newtitle = newtitle + r'\n'
+            count = count + 1
+        graph.title(newtitle)
     
     # Graph the data            
     def GraphData(self, path, graph):
         numfiles = len(path)
-        print numfiles
         file = range(numfiles)
         filecount = 0
         while filecount < numfiles:
@@ -358,10 +408,7 @@ class wxFrame1(wxFrame):
                     name =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Name']
                     result =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Results'][choice]['Value']
                     # graph it
-                    if self.data_style.GetSelection() != 3:
-                        graph("%s %f" % (name, result))
-                    else:
-                        graph("%s %f" % (count, result))
+                    graph("%s %f" % (count, result))
                     count = count + 1
                 graph("e\n")
                 time.sleep(0.1)
@@ -369,14 +416,13 @@ class wxFrame1(wxFrame):
                 resultcount = resultcount + 1
             resultcount = 0
             filecount = filecount + 1
-        graph("e\n")
         graph("exit")
         graph("exit")
     
     # Double click event for static bitmap 1
     # Open a new window and view image at full size    
     def OnBitmapDblClick(self, event):
-        img = wxBitmap(r".\new_test.png", wxBITMAP_TYPE_PNG)
+        img = wxBitmap("temp.png", wxBITMAP_TYPE_PNG)
         height = img.GetHeight()
         width = img.GetWidth()
         self.wxExpFrame1 = wxFrame(self, id=wxID_WXEXPFRAME1, name='',
@@ -386,7 +432,7 @@ class wxFrame1(wxFrame):
             name='scrolledWindow1', parent=self.wxExpFrame1, pos=wxPoint(0, 0),
             size=wxSize(width, height), style=wxHSCROLL | wxVSCROLL)
              
-        self.fullBitmap1 = wxStaticBitmap(bitmap=wxBitmap(".\\new_test.png",
+        self.fullBitmap1 = wxStaticBitmap(bitmap=wxBitmap(".\\temp.png",
             wxBITMAP_TYPE_PNG), id=wxID_WXFULLBITMAP,
             name='fullbitmap1', parent=self.scrolledWindow1, pos=wxPoint(0, 0),
             size=wxSize(width, height), style=0)
