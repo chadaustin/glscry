@@ -123,15 +123,29 @@ class wxFrame1(wxFrame):
         self.panel2 = wxPanel(id=wxID_WXFRAME1PANEL2, name='panel2',
               parent=self, pos=wxPoint(256, 0), size=wxSize(856, 768),
               style=wxTAB_TRAVERSAL)
-
-        self.staticBitmap1 = wxStaticBitmap(bitmap=wxBitmap(u'C:/python23/blank.png',
+        # panel sizers
+        box = wxBoxSizer(wxHORIZONTAL)
+        box.Add(self.panel1, 0, wxEXPAND)
+        box.Add(self.panel2, 1, wxEXPAND)
+        self.SetAutoLayout(True)
+        self.SetSizer(box)
+        self.Layout()
+        # end panel sizers
+        # bitmap resizers
+        self.staticBitmap1 = wxStaticBitmap(bitmap=wxBitmap('blank.png',
               wxBITMAP_TYPE_PNG), id=wxID_WXFRAME1STATICBITMAP1,
               name='staticBitmap1', parent=self.panel2, pos=wxPoint(40, 38),
               size=wxSize(852, 764), style=0)
         self.staticBitmap1.SetAutoLayout(True)
         self.staticBitmap1.Center(wxBOTH)
+        self.box2 = wxBoxSizer(wxHORIZONTAL)
+        self.box2.Add(self.staticBitmap1, 2, wxEXPAND)
+        self.panel2.SetAutoLayout(True)
+        self.panel2.SetSizer(self.box2)
+        self.panel2.Layout()
+        # end bitmap resizer
         EVT_LEFT_DCLICK(self.staticBitmap1, self.OnBitmapDblClick)
-        
+        # notebook layout sizers
         self.notebook1 = wxNotebook(id=wxID_WXFRAME1NOTEBOOK1, name='notebook1',
               parent=self.panel1, pos=wxPoint(8, 56), size=wxSize(248, 704),
               style=0)
@@ -139,7 +153,7 @@ class wxFrame1(wxFrame):
         self.panel3 = wxPanel(id=wxID_WXFRAME1PANEL3, name='panel3',
               parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(240, 678),
               style=wxTAB_TRAVERSAL)
-
+    
         self.panel4 = wxPanel(id=wxID_WXFRAME1PANEL4, name='panel4',
               parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(240, 678),
               style=wxTAB_TRAVERSAL)
@@ -256,27 +270,16 @@ class wxFrame1(wxFrame):
             path[count] = self.treeCtrl1.GetPyData(selected[count])
             count = count + 1
         # Set up the graph and plot data
-        self.GetXtics(path, g)
+        sortedtics = range(0)
+        self.GetXtics(path, g, sortedtics)
         self.SetGraphLabel(path, g)
-        self.GraphData(path, g)
+        self.GraphData(path, g, sortedtics)
         time.sleep(.7)
         img = wxBitmap(r"temp.png", wxBITMAP_TYPE_PNG)
-        resizedimg = img
-        toobig = false
-        height = img.GetHeight()
-        width = img.GetWidth()
-        if width > 852:
-            resizedimg.SetWidth(852)
-            toobig = true
-        if height > 764:
-            resizedimg.SetHeight(764)
-            toobig = true
-        if toobig == true:
-            self.staticBitmap1.SetBitmap(resizedimg)
-        else:
-            self.staticBitmap1.SetBitmap(img)
+        self.staticBitmap1.SetBitmap(img)
+        self.box2.RecalcSizes()
     # Get xtics for the graph
-    def GetXtics(self, path, graph):
+    def GetXtics(self, path, graph, sortedtics):
         numfiles = len(path)
         file = range(numfiles)
         filecount = 0
@@ -294,7 +297,6 @@ class wxFrame1(wxFrame):
             combinedtics[filecount] = xtics
             filecount = filecount + 1
         # append each value of xtics in combined xtics to sortedtics
-        sortedtics = range(0)
         filecount = 0
         while filecount < numfiles:
             size = len(combinedtics[filecount])
@@ -309,8 +311,9 @@ class wxFrame1(wxFrame):
                     sortedtics.append(xtic)
                 count = count + 1
             filecount = filecount + 1
-        # now sort sortedtics and set the xtics
-        sortedtics.sort()
+        # now sort sortedtics and set the xtics if you are not graphing with boxes
+        if self.data_style.GetSelection() != 3:
+            sortedtics.sort()
         count = 0
         size = len(sortedtics)
         xcom = "set xtics ("
@@ -371,7 +374,7 @@ class wxFrame1(wxFrame):
         graph.title(newtitle)
     
     # Graph the data            
-    def GraphData(self, path, graph):
+    def GraphData(self, path, graph, sortedtics):
         numfiles = len(path)
         file = range(numfiles)
         filecount = 0
@@ -384,9 +387,10 @@ class wxFrame1(wxFrame):
         filecount = 0
         count = 0
         resultcount = 0
-        numresults = len(file[0]['Test']['GraphLines'])
+        alltitles = range(0)
         plotcom = "plot "
         while filecount < numfiles:
+            numresults = len(file[filecount]['Test']['GraphLines'])
             while resultcount < numresults:
                 title = file[filecount]['Test']['GraphLines'][resultcount]['Title']
                 if filecount == 0:
@@ -407,8 +411,11 @@ class wxFrame1(wxFrame):
                 while count < size:
                     name =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Name']
                     result =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Results'][choice]['Value']
+                    # get the index of name in sortedtics
+                    index = self.GetIndex(name, sortedtics)
                     # graph it
-                    graph("%s %f" % (count, result))
+                    graph("%s %f" % (index, result))
+                    #graph("%s %f" % (count, result)) 
                     count = count + 1
                 graph("e\n")
                 time.sleep(0.1)
@@ -418,7 +425,22 @@ class wxFrame1(wxFrame):
             filecount = filecount + 1
         graph("exit")
         graph("exit")
-    
+        
+    # search through sorted tics to find value and return its index
+    def GetIndex(self, value, sortedtics):
+        # get the size of sorted tics
+        ticsize = len(sortedtics)
+        count = 0
+        while count < ticsize:
+            if self.data_style.GetSelection() != 3:
+                value = int(value)
+                curval = int(sortedtics[count])
+            else:
+                curval = sortedtics[count]
+            if curval == value:
+                index = count
+                return index
+            count = count + 1
     # Double click event for static bitmap 1
     # Open a new window and view image at full size    
     def OnBitmapDblClick(self, event):
