@@ -22,6 +22,7 @@
 #include "RefCounted.h"
 #include "StateSet.h"
 #include "Timer.h"
+#include "Transform.h"
 #include "Types.h"
 
 
@@ -91,7 +92,10 @@ namespace scry {
             return _name.c_str();
         }
 
-        void setTransform(
+        void setTransform(TransformPtr transform) {
+            _transform = transform;
+        }
+#if 0
             const Vec4f& row1,
             const Vec4f& row2,
             const Vec4f& row3,
@@ -103,8 +107,9 @@ namespace scry {
                 row3[0], row3[1], row3[2], row3[3],
                 row4[0], row4[1], row4[2], row4[3]);
         }
+#endif
 
-        const Matrix44f& getTransform() const {
+        TransformPtr getTransform() const {
             return _transform;
         }
 
@@ -138,7 +143,7 @@ namespace scry {
 
     private:
         std::string _name;
-        Matrix44f _transform;
+        TransformPtr _transform;
 
         Inited<bool, false>      _fullStateSwitch;
         std::vector<StateSetPtr> _stateSetList;

@@ -12,6 +12,7 @@ sources = Split("""
     Platform.cpp
     Pump.cpp
     Timer.cpp
+    Transform.cpp
 
     Array.cpp
     Geometry.cpp

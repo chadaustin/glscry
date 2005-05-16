@@ -28,7 +28,9 @@ namespace scry {
     public:
         RunSentry(Test* test): _test(test) {
             glPushMatrix();
-            glLoadMatrixf(_test->getTransform().getData());
+            if (_test->getTransform()) {
+                _test->getTransform()->apply();
+            }
             _test->setup();
         }
         ~RunSentry() {

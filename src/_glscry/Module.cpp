@@ -59,6 +59,8 @@ BOOST_PYTHON_MODULE(_glscry) {
     bindContext();
     bindPlatform();
 
+    Transform::bind();
+
     def("getVersion", getVersion);
     def("getBuildID", getBuildID);
 
