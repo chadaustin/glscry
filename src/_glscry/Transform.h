@@ -23,6 +23,9 @@
 namespace scry {
 
     class Transform : public RefCounted {
+    protected:
+        ~Transform() { }
+
     public:
         /// Binds all classes in this file.
         static void bind();

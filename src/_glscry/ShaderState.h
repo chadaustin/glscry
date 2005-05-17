@@ -16,6 +16,7 @@
 #define SCRY_SHADER_STATE_H
 
 
+#include <map>
 #include <vector>
 #include "GLUtility.h"
 #include "State.h"
@@ -178,8 +179,16 @@ namespace scry {
         const ShaderState& getDefault() const;
         void switchTo(const State& to, bool fullStateSwitch) const;
 
+        void setUniform4f(const string& name, Vec4f value) {
+            _uniforms[name] = value;
+        }
+
     private:
         ProgramPtr _program;
+
+        typedef std::map<string, Vec4f> UniformMap;
+        typedef UniformMap::const_iterator UniformMapCIter;
+        UniformMap _uniforms;
     };
     SCRY_REF_PTR(ShaderState);
 

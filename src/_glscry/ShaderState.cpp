@@ -81,6 +81,7 @@ namespace scry {
             .def(init< optional<ProgramPtr> >())
             .def("isSupported", &C::isSupported)
             .staticmethod("isSupported")
+            .def("setUniform4f", &C::setUniform4f)
             ;
 
         implicitly_convertible<ShaderStatePtr, StatePtr>();
@@ -104,6 +105,43 @@ namespace scry {
         if (fullStateSwitch || _program != ss._program) {
             glUseProgramObjectARB(handleOf(ss._program));
         }
+
+        //UniformMapCIter fromIter = _uniforms.begin();
+        //UniformMapCIter fromEnd  = _uniforms.end();
+        UniformMapCIter toIter   = ss._uniforms.begin();
+        UniformMapCIter toEnd    = ss._uniforms.end();
+
+        // This is wrong too.
+        for (; toIter != toEnd; ++toIter) {
+            GLint location = glGetUniformLocationARB(handleOf(ss._program), toIter->first.c_str());
+            glUniform4fvARB(location, 1, toIter->second.getData());
+        }
+
+#if 0
+        // This is wrong.
+        while (fromIter != fromEnd || toIter != toEnd) {
+            if (fromIter == fromEnd) {
+                glUniform4fvARB(location, 1, toIter->second.getData());
+                ++toIter;
+            } else if (toIter == toEnd) {
+                ++fromIter;
+            } else if (fromIter->first > toIter->first) {
+                glUniform4fvARB(location, 1, toIter->second.getData());
+                switchFromDefault(*assertTrue(toIter->second),
+                                  fullStateSwitch);
+                ++toIter;
+            } else if (fromIter->first < toIter->first) {
+                glUniform4fvARB(location, 1, toIter->second.getData());
+                ++fromIter;
+            } else {
+                stateSwitch(*assertTrue(fromIter->second),
+                            *assertTrue(toIter->second),
+                            fullStateSwitch);
+                ++toIter;
+                ++fromIter;
+            }
+        }
+#endif
     }
 
 }
