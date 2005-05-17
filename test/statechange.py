@@ -107,7 +107,29 @@ if ShaderState.isSupported():
         runStateChange('vertex_shader',
                        buildVertexShaderSS('void main() { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }'),
                        buildVertexShaderSS('void main() { gl_Position = ftransform(); }'))
+
     if FragmentShader.isSupported():
         runStateChange('fragment_shader',
                        buildFragmentShaderSS('void main() { gl_FragColor = vec4(1, 1, 1, 1); }'),
                        buildFragmentShaderSS('void main() { gl_FragColor = vec4(0, 0, 0, 1); }'))
+
+    # Uniforms
+    if VertexShader.isSupported():
+        source = """\
+uniform vec4 offset;
+void main() {
+  gl_Position = gl_ModelViewProjectionMatrix * (gl_Vertex + offset);
+}
+"""
+
+        shaders = ShaderList()
+        shaders[:] = [VertexShader(source)]
+        program = Program(shaders)
+
+        ss1 = ShaderState(program)
+        ss1.setUniform4f('offset', Vec4f(0, 0, 0, 0))
+    
+        ss2 = ShaderState(program)
+        ss2.setUniform4f('offset', Vec4f(1, 1, 1, 0))
+    
+        runStateChange('uniform', StateSet(ss1), StateSet(ss2))
