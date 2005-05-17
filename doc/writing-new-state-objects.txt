@@ -1,0 +1,39 @@
+Writing New State Objects
+Chad Austin
+2005-05-17
+
+
+A State object represents a configurable piece of the OpenGL state and
+thus a particular configuration of the graphics pipeline.  We have
+only implemented the State objects we have needed for particular
+tests.  Therefore, it's likely you'll want to implement new ones.
+This document describes how to do that.
+
+src/_glscry/State.h contains scry::State, the interface that all State
+objects must implement.  The methods you must implement are
+getDefault(), clone(), and switchTo().  getDefault() and clone() are
+easy, their implementations generally look like this:
+
+        const State& MyState::getDefault() const {
+            static StatePtr def(new MyState);
+            return *def;
+        }
+
+        State* MyState::clone() const {
+            // Assuming MyState has a valid copy constructor.
+            return new MyState(*this);
+        }
+
+switchTo() is where the actual OpenGL calls take place.  You'll notice
+it takes two arguments: the State to switch to and a boolean flag:
+fullStateSwitch.  Use checked_cast_ref to convert the const State& parameter
+to const MyState& and then call the OpenGL functions to set the new
+state.  Here's where fullStateSwitch comes into play.  The OpenGL
+state switch should only happen IF fullStateSwitch is true OR the new
+state is different from the old.
+
+You'll also need to export your State object to Python.  Add a static
+void bind() function (you'd probably do well to copy an existing
+State's bind()) and call it from Module.cpp.  
+
+I think that's it!

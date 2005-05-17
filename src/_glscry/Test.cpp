@@ -23,6 +23,12 @@ using namespace boost::python;
 
 namespace scry {
 
+    void normalize(ResultValues& results, double time) {
+        for (size_t i = 0; i < results.size(); ++i) {
+            results[i] /= time;
+        }
+    }
+
     /// Handles calling teardown() on exit in an exception-safe way.
     class RunSentry {
     public:

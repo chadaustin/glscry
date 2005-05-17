@@ -68,12 +68,6 @@ namespace scry {
 
     typedef std::vector<double> ResultValues;
 
-    inline void normalize(ResultValues& results, double time) {
-        for (size_t i = 0; i < results.size(); ++i) {
-            results[i] /= time;
-        }
-    }
-
 
     class Test : public RefCounted {
     protected:
@@ -95,19 +89,6 @@ namespace scry {
         void setTransform(TransformPtr transform) {
             _transform = transform;
         }
-#if 0
-            const Vec4f& row1,
-            const Vec4f& row2,
-            const Vec4f& row3,
-            const Vec4f& row4
-        ) {
-            _transform.set(
-                row1[0], row1[1], row1[2], row1[3],
-                row2[0], row2[1], row2[2], row2[3],
-                row3[0], row3[1], row3[2], row3[3],
-                row4[0], row4[1], row4[2], row4[3]);
-        }
-#endif
 
         TransformPtr getTransform() const {
             return _transform;

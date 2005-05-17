@@ -1,0 +1,46 @@
+Writing New Test Objects
+Chad Austin
+2005-05-17
+
+
+A Test object repeatedly performs some OpenGL operation for a fixed
+time and measures how many operations it performed per second.  A
+single Test can return multiple results.  For example, geometry
+rendering returns vertex rate, fill rate, primitive rate, batch
+rate, etc.
+
+To create your own Test object, derive from scry::Test in
+src/_glscry/Test.h.  Override the following methods:
+
+isSupported()   -- Return true if the OpenGL implementation supports
+                   what you want to test.
+
+setup()         -- Performs any test-specific initialization before
+                   iterate is called.
+
+iterate(values) -- Executes a single OpenGL operation and stores the
+                   results in 'values'.  (More about what results your
+                   test supports later.)  This is called in a loop
+                   until the test time is up.
+
+teardown()      -- Performs test-specific teardown after test is done
+                   running.
+
+Your test also must describe what results it returns.  But the
+following macros in your class declaration:
+
+SCRY_BEGIN_RESULT_DESCS()
+  SCRY_RESULT_DESC("VertexRate", "vertex/s")
+  SCRY_RESULT_DESC("FillRate",   "pixel/s")
+SCRY_END_RESULT_DESCS()
+
+Then:
+
+iterate(values) {
+  // run the OpenGL command
+  values[0] += vertices;
+  values[1] += pixels;
+}
+
+Now you only need to export your Test to Python, just as with state
+objects.
