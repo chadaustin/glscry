@@ -15,7 +15,9 @@ if platform == 'win32':
     defaultBoostIncludes = Dir('#/third-party/vc7/Boost/include')
     defaultBoostLibs     = Dir('#/third-party/vc7/Boost/lib')
 
-opts = Options('options.cache')
+optsFile = DefaultEnvironment().subst('options-${PLATFORM}.cache')
+
+opts = Options(optsFile)
 opts.AddOptions(
     PathOption('boostIncludes', 'Directory containing boost header files',
                defaultBoostIncludes),
@@ -34,7 +36,7 @@ if env['PLATFORM'] != 'win32':
     env['ENV'] = os.environ
 
 Help(opts.GenerateHelpText(env))
-opts.Save('options.cache', env)
+opts.Save(optsFile, env)
 
 env.Append(CPPPATH=['#/third-party/all'])
 if env.subst('$CXX') == 'cl':
