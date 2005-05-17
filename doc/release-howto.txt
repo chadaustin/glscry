@@ -1,0 +1,20 @@
+How to Make a New GLScry Release
+--
+
+Run SCons with native Win32 Python, making sure you pass the right
+path for the boostIncludes option.  For me, the command looks
+something like:
+
+        sconsw boostIncludes=D:/Projects/pyrallis/glscry/third-party/vc7/Boost/include
+
+GLScry has a distutils script that generates the actual distribution.
+Once again, here is the command on my system:
+
+       C:/Python24/python setup.py py2exe
+
+Now you should have a 'dist' directory that you can just zip up and
+distribute.  :)  If you get errors, send us an e-mail.
+
+
+Chad Austin
+aegis@aegisknight.org
