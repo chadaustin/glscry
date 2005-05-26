@@ -1,0 +1,21 @@
+- Replaced old statechange.py with new one.
+- Added a new test for comparing state changes side by side.
+- Add a statechange for uniforms test.
+- Added support for uniforms on the shader state.
+- Store different build options files based on the platform.
+- Added a transform test.
+- Upgrade to new glew and add data types test.
+- Added a test for triangle lists.
+- Upgraded to Boost 1.32
+- Sort the tests after they're globbed by run.py.
+- Added support for multiple batches in one Geometry.  Then added a
+  test for multiple triangle strips vs. joining with degenerate triangles.
+- Moved batchSize attribute from GeometryTest to Geometry.
+- Added documentation.
+- Added support for measuring geometry data rate.
+- Added a fragment shader test.
+- Added a shader switch test.
+- Added a GLSL ShaderState.
+- Got rid of DisplayListTest in lieu of ImmediateTest.useList
+- Got rid of CompiledVertexArrayTest in lieu of a flag on VertexArrayTest.
+- Add multitexturing support to the TextureState class.
