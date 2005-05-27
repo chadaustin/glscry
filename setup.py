@@ -12,6 +12,7 @@ options = {'py2exe': { 'includes': ['platform',
 
 msvcr71 = os.path.join(os.environ['WINDIR'], 'system32', 'msvcr71.dll')
 msvcp71 = os.path.join(os.environ['WINDIR'], 'system32', 'msvcp71.dll')
+docs = glob('doc/*.txt')
 tests = glob('test/*.py')
 
 setup(options=options,
@@ -19,6 +20,7 @@ setup(options=options,
                'scripts/win32-dist/RunGnuplot.py'],
       data_files=[('', ['COPYRIGHT.txt',
                         'README.txt',
+                        'ChangeLog',
                         'scripts/win32-dist/RunAllTests.bat',
                         'third-party/vc7/gnuplot/bin/wgnuplot.exe',
                         msvcr71]),
@@ -26,7 +28,5 @@ setup(options=options,
                            'lib/glscry.py',
                            'lib/_glscry.dll',
                            msvcp71]),
-                  ('doc', ['doc/dataformat.txt',
-                           'doc/links.txt',
-                           'doc/terminology.txt']),
+                  ('doc', docs),
                   ('test', tests)])
