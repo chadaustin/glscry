@@ -3,14 +3,14 @@
 
 from wxPython.wx import *
 import os
-import testFrame
+import GLAnalyzeMain
 
-modules ={u'testFrame': [1, 'Main frame of Application', u'testFrame.py']}
+modules ={u'GLAnalyzeMain': [1, 'Main frame of Application', u'GLAnalyzeMain.py']}
 
 class BoaApp(wxApp):
     def OnInit(self):
         wxInitAllImageHandlers()
-        self.main = testFrame.create(None)
+        self.main = GLAnalyzeMain.create(None)
         self.main.Show()
         self.SetTopWindow(self.main)
         return True

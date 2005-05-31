@@ -16,61 +16,42 @@ def create(parent):
  wxID_WXFULLBITMAP,
 ] = map(lambda _init_ctrls: wxNewId(), range(18))
 
-[wxID_WXFRAME1MENU3ITEMS0, wxID_WXFRAME1MENU3ITEMS1, 
-] = map(lambda _init_coll_menu3_Items: wxNewId(), range(2))
-
 [wxID_WXFRAME1MENU1ITEMS0, wxID_WXFRAME1MENU1ITEMS1, wxID_WXFRAME1MENU1ITEMS2, 
 ] = map(lambda _init_coll_menu1_Items: wxNewId(), range(3))
 
-[wxID_WXFRAME1MENU2ITEMS0, wxID_WXFRAME1MENU2ITEMS1, 
-] = map(lambda _init_coll_menu2_Items: wxNewId(), range(2))
-
-[wxID_WXFRAME1MENU4ITEMS0] = map(lambda _init_coll_menu4_Items: wxNewId(), range(1))
+[wxID_WXFRAME1MENU2ITEMS0,
+] = map(lambda _init_coll_menu2_Items: wxNewId(), range(1))
 
 class wxFrame1(wxFrame):
-    def _init_coll_menu3_Items(self, parent):
-        # generated method, don't edit
 
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU3ITEMS0, item='Items0',
-              kind=wxITEM_NORMAL)
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU3ITEMS1, item='Items1',
-              kind=wxITEM_NORMAL)
+    def _init_coll_menu2_Items(self, parent):         
 
-    def _init_coll_menu2_Items(self, parent):
-        # generated method, don't edit
-
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU2ITEMS0, item='Items0',
+        parent.AppendSeparator()
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU2ITEMS0, item='About',
               kind=wxITEM_NORMAL)
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU2ITEMS1, item='Items1',
-              kind=wxITEM_NORMAL)
+        EVT_MENU(self, wxID_WXFRAME1MENU2ITEMS0, self.OnAbout)
 
     def _init_coll_menu1_Items(self, parent):
-        # generated method, don't edit
-
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS0, item='Items0',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS0, item='Open',
               kind=wxITEM_NORMAL)
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS1, item='Items1',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS1, item='Save Image',
               kind=wxITEM_NORMAL)
         parent.AppendSeparator()
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS2, item='Items2',
+        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS2, item='Exit',
               kind=wxITEM_NORMAL)
+        EVT_MENU(self, wxID_WXFRAME1MENU1ITEMS0, self.OnOpen)
+        EVT_MENU(self, wxID_WXFRAME1MENU1ITEMS1, self.OnSave)
+        EVT_MENU(self, wxID_WXFRAME1MENU1ITEMS2, self.OnExit)
 
-    def _init_coll_menu4_Items(self, parent):
-        # generated method, don't edit
+    def _init_coll_menuBar1_Menus(self, parent):         
 
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU4ITEMS0, item='Items0',
-              kind=wxITEM_NORMAL)
+        parent.Append(menu=self.menu1, title='File')
+        parent.Append(menu=self.menu2, title='Help')
+        # to be added later if needed
+        #parent.Append(menu=self.menu3, title='Menus2')
+        #parent.Append(menu=self.menu4, title='Menus3')
 
-    def _init_coll_menuBar1_Menus(self, parent):
-        # generated method, don't edit
-
-        parent.Append(menu=self.menu1, title='Menus0')
-        parent.Append(menu=self.menu2, title='Menus1')
-        parent.Append(menu=self.menu3, title='Menus2')
-        parent.Append(menu=self.menu4, title='Menus3')
-
-    def _init_coll_notebook1_Pages(self, parent):
-        # generated method, don't edit
+    def _init_coll_notebook1_Pages(self, parent):         
 
         parent.AddPage(imageId=-1, page=self.panel3, select=True,
               text='GLGraph')
@@ -90,28 +71,22 @@ class wxFrame1(wxFrame):
         parent.Append("Boxes")
                     
     def _init_utils(self):
-        # generated method, don't edit
+         
         self.menuBar1 = wxMenuBar()
-
         self.menu1 = wxMenu(title='')
-
         self.menu2 = wxMenu(title='')
-
-        self.menu3 = wxMenu(title='')
-
-        self.menu4 = wxMenu(title='')
 
         self._init_coll_menuBar1_Menus(self.menuBar1)
         self._init_coll_menu1_Items(self.menu1)
         self._init_coll_menu2_Items(self.menu2)
-        self._init_coll_menu3_Items(self.menu3)
-        self._init_coll_menu4_Items(self.menu4)
 
     def _init_ctrls(self, prnt):
-        # generated method, don't edit
+         
+        self.curImg = wxBitmap("blank.png", wxBITMAP_TYPE_PNG)
+        self.curImgPath = "blank.png"
         wxFrame.__init__(self, id=wxID_WXFRAME1, name='', parent=prnt,
               pos=wxPoint(15, 3), size=wxSize(1120, 821),
-              style=wxDEFAULT_FRAME_STYLE, title='wxFrame1')
+              style=wxDEFAULT_FRAME_STYLE, title='GLAnalyze')
         self._init_utils()
         self.SetClientSize(wxSize(1112, 787))
         self.SetMenuBar(self.menuBar1)
@@ -200,9 +175,42 @@ class wxFrame1(wxFrame):
         self._init_coll_notebook1_Pages(self.notebook1)
         self._init_data_type(self.data_type)
         self._init_data_style(self.data_style)
+              
         
     def __init__(self, parent):
         self._init_ctrls(parent)
+    
+    # menu items
+    # About
+    def OnAbout(self, event):
+        d= wxMessageDialog( self, "GLAnalyze developed by Alex Allen \n" "in collaboration with Dr. Dirk Reiners \n" "and Chad Austin.\n"
+                            "Designed to work with GLScry \n" "developed by Chad Austin \n" "and Dr. Dirk Reiners. \n" "version 0.1 ", "About GLAnalyze", wxOK | wxICON_INFORMATION)
+                            # Create a message dialog box
+        d.ShowModal() # Shows it
+        d.Destroy() # finally destroy it when finished
+        
+    # Open file dialog
+    def OnOpen(self, event):
+        dlg = wxFileDialog(self, "Choose a file", os.getcwd(), "", "*.png", wxOPEN)
+        if dlg.ShowModal() == wxID_OK:
+            # This returns a Python list of files that were selected.
+            self.curImgPath = dlg.GetPath()
+            self.curImg = wxBitmap(self.curImgPath, wxBITMAP_TYPE_PNG)
+            self.staticBitmap1.SetBitmap(self.curImg)
+            self.box2.RecalcSizes()            
+        dlg.Destroy()
+    # Save file dialog
+    def OnSave(self, event):
+        dlg = wxFileDialog(self, "Choose a file", self.browse_txt.GetValue() , "", "*.png", wxSAVE)
+        dlg.SetFilterIndex(2)
+        if dlg.ShowModal() == wxID_OK:
+            path = dlg.GetPath()
+            self.curImg.SaveFile( path, wxBITMAP_TYPE_PNG ) 
+        dlg.Destroy()
+    
+    # Exit
+    def OnExit(self, event):
+        self.Close(true)  # Close the frame.
 
     # Build the tree from the chosen directory
     def BuildFolder(self, event):
@@ -247,7 +255,6 @@ class wxFrame1(wxFrame):
     
     # Graph button events  
     def OnGraphButton(self, event):
-        self.have_graphed = 1
         #-#------open a new gnuplot session-----#-#
         g = Gnuplot.Gnuplot(debug=1)
         g("set yrange [0:*]")
@@ -262,6 +269,8 @@ class wxFrame1(wxFrame):
         g(datacom)
         #-#------get datafile------#-#
         selected = self.treeCtrl1.GetSelections()
+        # first check if there is a file selected
+             
         size = len(selected)
         count = 0;
         path = range(size)
@@ -275,8 +284,9 @@ class wxFrame1(wxFrame):
         self.SetGraphLabel(path, g)
         self.GraphData(path, g, sortedtics)
         time.sleep(.7)
-        img = wxBitmap(r"temp.png", wxBITMAP_TYPE_PNG)
-        self.staticBitmap1.SetBitmap(img)
+        self.curImg = wxBitmap(r"temp.png", wxBITMAP_TYPE_PNG)
+        self.curImgPath = r"temp.png"
+        self.staticBitmap1.SetBitmap(self.curImg)
         self.box2.RecalcSizes()
     # Get xtics for the graph
     def GetXtics(self, path, graph, sortedtics):
@@ -415,7 +425,6 @@ class wxFrame1(wxFrame):
                     index = self.GetIndex(name, sortedtics)
                     # graph it
                     graph("%s %f" % (index, result))
-                    #graph("%s %f" % (count, result)) 
                     count = count + 1
                 graph("e\n")
                 time.sleep(0.1)
@@ -444,7 +453,7 @@ class wxFrame1(wxFrame):
     # Double click event for static bitmap 1
     # Open a new window and view image at full size    
     def OnBitmapDblClick(self, event):
-        img = wxBitmap("temp.png", wxBITMAP_TYPE_PNG)
+        img = self.curImg
         height = img.GetHeight()
         width = img.GetWidth()
         self.wxExpFrame1 = wxFrame(self, id=wxID_WXEXPFRAME1, name='',
@@ -454,7 +463,7 @@ class wxFrame1(wxFrame):
             name='scrolledWindow1', parent=self.wxExpFrame1, pos=wxPoint(0, 0),
             size=wxSize(width, height), style=wxHSCROLL | wxVSCROLL)
              
-        self.fullBitmap1 = wxStaticBitmap(bitmap=wxBitmap(".\\temp.png",
+        self.fullBitmap1 = wxStaticBitmap(bitmap=wxBitmap(self.curImgPath,
             wxBITMAP_TYPE_PNG), id=wxID_WXFULLBITMAP,
             name='fullbitmap1', parent=self.scrolledWindow1, pos=wxPoint(0, 0),
             size=wxSize(width, height), style=0)
