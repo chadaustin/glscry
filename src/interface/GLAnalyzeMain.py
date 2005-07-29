@@ -51,13 +51,54 @@ class wxFrame1(wxFrame):
         #parent.Append(menu=self.menu3, title='Menus2')
         #parent.Append(menu=self.menu4, title='Menus3')
 
-    def _init_coll_notebook1_Pages(self, parent):         
+    def _init_coll_notebook1_Pages(self, parent):
 
         parent.AddPage(imageId=-1, page=self.panel3, select=True,
-              text='GLGraph')
+              text='Graph')
         parent.AddPage(imageId=-1, page=self.panel4, select=False,
               text='GLScry')
-              
+    def _init_glscry_panel(self, parent):
+        glsizer = wxFlexGridSizer(14, 2, 2, 2)
+        self.checkBoxes = []
+        blank = wxStaticText(self.panel4, -1, " ")
+        checkAll = wxButton(self.panel4, -1, "Select All")
+        EVT_BUTTON(checkAll, -1, self.SelectAll)
+        run = wxButton(self.panel4, -1, "Run Tests")
+        # create each test's individual checkbox
+        batchCheck = wxCheckBox(self.panel4, -1, "Batch Sizes")
+        self.checkBoxes.append(batchCheck)
+        exampleCheck = wxCheckBox(self.panel4, -1, "Example")
+        self.checkBoxes.append(exampleCheck)
+        fillCheck = wxCheckBox(self.panel4, -1, "Fill Rate")
+        self.checkBoxes.append(fillCheck)
+        hierzCheck = wxCheckBox(self.panel4, -1, "Hierz")
+        self.checkBoxes.append(hierzCheck)
+        lightsCheck = wxCheckBox(self.panel4, -1, "Lights")
+        self.checkBoxes.append(lightsCheck)
+        pixelCheck = wxCheckBox(self.panel4, -1, "Pixel Transfer")
+        self.checkBoxes.append(pixelCheck)
+        primCheck = wxCheckBox(self.panel4, -1, "Prim Type")
+        self.checkBoxes.append(primCheck)
+        stateCheck = wxCheckBox(self.panel4, -1, "State Change")
+        self.checkBoxes.append(stateCheck)
+        texmemCheck = wxCheckBox(self.panel4, -1, "Tex Memory")
+        self.checkBoxes.append(texmemCheck)
+        texupCheck = wxCheckBox(self.panel4, -1, "Tex Upload")
+        self.checkBoxes.append(texupCheck)
+        vboCheck = wxCheckBox(self.panel4, -1, "VBO")
+        self.checkBoxes.append(vboCheck)
+        vertexCheck = wxCheckBox(self.panel4, -1, "Vertex Cache")
+        self.checkBoxes.append(vertexCheck)
+        vformatsCheck = wxCheckBox(self.panel4, -1, "VFormats")
+        self.checkBoxes.append(vformatsCheck)
+        for i in range(0, 13):
+            glsizer.Add(self.checkBoxes[i], 0, wxALIGN_LEFT)
+            glsizer.Add(blank, 0, wxALIGN_LEFT)
+        glsizer.Add(checkAll, 0, wxALIGN_LEFT)
+        glsizer.Add(run, 0, wxALIGN_LEFT)
+        parent.SetSizer(glsizer)
+        parent.SetAutoLayout(True)
+        parent.Layout()
     def _init_data_type(self, parent):
         parent.Append("VertexRate")
         parent.Append("PrimitiveRate")
@@ -175,7 +216,7 @@ class wxFrame1(wxFrame):
         self._init_coll_notebook1_Pages(self.notebook1)
         self._init_data_type(self.data_type)
         self._init_data_style(self.data_style)
-              
+        self._init_glscry_panel(self.panel4)              
         
     def __init__(self, parent):
         self._init_ctrls(parent)
@@ -214,7 +255,8 @@ class wxFrame1(wxFrame):
 
     # Build the tree from the chosen directory
     def BuildFolder(self, event):
-        dlg = wxDirDialog(self)
+        print os.curdir
+        dlg = wxDirDialog(self, "Select a directory", os.getcwd())
         try:
             if dlg.ShowModal() == wxID_OK:
                 dir = dlg.GetPath()
@@ -222,7 +264,7 @@ class wxFrame1(wxFrame):
                 self.browse_txt.WriteText(dir)
                 self.root = ""
                 self.treeCtrl1.DeleteAllItems()
-                self.StartBuildFromDir(dir)
+                self.StartTestBuild(dir)
                 self.treeCtrl1.Expand(self.root)
                 
         finally:
@@ -252,6 +294,66 @@ class wxFrame1(wxFrame):
                 newparent = self.treeCtrl1.AppendItem(parent, listing)
                 newdir = os.path.join(dir, listing)
                 self.BuildChildrenFromDir(newparent, newdir)
+    
+    # Build tree by test 
+    def StartTestBuild(self, dir):
+        rootname = os.path.split(dir)
+        self.root = self.treeCtrl1.AddRoot(rootname[1])
+        self.rootdir = dir
+        self.testlisting = []
+        self.testpath = []
+        self.machinelisting = []
+        self.machinepath = []
+        self.GetTestInfo(dir)
+        self.BuildTree()
+        
+    def GetTestInfo(self, dir):
+        dirlisting = os.listdir(dir)
+        for listing in dirlisting:
+            pathinquestion = os.path.join(dir, listing)
+            if os.path.isfile(pathinquestion):
+                filename = os.path.split(pathinquestion)
+                extension = filename[1].split(".")
+                extension = extension[1]
+                test = filename[1]
+                test = test.rstrip(extension)
+                test = test.rstrip(".")
+                # build a list of tests and thier paths
+                if extension == "testresult":
+                    self.testlisting.insert(len(self.testlisting), test)
+                    self.testpath.insert(len(self.testpath), pathinquestion)  
+            elif os.path.isdir(pathinquestion):
+                newdir = os.path.join(dir, listing)
+                self.GetTestInfo(newdir)
+                
+    def BuildTree(self):
+        self.treeCtrl1.DeleteAllItems()
+        self.treeCtrl1.AddRoot("Test List")
+        addedtests = []
+        curtest = 0
+        while curtest < len(self.testlisting):
+            # first get first test from list, then add it as parent in tree
+            if self.testlisting[curtest] not in addedtests:
+                newitem = self.treeCtrl1.AppendItem(self.treeCtrl1.GetRootItem(), self.testlisting[curtest])
+                addedtests.insert(len(addedtests), self.testlisting[curtest])
+            # then search list for test of the same name, adding its machine name
+            count = 0
+            while count < len(self.testlisting):
+                if self.testlisting[count] == self.testlisting[curtest]:
+                    host = self.GetHost(self.testpath[count])
+                    child = self.treeCtrl1.AppendItem(newitem, host)
+                    self.treeCtrl1.SetPyData(child, self.testpath[count])
+                count = count + 1
+            curtest = curtest + 1              
+        self.treeCtrl1.Expand(self.treeCtrl1.GetRootItem())
+        
+        
+    # Build tree by test helper functions
+    def GetHost(self, path):
+        file = eval(open(path).read())
+        host = file['System']['Host']
+        return host
+
     
     # Graph button events  
     def OnGraphButton(self, event):
@@ -471,4 +573,7 @@ class wxFrame1(wxFrame):
         self.scrolledWindow1.SetScrollbars(20, 20, (width/20) + .5, (height/20) + .9, noRefresh = FALSE)         
         
         self.wxExpFrame1.Show()
-    
+    # Start GLScry functions
+    def SelectAll(self, event):
+        for i in range(0,13):
+            self.checkBoxes[i].SetValue(True)
