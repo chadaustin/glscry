@@ -336,14 +336,14 @@ class wxFrame1(wxFrame):
             if self.testlisting[curtest] not in addedtests:
                 newitem = self.treeCtrl1.AppendItem(self.treeCtrl1.GetRootItem(), self.testlisting[curtest])
                 addedtests.insert(len(addedtests), self.testlisting[curtest])
-            # then search list for test of the same name, adding its machine name
-            count = 0
-            while count < len(self.testlisting):
-                if self.testlisting[count] == self.testlisting[curtest]:
-                    host = self.GetHost(self.testpath[count])
-                    child = self.treeCtrl1.AppendItem(newitem, host)
-                    self.treeCtrl1.SetPyData(child, self.testpath[count])
-                count = count + 1
+                # then search list for test of the same name, adding its machine name
+                count = 0
+                while count < len(self.testlisting):
+                    if self.testlisting[count] == self.testlisting[curtest]:
+                        host = self.GetHost(self.testpath[count])
+                        child = self.treeCtrl1.AppendItem(newitem, host)
+                        self.treeCtrl1.SetPyData(child, self.testpath[count])
+                    count = count + 1
             curtest = curtest + 1              
         self.treeCtrl1.Expand(self.treeCtrl1.GetRootItem())
         
