@@ -1,8 +1,14 @@
 #Boa:Frame:wxFrame1
+#GLAnalyze created by Alex Allen
 
 from wxPython.wx import *
 import os, time
 import Gnuplot, Gnuplot.PlotItems, Gnuplot.funcutils
+import string
+import sys
+from glob import glob
+import getopt
+import socket
 
 def create(parent):
     return wxFrame1(parent)
@@ -64,11 +70,10 @@ class wxFrame1(wxFrame):
         checkAll = wxButton(self.panel4, -1, "Select All")
         EVT_BUTTON(checkAll, -1, self.SelectAll)
         run = wxButton(self.panel4, -1, "Run Tests")
+        EVT_BUTTON(run, -1, self.RunGLScry)
         # create each test's individual checkbox
         batchCheck = wxCheckBox(self.panel4, -1, "Batch Sizes")
         self.checkBoxes.append(batchCheck)
-        exampleCheck = wxCheckBox(self.panel4, -1, "Example")
-        self.checkBoxes.append(exampleCheck)
         fillCheck = wxCheckBox(self.panel4, -1, "Fill Rate")
         self.checkBoxes.append(fillCheck)
         hierzCheck = wxCheckBox(self.panel4, -1, "Hierz")
@@ -91,7 +96,7 @@ class wxFrame1(wxFrame):
         self.checkBoxes.append(vertexCheck)
         vformatsCheck = wxCheckBox(self.panel4, -1, "VFormats")
         self.checkBoxes.append(vformatsCheck)
-        for i in range(0, 13):
+        for i in range(0, 12):
             glsizer.Add(self.checkBoxes[i], 0, wxALIGN_LEFT)
             glsizer.Add(blank, 0, wxALIGN_LEFT)
         glsizer.Add(checkAll, 0, wxALIGN_LEFT)
@@ -224,8 +229,8 @@ class wxFrame1(wxFrame):
     # menu items
     # About
     def OnAbout(self, event):
-        d= wxMessageDialog( self, "GLAnalyze developed by Alex Allen \n" "in collaboration with Dr. Dirk Reiners \n" "and Chad Austin.\n"
-                            "Designed to work with GLScry \n" "developed by Chad Austin \n" "and Dr. Dirk Reiners. \n" "version 0.1 ", "About GLAnalyze", wxOK | wxICON_INFORMATION)
+        d= wxMessageDialog( self, "GLAnalyze developed by Alex Allen in collaboration with Dr. Dirk Reiners and Chad Austin.\n"
+                            "Designed to work with GLScry developed by Chad Austin and Dr. Dirk Reiners. \n" "version 0.1 ", "About GLAnalyze", wxOK | wxICON_INFORMATION)
                             # Create a message dialog box
         d.ShowModal() # Shows it
         d.Destroy() # finally destroy it when finished
@@ -238,6 +243,7 @@ class wxFrame1(wxFrame):
             self.curImgPath = dlg.GetPath()
             self.curImg = wxBitmap(self.curImgPath, wxBITMAP_TYPE_PNG)
             self.staticBitmap1.SetBitmap(self.curImg)
+            self.Layout()
             self.box2.RecalcSizes()            
         dlg.Destroy()
     # Save file dialog
@@ -270,48 +276,29 @@ class wxFrame1(wxFrame):
         finally:
             dlg.Destroy()
 
-    def StartBuildFromDir(self, dir):
-        rootname = os.path.split(dir)
-        self.root = self.treeCtrl1.AddRoot(rootname[1])
-        self.rootdir = dir
-        self.BuildChildrenFromDir(self.root, dir)
-
-    def BuildChildrenFromDir(self, parent, dir):
-        dirlisting = os.listdir(dir)
-        for listing in dirlisting:
-            pathinquestion = os.path.join(dir, listing)
-            if os.path.isfile(pathinquestion):
-                extension = os.path.splitext(pathinquestion)
-                extension = extension[1]
-                if extension == ".testresult":
-                    child = self.treeCtrl1.AppendItem(parent, listing)
-                    childdata = self.treeCtrl1.GetItemData(child)
-                    childdata.path = pathinquestion
-                    self.treeCtrl1.SetPyData(child, pathinquestion)            
-                    
-                    
-            elif os.path.isdir(pathinquestion):
-                newparent = self.treeCtrl1.AppendItem(parent, listing)
-                newdir = os.path.join(dir, listing)
-                self.BuildChildrenFromDir(newparent, newdir)
-    
+     
     # Build tree by test 
     def StartTestBuild(self, dir):
         rootname = os.path.split(dir)
         self.root = self.treeCtrl1.AddRoot(rootname[1])
         self.rootdir = dir
+        self.treeCtrl1.DeleteAllItems()
+        self.treeCtrl1.AddRoot("Data")
+        self.testlist = self.treeCtrl1.AppendItem(self.treeCtrl1.GetRootItem(), "Test List")
+        self.dirlist = self.treeCtrl1.AppendItem(self.treeCtrl1.GetRootItem(), "Directory List")
         self.testlisting = []
         self.testpath = []
         self.machinelisting = []
         self.machinepath = []
-        self.GetTestInfo(dir)
+        self.GetTestInfo(self.dirlist, dir)
         self.BuildTree()
         
-    def GetTestInfo(self, dir):
+    def GetTestInfo(self, parent, dir):
         dirlisting = os.listdir(dir)
         for listing in dirlisting:
             pathinquestion = os.path.join(dir, listing)
             if os.path.isfile(pathinquestion):
+                # build tree by test
                 filename = os.path.split(pathinquestion)
                 extension = filename[1].split(".")
                 extension = extension[1]
@@ -321,28 +308,39 @@ class wxFrame1(wxFrame):
                 # build a list of tests and thier paths
                 if extension == "testresult":
                     self.testlisting.insert(len(self.testlisting), test)
-                    self.testpath.insert(len(self.testpath), pathinquestion)  
+                    self.testpath.insert(len(self.testpath), pathinquestion)
+                    # build directory tree
+                    child = self.treeCtrl1.AppendItem(parent, listing)
+                    childdata = self.treeCtrl1.GetItemData(child)
+                    childdata.path = pathinquestion
+                    self.treeCtrl1.SetPyData(child, pathinquestion)  
             elif os.path.isdir(pathinquestion):
+                newparent = self.treeCtrl1.AppendItem(parent, listing)
                 newdir = os.path.join(dir, listing)
-                self.GetTestInfo(newdir)
+                self.GetTestInfo(newparent, newdir)
                 
     def BuildTree(self):
-        self.treeCtrl1.DeleteAllItems()
-        self.treeCtrl1.AddRoot("Test List")
         addedtests = []
         curtest = 0
         while curtest < len(self.testlisting):
             # first get first test from list, then add it as parent in tree
             if self.testlisting[curtest] not in addedtests:
-                newitem = self.treeCtrl1.AppendItem(self.treeCtrl1.GetRootItem(), self.testlisting[curtest])
+                newitem = self.treeCtrl1.AppendItem(self.testlist, self.testlisting[curtest])
                 addedtests.insert(len(addedtests), self.testlisting[curtest])
                 # then search list for test of the same name, adding its machine name
                 count = 0
                 while count < len(self.testlisting):
                     if self.testlisting[count] == self.testlisting[curtest]:
                         host = self.GetHost(self.testpath[count])
+                        titleList = self.GetTitleList(self.testpath[count])
                         child = self.treeCtrl1.AppendItem(newitem, host)
                         self.treeCtrl1.SetPyData(child, self.testpath[count])
+                        # add test titles under the host 
+                        titleCount = 0
+                        while titleCount < len(titleList):
+                            title = self.treeCtrl1.AppendItem(child, titleList[titleCount])
+                            self.treeCtrl1.SetPyData(title, self.testpath[count])
+                            titleCount = titleCount + 1
                     count = count + 1
             curtest = curtest + 1              
         self.treeCtrl1.Expand(self.treeCtrl1.GetRootItem())
@@ -350,10 +348,19 @@ class wxFrame1(wxFrame):
         
     # Build tree by test helper functions
     def GetHost(self, path):
-        file = eval(open(path).read())
+        file = eval(open(path, "rU").read())
         host = file['System']['Host']
         return host
-
+    def GetTitleList(self, path):
+        file = eval(open(path, "rU").read())
+        titleLen = len(file['Test']['GraphLines'])
+        titleList = []
+        count = 0
+        while count < titleLen:
+            title = file['Test']['GraphLines'][count]['Title']
+            titleList.insert(count, title)
+            count = count + 1
+        return titleList
     
     # Graph button events  
     def OnGraphButton(self, event):
@@ -371,24 +378,26 @@ class wxFrame1(wxFrame):
         g(datacom)
         #-#------get datafile------#-#
         selected = self.treeCtrl1.GetSelections()
-        # first check if there is a file selected
-             
+        # first check if there is a file selected             
         size = len(selected)
         count = 0;
         path = range(size)
+        text = range(size)
         # Combine selected files into one list
         while count < size:
             path[count] = self.treeCtrl1.GetPyData(selected[count])
+            text[count] = self.treeCtrl1.GetItemText(selected[count])
             count = count + 1
         # Set up the graph and plot data
         sortedtics = range(0)
         self.GetXtics(path, g, sortedtics)
         self.SetGraphLabel(path, g)
-        self.GraphData(path, g, sortedtics)
+        self.GraphData(path, g, sortedtics, text)
         time.sleep(.7)
         self.curImg = wxBitmap(r"temp.png", wxBITMAP_TYPE_PNG)
         self.curImgPath = r"temp.png"
         self.staticBitmap1.SetBitmap(self.curImg)
+        self.Layout()
         self.box2.RecalcSizes()
     # Get xtics for the graph
     def GetXtics(self, path, graph, sortedtics):
@@ -398,7 +407,14 @@ class wxFrame1(wxFrame):
         # make a list of xtics in each file
         combinedtics = range(numfiles)
         while filecount < numfiles:
-            file[filecount] = eval(open(path[filecount]).read())
+            try:
+                file[filecount] = eval(open(path[filecount], "rU").read())
+            except:
+                print "\nERROR: Please select a valid test.\n"
+                d= wxMessageDialog( self, "Please select a valid test.", "Error", wxOK | wxICON_ERROR)
+                d.ShowModal() 
+                d.Destroy() 
+                break
             size = len(file[filecount]['Test']['GraphLines'][0]['ResultSet'])
             xtics = range(size)
             # set xtics from file
@@ -416,7 +432,14 @@ class wxFrame1(wxFrame):
             while count < size:
                 # add xtic to sortedtics if it is not already there
                 if self.data_style.GetSelection() != 3:
-                    xtic = int(combinedtics[filecount][count])
+                    try:
+                        xtic = int(combinedtics[filecount][count])
+                    except:
+                        print "\nERROR: Cannot graph data. Try a different data style.\n"
+                        d= wxMessageDialog( self, "Cannot graph data. Try a different data style.", "Error", wxOK | wxICON_ERROR)
+                        d.ShowModal() 
+                        d.Destroy()
+                        break
                 else:
                     xtic = combinedtics[filecount][count]
                 if xtic not in sortedtics:
@@ -452,7 +475,7 @@ class wxFrame1(wxFrame):
         newlbl = ""
         newtitle = ""
         while filecount < numfiles:
-            file[filecount] = eval(open(path[filecount]).read())
+            file[filecount] = eval(open(path[filecount], "rU").read())
             y = file[filecount]['Test']['GraphLines'][0]['ResultSet'][0]['Results'][choice]['Units']
             if y not in ylabels:
                 ylabels.append(y)
@@ -486,12 +509,12 @@ class wxFrame1(wxFrame):
         graph.title(newtitle)
     
     # Graph the data            
-    def GraphData(self, path, graph, sortedtics):
+    def GraphData(self, path, graph, sortedtics, text):
         numfiles = len(path)
         file = range(numfiles)
         filecount = 0
         while filecount < numfiles:
-            file[filecount] = eval(open(path[filecount]).read())
+            file[filecount] = eval(open(path[filecount], "rU").read())
             filecount = filecount + 1
         choice = self.data_type.GetSelection()
         if choice == -1:
@@ -502,9 +525,15 @@ class wxFrame1(wxFrame):
         alltitles = range(0)
         plotcom = "plot "
         while filecount < numfiles:
-            numresults = len(file[filecount]['Test']['GraphLines'])
+            if self.IsTitle(file[filecount], text[filecount]):
+                resultcount = self.GetResultCount(file[filecount], text[filecount])
+                numresults = resultcount + 1
+            else:
+                numresults = len(file[filecount]['Test']['GraphLines'])
             while resultcount < numresults:
                 title = file[filecount]['Test']['GraphLines'][resultcount]['Title']
+                host = file[filecount]['System']['Host']
+                title = title + "(" + host + ")"
                 if filecount == 0:
                     plotcom = plotcom + "'-' title '%s'" % (title)
                     if resultcount < numresults - 1:
@@ -520,6 +549,11 @@ class wxFrame1(wxFrame):
         while filecount < numfiles:
             size = len(file[filecount]['Test']['GraphLines'][0]['ResultSet'])
             while resultcount < numresults:
+                if self.IsTitle(file[filecount], text[filecount]):
+                    resultcount = self.GetResultCount(file[filecount], text[filecount])
+                    numresults = resultcount + 1
+                else:
+                    numresults = len(file[filecount]['Test']['GraphLines'])
                 while count < size:
                     name =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Name']
                     result =file[filecount]['Test']['GraphLines'][resultcount]['ResultSet'][count]['Results'][choice]['Value']
@@ -536,7 +570,24 @@ class wxFrame1(wxFrame):
             filecount = filecount + 1
         graph("exit")
         graph("exit")
-        
+    # if count == numresults, then text is not a title, if count < numresults, then
+    # the resultset to graph will file['Test']['GraphLines'][count]
+    def GetResultCount(self, file, text):
+        numresults = len(file['Test']['GraphLines'])
+        count = 0
+        while count < numresults:
+            if file['Test']['GraphLines'][count]['Title'] == text:
+                return count
+            count = count + 1
+        return count
+    def IsTitle(self, file, text):
+        numresults = len(file['Test']['GraphLines'])
+        count = 0
+        while count < numresults:
+            if file['Test']['GraphLines'][count]['Title'] == text:
+                return True
+            count = count + 1
+        return False
     # search through sorted tics to find value and return its index
     def GetIndex(self, value, sortedtics):
         # get the size of sorted tics
@@ -574,6 +625,104 @@ class wxFrame1(wxFrame):
         
         self.wxExpFrame1.Show()
     # Start GLScry functions
+    #!/usr/bin/env python
+    # [Begin Copyright Header]
+    # 
+    # GLScry - OpenGL Performance Analysis Tool
+    # Copyright (C) 2004-2005  Iowa State University
+    # 
+    # This software is licensed under the terms of the GNU Lesser Public
+    # License, version 2.1, as published by the Free Software Foundation.
+    # See the file COPYRIGHT.txt for details.
+    # 
+    # Authors:
+    #   Chad Austin <aegisk@iastate.edu>
+    #   Dirk Reiners <dreiners@iastate.edu>
+    # 
+    # [End Copyright Header]
     def SelectAll(self, event):
-        for i in range(0,13):
+        for i in range(0,12):
             self.checkBoxes[i].SetValue(True)
+    def GetSelected(self):
+        selected = []
+        for i in range(0,12):
+            if self.checkBoxes[i].IsChecked():
+                selected.append(i)
+            i = i + 1
+        return selected
+    def CreateTestList(self, selected):
+        tests = []
+        for i in range(0, len(selected)):
+            if selected[i] == 0:
+                tests.append("batchsizes")
+            if selected[i] == 1:
+                tests.append("fillrate")
+            if selected[i] == 2:
+                tests.append("hierz")
+            if selected[i] == 3:
+                tests.append("lights")
+            if selected[i] == 4:
+                tests.append("pixeltransfer")
+            if selected[i] == 5:
+                tests.append("primtype")
+            if selected[i] == 6:
+                tests.append("statechange")
+            if selected[i] == 7:
+                tests.append("texmem")
+            if selected[i] == 8:
+                tests.append("texupload")
+            if selected[i] == 9:
+                tests.append("vbo")
+            if selected[i] == 10:
+                tests.append("vertexcache")
+            if selected[i] == 11:
+                tests.append("vformats")
+            i = i + 1
+        return tests
+    def AssignPath(self, tests, scriptDir):
+        paths = []
+        for i in range(len(tests)):
+            path = os.path.join(scriptDir, tests[i])
+            path = path + ".py"
+            paths.append(path)
+        return paths
+    def RunGLScry(self, event):
+        selected = self.GetSelected()
+        tests = self.CreateTestList(selected)
+        cwd = os.getcwd()
+        scriptDir = os.path.join(cwd, 'test')
+        moduleDir = os.path.join(cwd, 'lib')
+        sys.path.append(moduleDir)
+        # Get test list.
+        if tests:
+            names = tests
+            tests = self.AssignPath(tests, scriptDir)
+        if not tests:
+            print "\nERROR: No tests selected."
+            d= wxMessageDialog( self, "No tests selected. Please select a test or click 'Select All' to run all tests.", "Error", wxOK | wxICON_ERROR)
+            d.ShowModal() 
+            d.Destroy()
+            event.Skip()
+            
+        
+        # Create data directory if it does not exist and switch to it so
+        # the tests output their files there.
+        
+        hostname = socket.gethostname()
+        datadir = os.path.join(cwd, 'data', hostname)
+        try:
+            os.makedirs(datadir)
+        except OSError:
+            pass
+        os.chdir(datadir)
+
+        print 'Data directory:', datadir
+
+        print '\nQueuing tests for execution:'
+        for t in names:
+            print "  " + t
+    
+        for t in tests:
+            print
+            print "Running test script '%s'" % t
+            exec open(t) in {}
