@@ -1,7 +1,7 @@
 #Boa:Frame:wxFrame1
 #GLAnalyze created by Alex Allen
 
-from wxPython.wx import *
+import wx
 import os, time
 import Gnuplot, Gnuplot.PlotItems, Gnuplot.funcutils
 import string
@@ -13,43 +13,39 @@ import socket
 def create(parent):
     return wxFrame1(parent)
 
-[wxID_WXFRAME1, wxID_WXFRAME1BROWSE_BUTTON, wxID_WXFRAME1BROWSE_TXT, 
- wxID_WXFRAME1DATA_STYLE, wxID_WXFRAME1DATA_STYLE_TXT, wxID_WXFRAME1DATA_TYPE, 
- wxID_WXFRAME1DATA_TYPE_TXT, wxID_WXFRAME1GRAPH_BUTTON, 
- wxID_WXFRAME1NOTEBOOK1, wxID_WXFRAME1PANEL1, wxID_WXFRAME1PANEL2, 
- wxID_WXFRAME1PANEL3, wxID_WXFRAME1PANEL4, wxID_WXFRAME1STATICBITMAP1, 
+[wxID_WXFRAME1, wxID_WXFRAME1BROWSE_BUTTON, wxID_WXFRAME1BROWSE_TXT,
+ wxID_WXFRAME1DATA_STYLE, wxID_WXFRAME1DATA_STYLE_TXT, wxID_WXFRAME1DATA_TYPE,
+ wxID_WXFRAME1DATA_TYPE_TXT, wxID_WXFRAME1GRAPH_BUTTON,
+ wxID_WXFRAME1NOTEBOOK1, wxID_WXFRAME1PANEL1, wxID_WXFRAME1PANEL2,
+ wxID_WXFRAME1PANEL3, wxID_WXFRAME1PANEL4, wxID_WXFRAME1STATICBITMAP1,
  wxID_WXFRAME1TREECTRL1, wxID_WXEXPFRAME1, wxID_WXMINIFRAME1SCROLLEDWINDOW1,
  wxID_WXFULLBITMAP,
-] = map(lambda _init_ctrls: wxNewId(), range(18))
+] = [wx.NewId() for _init_ctrls in range(18)]
 
-[wxID_WXFRAME1MENU1ITEMS0, wxID_WXFRAME1MENU1ITEMS1, wxID_WXFRAME1MENU1ITEMS2, 
-] = map(lambda _init_coll_menu1_Items: wxNewId(), range(3))
+[wxID_WXFRAME1MENU1ITEMS0, wxID_WXFRAME1MENU1ITEMS1, wxID_WXFRAME1MENU1ITEMS2,
+] = [wx.NewId() for _init_coll_menu1_Items in range(3)]
 
 [wxID_WXFRAME1MENU2ITEMS0,
-] = map(lambda _init_coll_menu2_Items: wxNewId(), range(1))
+] = [wx.NewId() for _init_coll_menu2_Items in range(1)]
 
-class wxFrame1(wxFrame):
+class wxFrame1(wx.Frame):
 
-    def _init_coll_menu2_Items(self, parent):         
+    def _init_coll_menu2_Items(self, parent):
 
         parent.AppendSeparator()
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU2ITEMS0, item='About',
-              kind=wxITEM_NORMAL)
-        EVT_MENU(self, wxID_WXFRAME1MENU2ITEMS0, self.OnAbout)
+        parent.Append(help='', id=wxID_WXFRAME1MENU2ITEMS0, text='About', kind=wx.ITEM_NORMAL)
+        self.Bind(wx.EVT_MENU, self.OnAbout, id=wxID_WXFRAME1MENU2ITEMS0)
 
     def _init_coll_menu1_Items(self, parent):
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS0, item='Open',
-              kind=wxITEM_NORMAL)
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS1, item='Save Image',
-              kind=wxITEM_NORMAL)
+        parent.Append(help='', id=wxID_WXFRAME1MENU1ITEMS0, text='Open', kind=wx.ITEM_NORMAL)
+        parent.Append(help='', id=wxID_WXFRAME1MENU1ITEMS1, text='Save Image', kind=wx.ITEM_NORMAL)
         parent.AppendSeparator()
-        parent.Append(helpString='', id=wxID_WXFRAME1MENU1ITEMS2, item='Exit',
-              kind=wxITEM_NORMAL)
-        EVT_MENU(self, wxID_WXFRAME1MENU1ITEMS0, self.OnOpen)
-        EVT_MENU(self, wxID_WXFRAME1MENU1ITEMS1, self.OnSave)
-        EVT_MENU(self, wxID_WXFRAME1MENU1ITEMS2, self.OnExit)
+        parent.Append(help='', id=wxID_WXFRAME1MENU1ITEMS2, text='Exit', kind=wx.ITEM_NORMAL)
+        self.Bind(wx.EVT_MENU, self.OnOpen, id=wxID_WXFRAME1MENU1ITEMS0)
+        self.Bind(wx.EVT_MENU, self.OnSave, id=wxID_WXFRAME1MENU1ITEMS1)
+        self.Bind(wx.EVT_MENU, self.OnExit, id=wxID_WXFRAME1MENU1ITEMS2)
 
-    def _init_coll_menuBar1_Menus(self, parent):         
+    def _init_coll_menuBar1_Menus(self, parent):
 
         parent.Append(menu=self.menu1, title='File')
         parent.Append(menu=self.menu2, title='Help')
@@ -64,43 +60,42 @@ class wxFrame1(wxFrame):
         parent.AddPage(imageId=-1, page=self.panel4, select=False,
               text='GLScry')
     def _init_glscry_panel(self, parent):
-        glsizer = wxFlexGridSizer(14, 2, 2, 2)
+        glsizer = wx.FlexGridSizer(14, 2, 2, 2)
         self.checkBoxes = []
-        blank = wxStaticText(self.panel4, -1, " ")
-        checkAll = wxButton(self.panel4, -1, "Select All")
-        EVT_BUTTON(checkAll, -1, self.SelectAll)
-        run = wxButton(self.panel4, -1, "Run Tests")
-        EVT_BUTTON(run, -1, self.RunGLScry)
+        checkAll = wx.Button(self.panel4, -1, "Select All")
+        wx.EVT_BUTTON(checkAll, -1, self.SelectAll)
+        run = wx.Button(self.panel4, -1, "Run Tests")
+        wx.EVT_BUTTON(run, -1, self.RunGLScry)
         # create each test's individual checkbox
-        batchCheck = wxCheckBox(self.panel4, -1, "Batch Sizes")
+        batchCheck = wx.CheckBox(self.panel4, -1, "Batch Sizes")
         self.checkBoxes.append(batchCheck)
-        fillCheck = wxCheckBox(self.panel4, -1, "Fill Rate")
+        fillCheck = wx.CheckBox(self.panel4, -1, "Fill Rate")
         self.checkBoxes.append(fillCheck)
-        hierzCheck = wxCheckBox(self.panel4, -1, "Hierz")
+        hierzCheck = wx.CheckBox(self.panel4, -1, "Hierz")
         self.checkBoxes.append(hierzCheck)
-        lightsCheck = wxCheckBox(self.panel4, -1, "Lights")
+        lightsCheck = wx.CheckBox(self.panel4, -1, "Lights")
         self.checkBoxes.append(lightsCheck)
-        pixelCheck = wxCheckBox(self.panel4, -1, "Pixel Transfer")
+        pixelCheck = wx.CheckBox(self.panel4, -1, "Pixel Transfer")
         self.checkBoxes.append(pixelCheck)
-        primCheck = wxCheckBox(self.panel4, -1, "Prim Type")
+        primCheck = wx.CheckBox(self.panel4, -1, "Prim Type")
         self.checkBoxes.append(primCheck)
-        stateCheck = wxCheckBox(self.panel4, -1, "State Change")
+        stateCheck = wx.CheckBox(self.panel4, -1, "State Change")
         self.checkBoxes.append(stateCheck)
-        texmemCheck = wxCheckBox(self.panel4, -1, "Tex Memory")
+        texmemCheck = wx.CheckBox(self.panel4, -1, "Tex Memory")
         self.checkBoxes.append(texmemCheck)
-        texupCheck = wxCheckBox(self.panel4, -1, "Tex Upload")
+        texupCheck = wx.CheckBox(self.panel4, -1, "Tex Upload")
         self.checkBoxes.append(texupCheck)
-        vboCheck = wxCheckBox(self.panel4, -1, "VBO")
+        vboCheck = wx.CheckBox(self.panel4, -1, "VBO")
         self.checkBoxes.append(vboCheck)
-        vertexCheck = wxCheckBox(self.panel4, -1, "Vertex Cache")
+        vertexCheck = wx.CheckBox(self.panel4, -1, "Vertex Cache")
         self.checkBoxes.append(vertexCheck)
-        vformatsCheck = wxCheckBox(self.panel4, -1, "VFormats")
+        vformatsCheck = wx.CheckBox(self.panel4, -1, "VFormats")
         self.checkBoxes.append(vformatsCheck)
         for i in range(0, 12):
-            glsizer.Add(self.checkBoxes[i], 0, wxALIGN_LEFT)
-            glsizer.Add(blank, 0, wxALIGN_LEFT)
-        glsizer.Add(checkAll, 0, wxALIGN_LEFT)
-        glsizer.Add(run, 0, wxALIGN_LEFT)
+            glsizer.Add(self.checkBoxes[i], 0, wx.ALIGN_LEFT)
+            glsizer.Add(wx.StaticText(self.panel4, -1, " "), 0, wx.ALIGN_LEFT)
+        glsizer.Add(checkAll, 0, wx.ALIGN_LEFT)
+        glsizer.Add(run, 0, wx.ALIGN_LEFT)
         parent.SetSizer(glsizer)
         parent.SetAutoLayout(True)
         parent.Layout()
@@ -109,162 +104,168 @@ class wxFrame1(wxFrame):
         parent.Append("PrimitiveRate")
         parent.Append("FillRate")
         parent.Append("BatchRate")
-    
+
     def _init_data_style(self, parent):
         parent.Append("Lines")
         parent.Append("Points")
         parent.Append("LinesPoints")
         parent.Append("Boxes")
-                    
+
     def _init_utils(self):
-         
-        self.menuBar1 = wxMenuBar()
-        self.menu1 = wxMenu(title='')
-        self.menu2 = wxMenu(title='')
+
+        self.menuBar1 = wx.MenuBar()
+        self.menu1 = wx.Menu(title='')
+        self.menu2 = wx.Menu(title='')
 
         self._init_coll_menuBar1_Menus(self.menuBar1)
         self._init_coll_menu1_Items(self.menu1)
         self._init_coll_menu2_Items(self.menu2)
 
     def _init_ctrls(self, prnt):
-         
-        self.curImg = wxBitmap("blank.png", wxBITMAP_TYPE_PNG)
+
+        self.curImg = wx.Bitmap("blank.png", wx.BITMAP_TYPE_PNG)
         self.curImgPath = "blank.png"
-        wxFrame.__init__(self, id=wxID_WXFRAME1, name='', parent=prnt,
-              pos=wxPoint(15, 3), size=wxSize(1120, 821),
-              style=wxDEFAULT_FRAME_STYLE, title='GLAnalyze')
+        wx.Frame.__init__(self, id=wxID_WXFRAME1, name='', parent=prnt,
+              pos= wx.Point(15, 3), size= wx.Size(1120, 821),
+              style=wx.DEFAULT_FRAME_STYLE, title='GLAnalyze')
         self._init_utils()
-        self.SetClientSize(wxSize(1112, 787))
+        self.SetClientSize(wx.Size(1112, 787))
         self.SetMenuBar(self.menuBar1)
 
-        self.panel1 = wxPanel(id=wxID_WXFRAME1PANEL1, name='panel1',
-              parent=self, pos=wxPoint(0, 0), size=wxSize(256, 768),
-              style=wxTAB_TRAVERSAL)
+        self.panel1 = wx.Panel(id=wxID_WXFRAME1PANEL1, name='panel1',
+              parent=self, pos= wx.Point(0, 0), size= wx.Size(256, 768),
+              style=wx.TAB_TRAVERSAL)
 
-        self.panel2 = wxPanel(id=wxID_WXFRAME1PANEL2, name='panel2',
-              parent=self, pos=wxPoint(256, 0), size=wxSize(856, 768),
-              style=wxTAB_TRAVERSAL)
+        self.panel2 = wx.Panel(id=wxID_WXFRAME1PANEL2, name='panel2',
+              parent=self, pos= wx.Point(256, 0), size= wx.Size(856, 768),
+              style=wx.TAB_TRAVERSAL)
         # panel sizers
-        box = wxBoxSizer(wxHORIZONTAL)
-        box.Add(self.panel1, 0, wxEXPAND)
-        box.Add(self.panel2, 1, wxEXPAND)
+        box = wx.BoxSizer(wx.HORIZONTAL)
+        box.Add(self.panel1, 0, wx.EXPAND)
+        box.Add(self.panel2, 1, wx.EXPAND)
         self.SetAutoLayout(True)
         self.SetSizer(box)
         self.Layout()
         # end panel sizers
         # bitmap resizers
-        self.staticBitmap1 = wxStaticBitmap(bitmap=wxBitmap('blank.png',
-              wxBITMAP_TYPE_PNG), id=wxID_WXFRAME1STATICBITMAP1,
-              name='staticBitmap1', parent=self.panel2, pos=wxPoint(40, 38),
-              size=wxSize(852, 764), style=0)
+        self.curImg = wx.Bitmap(r"blank.png", wx.BITMAP_TYPE_PNG)
+        self.curImgPath = "blank.png"
+        self.ImageResize
+        self.staticBitmap1 = wx.StaticBitmap(bitmap= self.curImg, id=wxID_WXFRAME1STATICBITMAP1,
+              name='staticBitmap1', parent=self.panel2, pos= wx.Point(40, 38), style=0)
         self.staticBitmap1.SetAutoLayout(True)
-        self.staticBitmap1.Center(wxBOTH)
-        self.box2 = wxBoxSizer(wxHORIZONTAL)
-        self.box2.Add(self.staticBitmap1, 2, wxEXPAND)
-        self.panel2.SetAutoLayout(True)
+        self.staticBitmap1.Center(wx.BOTH)
+        self.staticBitmap1.SetBitmap(self.curImg)
+        self.box2 = wx.BoxSizer(wx.HORIZONTAL)
+        self.box2.Add(self.staticBitmap1, 2, wx.ALL|wx.EXPAND)
         self.panel2.SetSizer(self.box2)
-        self.panel2.Layout()
         # end bitmap resizer
-        EVT_LEFT_DCLICK(self.staticBitmap1, self.OnBitmapDblClick)
+        self.staticBitmap1.Bind(wx.EVT_LEFT_DCLICK, self.OnBitmapDblClick)
         # notebook layout sizers
-        self.notebook1 = wxNotebook(id=wxID_WXFRAME1NOTEBOOK1, name='notebook1',
-              parent=self.panel1, pos=wxPoint(8, 56), size=wxSize(248, 704),
+        self.notebook1 = wx.Notebook(id=wxID_WXFRAME1NOTEBOOK1, name='notebook1',
+              parent=self.panel1, pos= wx.Point(8, 56), size= wx.Size(248, 704),
               style=0)
 
-        self.panel3 = wxPanel(id=wxID_WXFRAME1PANEL3, name='panel3',
-              parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(240, 678),
-              style=wxTAB_TRAVERSAL)
-    
-        self.panel4 = wxPanel(id=wxID_WXFRAME1PANEL4, name='panel4',
-              parent=self.notebook1, pos=wxPoint(0, 0), size=wxSize(240, 678),
-              style=wxTAB_TRAVERSAL)
+        self.panel3 = wx.Panel(id=wxID_WXFRAME1PANEL3, name='panel3',
+              parent=self.notebook1, pos= wx.Point(0, 0), size= wx.Size(240, 678),
+              style=wx.TAB_TRAVERSAL)
 
-        self.treeCtrl1 = wxTreeCtrl(id=wxID_WXFRAME1TREECTRL1, name='treeCtrl1',
-              parent=self.panel3, pos=wxPoint(16, 80), size=wxSize(200, 536),
-              style=wxTR_HAS_BUTTONS | wxTR_MULTIPLE)
+        self.panel4 = wx.Panel(id=wxID_WXFRAME1PANEL4, name='panel4',
+              parent=self.notebook1, pos= wx.Point(0, 0), size= wx.Size(240, 678),
+              style=wx.TAB_TRAVERSAL)
 
-        self.graph_button = wxButton(id=wxID_WXFRAME1GRAPH_BUTTON,
+        self.treeCtrl1 = wx.TreeCtrl(id=wxID_WXFRAME1TREECTRL1, name='treeCtrl1',
+              parent=self.panel3, pos= wx.Point(16, 80), size= wx.Size(200, 536),
+              style=wx.TR_HAS_BUTTONS | wx.TR_MULTIPLE)
+
+        self.graph_button = wx.Button(id=wxID_WXFRAME1GRAPH_BUTTON,
               label='Graph', name='graph_button', parent=self.panel3,
-              pos=wxPoint(144, 624), size=wxSize(75, 31), style=0)
-        EVT_BUTTON(self.graph_button, wxID_WXFRAME1GRAPH_BUTTON,
-              self.OnGraphButton)
-              
-        self.data_style = wxChoice(choices=[], id=wxID_WXFRAME1DATA_STYLE,
-              name='data_style', parent=self.panel3, pos=wxPoint(88, 48),
-              size=wxSize(125, 21), style=0)
+              pos= wx.Point(144, 624), size= wx.Size(75, 31), style=0)
+        self.graph_button.Bind(wx.EVT_BUTTON, self.OnGraphButton, id=wxID_WXFRAME1GRAPH_BUTTON)
 
-        self.data_style_txt = wxStaticText(id=wxID_WXFRAME1DATA_STYLE_TXT,
+        self.data_style=wx.Choice(choices=[], id=wxID_WXFRAME1DATA_STYLE,
+              name='data_style', parent=self.panel3, pos= wx.Point(88, 48),
+              size= wx.Size(125, 21), style=0)
+
+        self.data_style_txt = wx.StaticText(id=wxID_WXFRAME1DATA_STYLE_TXT,
               label='Data Style:', name='data_style_txt', parent=self.panel3,
-              pos=wxPoint(16, 48), size=wxSize(65, 16), style=0)
-        self.data_style_txt.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL,
+              pos= wx.Point(16, 48), size= wx.Size(65, 16), style=0)
+        self.data_style_txt.SetFont(wx.Font(10,wx.SWISS,wx.NORMAL,wx.NORMAL,
               False, 'Arial'))
 
-        self.data_type = wxChoice(choices=[], id=wxID_WXFRAME1DATA_TYPE,
-              name='data_type', parent=self.panel3, pos=wxPoint(88, 16),
-              size=wxSize(125, 21), style=0)
+        self.data_type = wx.Choice(choices=[], id=wxID_WXFRAME1DATA_TYPE,
+              name='data_type', parent=self.panel3, pos= wx.Point(88, 16),
+              size= wx.Size(125, 21), style=0)
 
-        self.data_type_txt = wxStaticText(id=wxID_WXFRAME1DATA_TYPE_TXT,
+        self.data_type_txt = wx.StaticText(id=wxID_WXFRAME1DATA_TYPE_TXT,
               label='Data Type:', name='data_type_txt', parent=self.panel3,
-              pos=wxPoint(16, 16), size=wxSize(63, 16), style=0)
-        self.data_type_txt.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL,
+              pos= wx.Point(16, 16), size= wx.Size(63, 16), style=0)
+        self.data_type_txt.SetFont(wx.Font(10,wx.SWISS,wx.NORMAL,wx.NORMAL,
               False, 'Arial'))
 
-        self.browse_txt = wxTextCtrl(id=wxID_WXFRAME1BROWSE_TXT,
-              name='browse_txt', parent=self.panel1, pos=wxPoint(8, 16),
-              size=wxSize(152, 21), style=0, value='Select a directory...')
+        self.browse_txt = wx.TextCtrl(id=wxID_WXFRAME1BROWSE_TXT,
+              name='browse_txt', parent=self.panel1, pos= wx.Point(8, 16),
+              size= wx.Size(152, 21), style=0, value='Select a directory...')
 
-        self.browse_button = wxButton(id=wxID_WXFRAME1BROWSE_BUTTON,
+        self.browse_button = wx.Button(id=wxID_WXFRAME1BROWSE_BUTTON,
               label='Browse', name='browse_button', parent=self.panel1,
-              pos=wxPoint(168, 16), size=wxSize(75, 23), style=0)
-        EVT_BUTTON(self.browse_button, wxID_WXFRAME1BROWSE_BUTTON,
-              self.BuildFolder)
+              pos= wx.Point(168, 16), size= wx.Size(75, 23), style=0)
+        self.browse_button.Bind(wx.EVT_BUTTON, self.BuildFolder, id=wxID_WXFRAME1BROWSE_BUTTON)
         self._init_coll_notebook1_Pages(self.notebook1)
         self._init_data_type(self.data_type)
         self._init_data_style(self.data_style)
-        self._init_glscry_panel(self.panel4)              
-        
+        self._init_glscry_panel(self.panel4)
+
     def __init__(self, parent):
         self._init_ctrls(parent)
-    
+        
+    def ImageResize(self, event):
+        print "Image Resize"
+        wSize = self.panel2.GetSizeTuple()
+        self.curImg.Rescal(wSize[0], wSize[1])
+                
     # menu items
     # About
     def OnAbout(self, event):
-        d= wxMessageDialog( self, "GLAnalyze developed by Alex Allen in collaboration with Dr. Dirk Reiners and Chad Austin.\n"
-                            "Designed to work with GLScry developed by Chad Austin and Dr. Dirk Reiners. \n" "version 0.1 ", "About GLAnalyze", wxOK | wxICON_INFORMATION)
+        self.ImageResize
+        d= wx.MessageDialog( self, "GLAnalyze developed by Alex Allen in collaboration with Dr. Dirk Reiners and Chad Austin.\n"
+                            "Designed to work with GLScry developed by Chad Austin and Dr. Dirk Reiners. \n" "version 0.1 ", "About GLAnalyze", wx.OK | wx.ICON_INFORMATION)
                             # Create a message dialog box
         d.ShowModal() # Shows it
         d.Destroy() # finally destroy it when finished
-        
+
     # Open file dialog
     def OnOpen(self, event):
-        dlg = wxFileDialog(self, "Choose a file", os.getcwd(), "", "*.png", wxOPEN)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.png", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
             # This returns a Python list of files that were selected.
             self.curImgPath = dlg.GetPath()
-            self.curImg = wxBitmap(self.curImgPath, wxBITMAP_TYPE_PNG)
+            self.curImg = wx.Bitmap(self.curImgPath, wx.BITMAP_TYPE_PNG)
             self.staticBitmap1.SetBitmap(self.curImg)
             self.Layout()
-            self.box2.RecalcSizes()            
+            self.box2.RecalcSizes()
+            self.Refresh()
+            wx.WakeUpIdle()
         dlg.Destroy()
     # Save file dialog
     def OnSave(self, event):
-        dlg = wxFileDialog(self, "Choose a file", self.browse_txt.GetValue() , "", "*.png", wxSAVE)
+        dlg = wx.FileDialog(self, "Choose a file", self.browse_txt.GetValue() , "", "*.png", wx.SAVE)
         dlg.SetFilterIndex(2)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            self.curImg.SaveFile( path, wxBITMAP_TYPE_PNG ) 
+            self.curImg.SaveFile( path, wx.BITMAP_TYPE_PNG )
         dlg.Destroy()
-    
+
     # Exit
     def OnExit(self, event):
-        self.Close(true)  # Close the frame.
+        self.Close(True)  # Close the frame.
 
     # Build the tree from the chosen directory
     def BuildFolder(self, event):
         print os.curdir
-        dlg = wxDirDialog(self, "Select a directory", os.getcwd())
+        dlg = wx.DirDialog(self, "Select a directory", os.getcwd())
         try:
-            if dlg.ShowModal() == wxID_OK:
+            if dlg.ShowModal() == wx.ID_OK:
                 dir = dlg.GetPath()
                 self.browse_txt.Clear()
                 self.browse_txt.WriteText(dir)
@@ -272,12 +273,12 @@ class wxFrame1(wxFrame):
                 self.treeCtrl1.DeleteAllItems()
                 self.StartTestBuild(dir)
                 self.treeCtrl1.Expand(self.root)
-                
+
         finally:
             dlg.Destroy()
 
-     
-    # Build tree by test 
+
+    # Build tree by test
     def StartTestBuild(self, dir):
         rootname = os.path.split(dir)
         self.root = self.treeCtrl1.AddRoot(rootname[1])
@@ -292,7 +293,7 @@ class wxFrame1(wxFrame):
         self.machinepath = []
         self.GetTestInfo(self.dirlist, dir)
         self.BuildTree()
-        
+
     def GetTestInfo(self, parent, dir):
         dirlisting = os.listdir(dir)
         for listing in dirlisting:
@@ -313,12 +314,12 @@ class wxFrame1(wxFrame):
                     child = self.treeCtrl1.AppendItem(parent, listing)
                     childdata = self.treeCtrl1.GetItemData(child)
                     childdata.path = pathinquestion
-                    self.treeCtrl1.SetPyData(child, pathinquestion)  
+                    self.treeCtrl1.SetPyData(child, pathinquestion)
             elif os.path.isdir(pathinquestion):
                 newparent = self.treeCtrl1.AppendItem(parent, listing)
                 newdir = os.path.join(dir, listing)
                 self.GetTestInfo(newparent, newdir)
-                
+
     def BuildTree(self):
         addedtests = []
         curtest = 0
@@ -335,17 +336,17 @@ class wxFrame1(wxFrame):
                         titleList = self.GetTitleList(self.testpath[count])
                         child = self.treeCtrl1.AppendItem(newitem, host)
                         self.treeCtrl1.SetPyData(child, self.testpath[count])
-                        # add test titles under the host 
+                        # add test titles under the host
                         titleCount = 0
                         while titleCount < len(titleList):
                             title = self.treeCtrl1.AppendItem(child, titleList[titleCount])
                             self.treeCtrl1.SetPyData(title, self.testpath[count])
                             titleCount = titleCount + 1
                     count = count + 1
-            curtest = curtest + 1              
+            curtest = curtest + 1
         self.treeCtrl1.Expand(self.treeCtrl1.GetRootItem())
-        
-        
+
+
     # Build tree by test helper functions
     def GetHost(self, path):
         file = eval(open(path, "rU").read())
@@ -361,8 +362,8 @@ class wxFrame1(wxFrame):
             titleList.insert(count, title)
             count = count + 1
         return titleList
-    
-    # Graph button events  
+
+    # Graph button events
     def OnGraphButton(self, event):
         #-#------open a new gnuplot session-----#-#
         g = Gnuplot.Gnuplot(debug=1)
@@ -378,7 +379,7 @@ class wxFrame1(wxFrame):
         g(datacom)
         #-#------get datafile------#-#
         selected = self.treeCtrl1.GetSelections()
-        # first check if there is a file selected             
+        # first check if there is a file selected
         size = len(selected)
         count = 0;
         path = range(size)
@@ -394,11 +395,10 @@ class wxFrame1(wxFrame):
         self.SetGraphLabel(path, g)
         self.GraphData(path, g, sortedtics, text)
         time.sleep(.7)
-        self.curImg = wxBitmap(r"temp.png", wxBITMAP_TYPE_PNG)
+        self.curImg = wx.Bitmap(r"temp.png", wx.BITMAP_TYPE_PNG)
         self.curImgPath = r"temp.png"
+        self.ImageResize
         self.staticBitmap1.SetBitmap(self.curImg)
-        self.Layout()
-        self.box2.RecalcSizes()
     # Get xtics for the graph
     def GetXtics(self, path, graph, sortedtics):
         numfiles = len(path)
@@ -411,9 +411,9 @@ class wxFrame1(wxFrame):
                 file[filecount] = eval(open(path[filecount], "rU").read())
             except:
                 print "\nERROR: Please select a valid test.\n"
-                d= wxMessageDialog( self, "Please select a valid test.", "Error", wxOK | wxICON_ERROR)
-                d.ShowModal() 
-                d.Destroy() 
+                d= wx.MessageDialog( self, "Please select a valid test.", "Error", wx.OK | wx.ICON_ERROR)
+                d.ShowModal()
+                d.Destroy()
                 break
             size = len(file[filecount]['Test']['GraphLines'][0]['ResultSet'])
             xtics = range(size)
@@ -436,8 +436,8 @@ class wxFrame1(wxFrame):
                         xtic = int(combinedtics[filecount][count])
                     except:
                         print "\nERROR: Cannot graph data. Try a different data style.\n"
-                        d= wxMessageDialog( self, "Cannot graph data. Try a different data style.", "Error", wxOK | wxICON_ERROR)
-                        d.ShowModal() 
+                        d= wx.MessageDialog( self, "Cannot graph data. Try a different data style.", "Error", wx.OK | wx.ICON_ERROR)
+                        d.ShowModal()
                         d.Destroy()
                         break
                 else:
@@ -461,7 +461,7 @@ class wxFrame1(wxFrame):
             count = count + 1
         xcom = xcom + ")"
         graph(xcom)
-    # Set up the graph                
+    # Set up the graph
     def SetGraphLabel(self, path, graph):
         choice = self.data_type.GetSelection()
         if choice == -1:
@@ -507,8 +507,8 @@ class wxFrame1(wxFrame):
                 newtitle = newtitle + r'\n'
             count = count + 1
         graph.title(newtitle)
-    
-    # Graph the data            
+
+    # Graph the data
     def GraphData(self, path, graph, sortedtics, text):
         numfiles = len(path)
         file = range(numfiles)
@@ -604,41 +604,41 @@ class wxFrame1(wxFrame):
                 return index
             count = count + 1
     # Double click event for static bitmap 1
-    # Open a new window and view image at full size    
+    # Open a new window and view image at full size
     def OnBitmapDblClick(self, event):
         img = self.curImg
         height = img.GetHeight()
         width = img.GetWidth()
-        self.wxExpFrame1 = wxFrame(self, id=wxID_WXEXPFRAME1, name='',
-            pos=wxPoint(175, 144), size=wxSize(768, 530),
-            style=wxDEFAULT_FRAME_STYLE, title="Generated Image")
-        self.scrolledWindow1 =wxScrolledWindow(id=wxID_WXMINIFRAME1SCROLLEDWINDOW1,
-            name='scrolledWindow1', parent=self.wxExpFrame1, pos=wxPoint(0, 0),
-            size=wxSize(width, height), style=wxHSCROLL | wxVSCROLL)
-             
-        self.fullBitmap1 = wxStaticBitmap(bitmap=wxBitmap(self.curImgPath,
-            wxBITMAP_TYPE_PNG), id=wxID_WXFULLBITMAP,
-            name='fullbitmap1', parent=self.scrolledWindow1, pos=wxPoint(0, 0),
-            size=wxSize(width, height), style=0)
-        
-        self.scrolledWindow1.SetScrollbars(20, 20, (width/20) + .5, (height/20) + .9, noRefresh = FALSE)         
-        
+        self.wxExpFrame1 = wx.Frame(self, id=wxID_WXEXPFRAME1, name='',
+            pos= wx.Point(175, 144), size= wx.Size(768, 530),
+            style=wx.DEFAULT_FRAME_STYLE, title="Generated Image")
+        self.scrolledWindow1 = wx.ScrolledWindow(id=wxID_WXMINIFRAME1SCROLLEDWINDOW1,
+            name='scrolledWindow1', parent=self.wxExpFrame1, pos= wx.Point(0, 0),
+            size= wx.Size(width, height), style=wx.HSCROLL | wx.VSCROLL)
+
+        self.fullBitmap1 = wx.StaticBitmap(bitmap= wx.Bitmap(self.curImgPath,
+            wx.BITMAP_TYPE_PNG), id=wxID_WXFULLBITMAP,
+            name='fullbitmap1', parent=self.scrolledWindow1, pos= wx.Point(0, 0),
+            size= wx.Size(width, height), style=0)
+
+        self.scrolledWindow1.SetScrollbars(20, 20, (width/20) + .5, (height/20) + .9, noRefresh = False)
+
         self.wxExpFrame1.Show()
     # Start GLScry functions
     #!/usr/bin/env python
     # [Begin Copyright Header]
-    # 
+    #
     # GLScry - OpenGL Performance Analysis Tool
     # Copyright (C) 2004-2005  Iowa State University
-    # 
+    #
     # This software is licensed under the terms of the GNU Lesser Public
     # License, version 2.1, as published by the Free Software Foundation.
     # See the file COPYRIGHT.txt for details.
-    # 
+    #
     # Authors:
     #   Chad Austin <aegisk@iastate.edu>
     #   Dirk Reiners <dreiners@iastate.edu>
-    # 
+    #
     # [End Copyright Header]
     def SelectAll(self, event):
         for i in range(0,12):
@@ -699,15 +699,15 @@ class wxFrame1(wxFrame):
             tests = self.AssignPath(tests, scriptDir)
         if not tests:
             print "\nERROR: No tests selected."
-            d= wxMessageDialog( self, "No tests selected. Please select a test or click 'Select All' to run all tests.", "Error", wxOK | wxICON_ERROR)
-            d.ShowModal() 
+            d= wx.MessageDialog( self, "No tests selected. Please select a test or click 'Select All' to run all tests.", "Error", wx.OK | wx.ICON_ERROR)
+            d.ShowModal()
             d.Destroy()
             event.Skip()
-            
-        
+
+
         # Create data directory if it does not exist and switch to it so
         # the tests output their files there.
-        
+
         hostname = socket.gethostname()
         datadir = os.path.join(cwd, 'data', hostname)
         try:
@@ -721,7 +721,7 @@ class wxFrame1(wxFrame):
         print '\nQueuing tests for execution:'
         for t in names:
             print "  " + t
-    
+
         for t in tests:
             print
             print "Running test script '%s'" % t
