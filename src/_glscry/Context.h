@@ -27,6 +27,7 @@ namespace scry {
     void initializeSDL(int initflags);
     void throwGLEWError(const std::string& prefix, GLenum error);
     void initContext();
+	void quitSDL();
     
     void flip();
     void betweenTests();

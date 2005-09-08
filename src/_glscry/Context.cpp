@@ -120,6 +120,10 @@ namespace scry {
         SDL_ShowCursor(SDL_DISABLE);
     }
 
+	void quitSDL()
+	{
+		SDL_Quit();
+	}
 
     void flip() {
         SDL_GL_SwapBuffers();

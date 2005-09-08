@@ -63,6 +63,7 @@ BOOST_PYTHON_MODULE(_glscry) {
 
     def("getVersion", getVersion);
     def("getBuildID", getBuildID);
+	def("quitSDL", quitSDL);
 
     // States.
     StateSet::bind();
