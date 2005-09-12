@@ -335,6 +335,8 @@ class wxFrame1(wx.Frame):
         self.treeCtrl1.DeleteAllItems()
         self.treeCtrl1.AddRoot("Data")
         self.testlist = self.treeCtrl1.AppendItem(self.treeCtrl1.GetRootItem(), "Test List")
+        self.byHost = self.treeCtrl1.AppendItem(self.testlist, "By Host")
+        self.byTitle = self.treeCtrl1.AppendItem(self.testlist, "By Title")
         self.dirlist = self.treeCtrl1.AppendItem(self.treeCtrl1.GetRootItem(), "Directory List")
         self.testlisting = []
         self.testpath = []
@@ -372,29 +374,56 @@ class wxFrame1(wx.Frame):
 
     def BuildTree(self):
         addedtests = []
+        addedtitles = []
+        addedhosts = []
         curtest = 0
         self.GaugeBox(len(self.testlisting))
         while curtest < len(self.testlisting):
             self.buildGague.SetValue(curtest)
             # first get first test from list, then add it as parent in tree
             if self.testlisting[curtest] not in addedtests:
-                newitem = self.treeCtrl1.AppendItem(self.testlist, self.testlisting[curtest])
+                newhost = self.treeCtrl1.AppendItem(self.byHost, self.testlisting[curtest])
+                hostbytitle = self.treeCtrl1.AppendItem(self.byTitle, self.testlisting[curtest])
                 addedtests.insert(len(addedtests), self.testlisting[curtest])
                 # then search list for test of the same name, adding its machine name
                 count = 0
                 while count < len(self.testlisting):
                     if self.testlisting[count] == self.testlisting[curtest]:
+                        addedtitle = []
                         host = self.GetHost(self.testpath[count])
                         titleList = self.GetTitleList(self.testpath[count])
-                        child = self.treeCtrl1.AppendItem(newitem, host)
-                        self.treeCtrl1.SetPyData(child, self.testpath[count])
-                        # add test titles under the host
+                        hostchild = self.treeCtrl1.AppendItem(newhost, host)
+                        self.treeCtrl1.SetPyData(hostchild, self.testpath[count])
+                        # add test titles under the host and under test for byTest
                         titleCount = 0
                         while titleCount < len(titleList):
-                            title = self.treeCtrl1.AppendItem(child, titleList[titleCount])
+                            toadd = titleList[titleCount] + " " + self.testlisting[curtest]
+                            if toadd not in addedtitles:
+                                self.treeCtrl1.AppendItem(hostbytitle, titleList[titleCount])
+                                addedtitles.insert(len(addedtitle), toadd)                
+                            title = self.treeCtrl1.AppendItem(hostchild, titleList[titleCount])
                             self.treeCtrl1.SetPyData(title, self.testpath[count])
-                            titleCount = titleCount + 1
+                            titleCount = titleCount + 1   
                     count = count + 1
+            # do a loop to get the test list of the current test and find out if it has the title
+            # if so add host under the title in tree
+            titleList = self.GetTitleList(self.testpath[curtest])
+            titleCount = 0
+            childcount = 0
+            curchild, cookie = self.treeCtrl1.GetFirstChild(self.byTitle)
+            numchild = self.treeCtrl1.GetChildrenCount(self.byTitle)
+            while childcount < numchild:
+                if curchild.IsOk():
+                    while titleCount < len(titleList):
+                        print self.treeCtrl1.GetItemText(curchild)
+                        for i in self.iterchildren(self.treeCtrl1, curchild):
+                            print self.treeCtrl1.GetItemText(i)
+                            if titleList[titleCount] == self.treeCtrl1.GetItemText(i):
+                                newchild = self.treeCtrl1.AppendItem(i, self.GetHost(self.testpath[curtest]))
+                                self.treeCtrl1.SetPyData(newchild, self.testpath[curtest])
+                        titleCount = titleCount + 1
+                curchild, cookie = self.treeCtrl1.GetNextChild(self.byTitle, cookie)
+                childcount = childcount + 1
             curtest = curtest + 1
         self.treeCtrl1.Expand(self.treeCtrl1.GetRootItem())
 
@@ -414,7 +443,21 @@ class wxFrame1(wx.Frame):
             titleList.insert(count, title)
             count = count + 1
         return titleList
-
+    def HasTitle(self, path, tiq):
+        file = eval(open(path, "rU").read())
+        titleLen = len(file['Test']['GraphLines'])
+        count = 0
+        while count < titleLen:
+            title = file['Test']['GraphLines'][count]['Title']
+            if tiq == title:
+                return True
+            count = count + 1
+        return False
+    def iterchildren(self, treectrl, node):
+        cid, citem = treectrl.GetFirstChild(node)
+        while cid.IsOk(): 
+            yield cid
+            cid, citem = treectrl.GetNextChild(node, citem)
     # Graph button events
     def OnGraphButton(self, event):
         #-#------open a new gnuplot session-----#-#
