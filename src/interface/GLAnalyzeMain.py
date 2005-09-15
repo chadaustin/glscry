@@ -405,25 +405,13 @@ class wxFrame1(wx.Frame):
                             self.treeCtrl1.SetPyData(title, self.testpath[count])
                             titleCount = titleCount + 1   
                     count = count + 1
-            # do a loop to get the test list of the current test and find out if it has the title
-            # if so add host under the title in tree
-            titleList = self.GetTitleList(self.testpath[curtest])
-            titleCount = 0
-            childcount = 0
-            curchild, cookie = self.treeCtrl1.GetFirstChild(self.byTitle)
-            numchild = self.treeCtrl1.GetChildrenCount(self.byTitle)
-            while childcount < numchild:
-                if curchild.IsOk():
-                    while titleCount < len(titleList):
-                        print self.treeCtrl1.GetItemText(curchild)
-                        for i in self.iterchildren(self.treeCtrl1, curchild):
-                            print self.treeCtrl1.GetItemText(i)
-                            if titleList[titleCount] == self.treeCtrl1.GetItemText(i):
-                                newchild = self.treeCtrl1.AppendItem(i, self.GetHost(self.testpath[curtest]))
-                                self.treeCtrl1.SetPyData(newchild, self.testpath[curtest])
-                        titleCount = titleCount + 1
-                curchild, cookie = self.treeCtrl1.GetNextChild(self.byTitle, cookie)
-                childcount = childcount + 1
+            # first build a list of byTitle's children, and then iter that list
+            # if the test is the same as the tree node, then add its host to its children
+            for i in self.iterchildren(self.treeCtrl1, self.byTitle):
+                if self.testlisting[curtest] == self.treeCtrl1.GetItemText(i):
+                    for x in self.iterchildren(self.treeCtrl1, i):
+                        toadd = self.treeCtrl1.AppendItem(x, self.GetHost(self.testpath[curtest]))
+                        self.treeCtrl1.SetPyData(toadd, self.testpath[curtest])
             curtest = curtest + 1
         self.treeCtrl1.Expand(self.treeCtrl1.GetRootItem())
 
@@ -479,16 +467,18 @@ class wxFrame1(wx.Frame):
         count = 0;
         path = range(size)
         text = range(size)
+        parents = range(size)
         # Combine selected files into one list
         while count < size:
             path[count] = self.treeCtrl1.GetPyData(selected[count])
             text[count] = self.treeCtrl1.GetItemText(selected[count])
+            parents[count] = self.treeCtrl1.GetItemText(self.treeCtrl1.GetItemParent(selected[count]))
             count = count + 1
         # Set up the graph and plot data
         sortedtics = range(0)
         self.GetXtics(path, g, sortedtics)
         self.SetGraphLabel(path, g)
-        self.GraphData(path, g, sortedtics, text)
+        self.GraphData(path, g, sortedtics, text, parents)
         time.sleep(.7)
         self.curImg = wx.Bitmap(r"temp.png", wx.BITMAP_TYPE_PNG)
         self.curImgPath = r"temp.png"
@@ -606,9 +596,13 @@ class wxFrame1(wx.Frame):
         graph.title(newtitle)
 
     # Graph the data
-    def GraphData(self, path, graph, sortedtics, text):
+    def GraphData(self, path, graph, sortedtics, text, parents):
+        longtitle = self.UseLong(path)
         numfiles = len(path)
         file = range(numfiles)
+        shortTitles = []
+        longTitles = []
+        newtitle = []
         filecount = 0
         while filecount < numfiles:
             file[filecount] = eval(open(path[filecount], "rU").read())
@@ -622,16 +616,19 @@ class wxFrame1(wx.Frame):
         alltitles = range(0)
         plotcom = "plot "
         while filecount < numfiles:
-            if self.IsTitle(file[filecount], text[filecount]):
-                resultcount = self.GetResultCount(file[filecount], text[filecount])
+            if self.IsTitle(file[filecount], text[filecount], parents[filecount]):
+                resultcount = self.GetResultCount(file[filecount], text[filecount], parents[filecount])
                 numresults = resultcount + 1
             else:
                 numresults = len(file[filecount]['Test']['GraphLines'])
             while resultcount < numresults:
-                title = file[filecount]['Test']['GraphLines'][resultcount]['Title']
-                host = file[filecount]['System']['Host']
-                if numfiles > 1:
-                    title = title + "(" + host + ")"
+                if longtitle:
+                    title = file[filecount]['Test']['GraphLines'][resultcount]['Title']
+                    host = file[filecount]['System']['Host']
+                    renderer = file[filecount]['System']['OpenGL Renderer']
+                    title = title + " :: " + host + " :: " + renderer
+                else:
+                    title = file[filecount]['Test']['GraphLines'][resultcount]['Title']
                 if filecount == 0:
                     plotcom = plotcom + "'-' title '%s'" % (title)
                     if resultcount < numresults - 1:
@@ -647,8 +644,8 @@ class wxFrame1(wx.Frame):
         while filecount < numfiles:
             size = len(file[filecount]['Test']['GraphLines'][0]['ResultSet'])
             while resultcount < numresults:
-                if self.IsTitle(file[filecount], text[filecount]):
-                    resultcount = self.GetResultCount(file[filecount], text[filecount])
+                if self.IsTitle(file[filecount], text[filecount], parents[filecount]):
+                    resultcount = self.GetResultCount(file[filecount], text[filecount], parents[filecount])
                     numresults = resultcount + 1
                 else:
                     numresults = len(file[filecount]['Test']['GraphLines'])
@@ -668,21 +665,41 @@ class wxFrame1(wx.Frame):
             filecount = filecount + 1
         graph("exit")
         graph("exit")
+        
+    # helper function to browse through selected tests and compare their titles,
+    # if they are the same the function will return true and a longer name will be used
+    def UseLong(self, path):
+        file = []
+        titles = []
+        filecount = 0
+        while filecount < len(path):
+            file.insert(len(file), eval(open(path[filecount], "rU").read()))
+            filecount = filecount + 1
+        filecount = 0
+        while filecount < len(file):
+            title = file[filecount]['Test']['GraphLines'][0]['Title']
+            if title not in titles:
+                titles.insert(len(titles), title)
+            else:
+                return True
+            filecount = filecount + 1
+        return False
+    
     # if count == numresults, then text is not a title, if count < numresults, then
     # the resultset to graph will file['Test']['GraphLines'][count]
-    def GetResultCount(self, file, text):
+    def GetResultCount(self, file, text, parents):
         numresults = len(file['Test']['GraphLines'])
         count = 0
         while count < numresults:
-            if file['Test']['GraphLines'][count]['Title'] == text:
+            if file['Test']['GraphLines'][count]['Title'] == text or file['Test']['GraphLines'][count]['Title'] == parents:
                 return count
             count = count + 1
         return count
-    def IsTitle(self, file, text):
+    def IsTitle(self, file, text, parents):
         numresults = len(file['Test']['GraphLines'])
         count = 0
         while count < numresults:
-            if file['Test']['GraphLines'][count]['Title'] == text:
+            if file['Test']['GraphLines'][count]['Title'] == text or file['Test']['GraphLines'][count]['Title'] == parents:
                 return True
             count = count + 1
         return False
@@ -800,11 +817,8 @@ class wxFrame1(wx.Frame):
             d.ShowModal()
             d.Destroy()
             event.Skip()
-
-
         # Create data directory if it does not exist and switch to it so
         # the tests output their files there.
-
         hostname = socket.gethostname()
         datadir = os.path.join(cwd, 'data', hostname)
         try:
@@ -823,5 +837,3 @@ class wxFrame1(wx.Frame):
             infoBox.WriteText("\n")
             infoBox.WriteText("Running test script '%s'" % t)
             exec open(t) in {}
-        for t in tests:
-            os.Close(t) in {}

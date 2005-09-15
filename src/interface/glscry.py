@@ -16,8 +16,11 @@ import platform
 import pprint
 import socket
 import time
-import GLAnalyzeMain
 from _glscry import *
+try:
+    import GLAnalyzeMain
+except:
+    print "No GUI detected. Using command line version"
 
 
 def flatten(list):
@@ -226,20 +229,32 @@ def runTest(test, runFor, resultName=None, printedName=None):
 
     GLError = RuntimeError
     try:
-        GLAnalyzeMain.WriteToInfoBox("\nRunning test '%s'" % printedName)
+        try:
+            GLAnalyzeMain.WriteToInfoBox("\nRunning test '%s'" % printedName)
+        except:
+            print "\nRunning test '%s'" % printedName
         
         if test.isSupported():
             resultSet = test.run(runFor)
 
             for value, desc in zip(resultSet, test.getResultDescs()):
-                GLAnalyzeMain.WriteToInfoBox("  %s = %s %s" % (desc.name, value, desc.units))
+                try:
+                    GLAnalyzeMain.WriteToInfoBox("  %s = %s %s" % (desc.name, value, desc.units))
+                except:
+                    print "  %s = %s %s" % (desc.name, value, desc.units)
 
             return makeResultSet(resultSet)
         else:
-            GLAnalyzeMain.WriteToInfoBox("  Unsupported")
+            try:
+                GLAnalyzeMain.WriteToInfoBox("  Unsupported")
+            except:
+                print "  Unsupported"
 
     except GLError, e:
-        print e
+        try:
+            GLAnalyzeMain.WriteToInfoBox(e)
+        except:
+            print e
 
     # Return zeroes if the test isn't supported or throws an exception.
     resultSet = ResultValues()
@@ -379,7 +394,10 @@ def _generateActualGraph(filename, graphLineList, measured,
 
     # Write the result matrix to a file.
     datafile = filename + '.data'
-    GLAnalyzeMain.WriteToInfoBox("\nWriting data file: %s" % datafile)
+    try:
+        GLAnalyzeMain.WriteToInfoBox("\nWriting data file: %s" % datafile)
+    except:
+        print "\nWriting data file: %s" % datafile
 
     of = open(datafile, 'w')
     writeID(of)
@@ -396,7 +414,10 @@ def _generateActualGraph(filename, graphLineList, measured,
             print >> of
 
     script = filename + '.gnuplot'
-    GLAnalyzeMain.WriteToInfoBox("Generating graph script: %s" % script)
+    try:
+        GLAnalyzeMain.WriteToInfoBox("Generating graph script: %s" % script)
+    except:
+        print "Generating graph script: %s" % script
     plot = open(script, 'w')
 
     print >> plot, 'set terminal png'
@@ -422,7 +443,8 @@ def _generateActualGraph(filename, graphLineList, measured,
                 for i in range(lineCount)]
     plotStr = ', '.join(plotList)
     print >> plot, 'plot %s' % plotStr
-    
+
+
 def generateGraph(filename, graphLineList, measured,
                   xlabel=None, graphType=GraphType.BAR, normalizeBy=None):
 
