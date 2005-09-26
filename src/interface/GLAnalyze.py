@@ -24,3 +24,7 @@ if __name__ == '__main__':
     
 if os.path.exists("temp.png"):
     os.remove("temp.png")
+if os.path.exists("full.png"):
+    os.remove("full.png")
+if os.path.exists("temp.gnu"):
+    os.remove("temp.gnu")

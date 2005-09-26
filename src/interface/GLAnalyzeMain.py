@@ -2,7 +2,7 @@
 #GLAnalyze created by Alex Allen
 
 import wx
-import os, time
+import os, time, shutil
 import Gnuplot, Gnuplot.PlotItems, Gnuplot.funcutils
 import string
 import sys
@@ -19,8 +19,8 @@ def create(parent):
  wxID_WXFRAME1NOTEBOOK1, wxID_WXFRAME1PANEL1, wxID_WXFRAME1PANEL2,
  wxID_WXFRAME1PANEL3, wxID_WXFRAME1PANEL4, wxID_WXFRAME1STATICBITMAP1,
  wxID_WXFRAME1TREECTRL1, wxID_WXEXPFRAME1, wxID_WXMINIFRAME1SCROLLEDWINDOW1,
- wxID_WXFULLBITMAP,
-] = [wx.NewId() for _init_ctrls in range(18)]
+ wxID_WXFULLBITMAP,wxID_WXFRAME1MENU1ITEMS3,
+] = [wx.NewId() for _init_ctrls in range(19)]
 
 [wxID_WXFRAME1MENU1ITEMS0, wxID_WXFRAME1MENU1ITEMS1, wxID_WXFRAME1MENU1ITEMS2,
 ] = [wx.NewId() for _init_coll_menu1_Items in range(3)]
@@ -42,11 +42,13 @@ class wxFrame1(wx.Frame):
     def _init_coll_menu1_Items(self, parent):
         parent.Append(help='', id=wxID_WXFRAME1MENU1ITEMS0, text='Open', kind=wx.ITEM_NORMAL)
         parent.Append(help='', id=wxID_WXFRAME1MENU1ITEMS1, text='Save Image', kind=wx.ITEM_NORMAL)
+        parent.Append(help='', id=wxID_WXFRAME1MENU1ITEMS3, text='Save Gnuplot File', kind=wx.ITEM_NORMAL)
         parent.AppendSeparator()
         parent.Append(help='', id=wxID_WXFRAME1MENU1ITEMS2, text='Exit', kind=wx.ITEM_NORMAL)
         self.Bind(wx.EVT_MENU, self.OnOpen, id=wxID_WXFRAME1MENU1ITEMS0)
         self.Bind(wx.EVT_MENU, self.OnSave, id=wxID_WXFRAME1MENU1ITEMS1)
         self.Bind(wx.EVT_MENU, self.OnExit, id=wxID_WXFRAME1MENU1ITEMS2)
+        self.Bind(wx.EVT_MENU, self.OnGnuSave, id=wxID_WXFRAME1MENU1ITEMS3)
 
     def _init_coll_menuBar1_Menus(self, parent):
 
@@ -259,7 +261,7 @@ class wxFrame1(wx.Frame):
         self.reInitBuffer = False
         
     def ImageResize(self):
-        self.curImg = self.fullImg.ConvertToImage()
+        self.curImg = self.curImg.ConvertToImage()
         wSize = self.panel2.GetSizeTuple()
         self.curImg.Rescale(wSize[0] -6, wSize[1] -1)
         self.curImg = self.curImg.ConvertToBitmap()
@@ -303,7 +305,15 @@ class wxFrame1(wx.Frame):
         dlg.SetFilterIndex(2)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            self.curImg.SaveFile(path, wx.BITMAP_TYPE_PNG)
+            self.fullImg.SaveFile(path, wx.BITMAP_TYPE_PNG)
+        dlg.Destroy()
+    
+    def OnGnuSave(self, event):
+        dlg = wx.FileDialog(self, "Choose a file", self.browse_txt.GetValue() , "", "*.gnu", wx.SAVE)
+        dlg.SetFilterIndex(2)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()            
+            shutil.copy(r"temp.gnu",path)
         dlg.Destroy()
 
     # Exit
@@ -448,11 +458,14 @@ class wxFrame1(wx.Frame):
             cid, citem = treectrl.GetNextChild(node, citem)
     # Graph button events
     def OnGraphButton(self, event):
+        temp = "temp.gnu"
+        self.plot = open(temp, 'w')
         #-#------open a new gnuplot session-----#-#
         g = Gnuplot.Gnuplot(debug=1)
+        w, h = self.CalcImageSize()
         g("set yrange [0:*]")
         g("set terminal png")
-        g("set size 2,2")
+        g("set size %s,%f" %(w,h))
         g('set output "temp.png"')
         datastyle = "lines"
         if self.data_style.GetSelection() != -1:
@@ -460,6 +473,7 @@ class wxFrame1(wx.Frame):
             datastyle = datastyle.lower()
         datacom = "set data style " + datastyle
         g(datacom)
+        print >> self.plot, datacom
         #-#------get datafile------#-#
         selected = self.treeCtrl1.GetSelections()
         # first check if there is a file selected
@@ -476,18 +490,50 @@ class wxFrame1(wx.Frame):
             count = count + 1
         # Set up the graph and plot data
         sortedtics = range(0)
-        self.GetXtics(path, g, sortedtics)
-        self.SetGraphLabel(path, g)
-        self.GraphData(path, g, sortedtics, text, parents)
+        self.GetXtics(path, g, sortedtics, False)
+        self.SetGraphLabel(path, g, False)
+        self.GraphData(path, g, sortedtics, text, parents, False)
         time.sleep(.7)
         self.curImg = wx.Bitmap(r"temp.png", wx.BITMAP_TYPE_PNG)
         self.curImgPath = r"temp.png"
-        self.fullImg = self.curImg
-        self.fullImgPath = self.curImgPath
         self.ImageResize()
         self.staticBitmap1.SetBitmap(self.curImg)
+        # now graph the full sized image
+        g = Gnuplot.Gnuplot(debug=1)
+        g("set yrange [0:*]")
+        print >> self.plot, "set yrange [0:*]"
+        g("set terminal png")
+        print >> self.plot, "set terminal png"
+        g("set size 2,2")
+        print >> self.plot, "set size 2,2"
+        g('set output "full.png"')
+        print >> self.plot, 'set output "full.png"'
+        datastyle = "lines"
+        if self.data_style.GetSelection() != -1:
+            datastyle = self.data_style.GetStringSelection()
+            datastyle = datastyle.lower()
+        datacom = "set data style " + datastyle
+        g(datacom)
+        print >> self.plot, datacom
+        self.GetXtics(path, g, sortedtics, True)
+        self.SetGraphLabel(path, g, True)
+        self.GraphData(path, g, sortedtics, text, parents, True)
+        self.plot.close()
+        time.sleep(1.0)
+        self.fullImg = wx.Bitmap(r"full.png", wx.BITMAP_TYPE_PNG)
+        self.fullImgPath = r"full.png"
+    # calculate gnuplot image output size for current size of window
+    def CalcImageSize(self):
+        # get current size of the window
+        width, height = self.panel2.GetSizeTuple()
+        width = float(width)
+        height = float(height)
+        # the calculate the size setting for gnuplot
+        rwidth = width / 640;
+        rheight = height / 480;
+        return rwidth, rheight
     # Get xtics for the graph
-    def GetXtics(self, path, graph, sortedtics):
+    def GetXtics(self, path, graph, sortedtics, tofile):
         numfiles = len(path)
         file = range(numfiles)
         filecount = 0
@@ -548,8 +594,10 @@ class wxFrame1(wx.Frame):
             count = count + 1
         xcom = xcom + ")"
         graph(xcom)
+        if tofile is True:
+            print >> self.plot, xcom
     # Set up the graph
-    def SetGraphLabel(self, path, graph):
+    def SetGraphLabel(self, path, graph, tofile):
         choice = self.data_type.GetSelection()
         if choice == -1:
             choice = 0
@@ -585,6 +633,8 @@ class wxFrame1(wx.Frame):
                 newlbl = newlbl + ", "
             count = count + 1
         graph.ylabel(newlbl)
+        if tofile is True:
+            print >> self.plot, "set ylabel '%s'" %(newlbl)
         # set the title
         size = len(titles)
         count = 0
@@ -594,9 +644,11 @@ class wxFrame1(wx.Frame):
                 newtitle = newtitle + r'\n'
             count = count + 1
         graph.title(newtitle)
+        if tofile is True:
+            print >> self.plot, "set title '%s'" %(newtitle)
 
     # Graph the data
-    def GraphData(self, path, graph, sortedtics, text, parents):
+    def GraphData(self, path, graph, sortedtics, text, parents, tofile):
         longtitle = self.UseLong(path)
         numfiles = len(path)
         file = range(numfiles)
@@ -639,6 +691,8 @@ class wxFrame1(wx.Frame):
             resultcount = 0
             filecount = filecount + 1
         graph(plotcom)
+        if tofile is True:
+            print >> self.plot, plotcom
         resultcount = 0
         filecount = 0
         while filecount < numfiles:
@@ -656,15 +710,17 @@ class wxFrame1(wx.Frame):
                     index = self.GetIndex(name, sortedtics)
                     # graph it
                     graph("%s %f" % (index, result))
+                    if tofile is True:
+                        print >> self.plot, "%s %f" % (index, result)
                     count = count + 1
                 graph("e\n")
+                if tofile is True:
+                    print >> self.plot, "e\n"
                 time.sleep(0.1)
                 count = 0
                 resultcount = resultcount + 1
             resultcount = 0
             filecount = filecount + 1
-        graph("exit")
-        graph("exit")
         
     # helper function to browse through selected tests and compare their titles,
     # if they are the same the function will return true and a longer name will be used
