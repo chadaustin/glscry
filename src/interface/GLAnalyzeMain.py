@@ -7,6 +7,7 @@ import Gnuplot, Gnuplot.PlotItems, Gnuplot.funcutils
 import string
 import sys
 from glob import glob
+from decimal import *
 import getopt
 import socket
 
@@ -305,15 +306,31 @@ class wxFrame1(wx.Frame):
         dlg.SetFilterIndex(2)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            self.fullImg.SaveFile(path, wx.BITMAP_TYPE_PNG)
+            if os.path.exists("full.png"):
+                self.fullImg.SaveFile(path, wx.BITMAP_TYPE_PNG)
+            else:
+                if os.path.exists("temp.png"):
+                    self.curImg.SaveFile(path, wx.BITMAP_TYPE_PNG)
+                else:
+                    d= wx.MessageDialog( self, "Please generate an image first.", "No Image to Save", wx.OK | wx.ICON_ERROR)
+                            # Create a message dialog box
+                    d.ShowModal() # Shows it
+                    d.Destroy() # finally destroy it when finished
+                
         dlg.Destroy()
     
     def OnGnuSave(self, event):
         dlg = wx.FileDialog(self, "Choose a file", self.browse_txt.GetValue() , "", "*.gnu", wx.SAVE)
         dlg.SetFilterIndex(2)
         if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()            
-            shutil.copy(r"temp.gnu",path)
+            path = dlg.GetPath()
+            if os.path.exists(r"temp.gnu"):
+                shutil.copy(r"temp.gnu",path)
+            else:
+                d= wx.MessageDialog(self, "Please generate a graph first.", "No Graph to Save", wx.OK | wx.ICON_ERROR)
+                            # Create a message dialog box
+                d.ShowModal() # Shows it
+                d.Destroy() # finally destroy it when finished
         dlg.Destroy()
 
     # Exit
@@ -464,64 +481,51 @@ class wxFrame1(wx.Frame):
         g = Gnuplot.Gnuplot(debug=1)
         w, h = self.CalcImageSize()
         g("set yrange [0:*]")
+        print >> self.plot, "set yrange [0:*]"
         g("set terminal png")
+        print >> self.plot, "set terminal png"
         g("set size %s,%f" %(w,h))
+        print >> self.plot, "set size %s,%f" %(w,h)
         g('set output "temp.png"')
+        print >> self.plot, "set output 'plot.png'"
         datastyle = "lines"
         if self.data_style.GetSelection() != -1:
             datastyle = self.data_style.GetStringSelection()
             datastyle = datastyle.lower()
-        datacom = "set data style " + datastyle
-        g(datacom)
-        print >> self.plot, datacom
+        self.datacom = "set data style " + datastyle
+        g(self.datacom)
+        print >> self.plot, self.datacom
         #-#------get datafile------#-#
         selected = self.treeCtrl1.GetSelections()
         # first check if there is a file selected
         size = len(selected)
         count = 0;
-        path = range(size)
-        text = range(size)
-        parents = range(size)
+        self.path = range(size)
+        self.text = range(size)
+        self.parents = range(size)
         # Combine selected files into one list
         while count < size:
-            path[count] = self.treeCtrl1.GetPyData(selected[count])
-            text[count] = self.treeCtrl1.GetItemText(selected[count])
-            parents[count] = self.treeCtrl1.GetItemText(self.treeCtrl1.GetItemParent(selected[count]))
+            self.path[count] = self.treeCtrl1.GetPyData(selected[count])
+            self.text[count] = self.treeCtrl1.GetItemText(selected[count])
+            self.parents[count] = self.treeCtrl1.GetItemText(self.treeCtrl1.GetItemParent(selected[count]))
             count = count + 1
         # Set up the graph and plot data
         sortedtics = range(0)
-        self.GetXtics(path, g, sortedtics, False)
-        self.SetGraphLabel(path, g, False)
-        self.GraphData(path, g, sortedtics, text, parents, False)
-        time.sleep(.7)
-        self.curImg = wx.Bitmap(r"temp.png", wx.BITMAP_TYPE_PNG)
-        self.curImgPath = r"temp.png"
-        self.ImageResize()
-        self.staticBitmap1.SetBitmap(self.curImg)
-        # now graph the full sized image
-        g = Gnuplot.Gnuplot(debug=1)
-        g("set yrange [0:*]")
-        print >> self.plot, "set yrange [0:*]"
-        g("set terminal png")
-        print >> self.plot, "set terminal png"
-        g("set size 2,2")
-        print >> self.plot, "set size 2,2"
-        g('set output "full.png"')
-        print >> self.plot, 'set output "full.png"'
-        datastyle = "lines"
-        if self.data_style.GetSelection() != -1:
-            datastyle = self.data_style.GetStringSelection()
-            datastyle = datastyle.lower()
-        datacom = "set data style " + datastyle
-        g(datacom)
-        print >> self.plot, datacom
-        self.GetXtics(path, g, sortedtics, True)
-        self.SetGraphLabel(path, g, True)
-        self.GraphData(path, g, sortedtics, text, parents, True)
+        self.GetXtics(self.path, g, sortedtics, True)
+        self.SetGraphLabel(self.path, g, True)
+        self.GraphData(self.path, g, sortedtics, self.text, self.parents, True)
         self.plot.close()
-        time.sleep(1.0)
-        self.fullImg = wx.Bitmap(r"full.png", wx.BITMAP_TYPE_PNG)
-        self.fullImgPath = r"full.png"
+        time.sleep(0.5)
+        mtry = 0
+        while mtry < 5:
+            if os.stat(r"temp.png")[6] > 0:
+                self.curImg = wx.Bitmap(r"temp.png", wx.BITMAP_TYPE_PNG)
+                self.curImgPath = r"temp.png"
+                self.ImageResize()
+                self.staticBitmap1.SetBitmap(self.curImg)
+                break
+            time.sleep(0.1)
+            mtry = mtry + 1
     # calculate gnuplot image output size for current size of window
     def CalcImageSize(self):
         # get current size of the window
@@ -530,7 +534,14 @@ class wxFrame1(wx.Frame):
         height = float(height)
         # the calculate the size setting for gnuplot
         rwidth = width / 640;
+        rwidth = round(rwidth, 1)
         rheight = height / 480;
+        rheight = round(rheight, 1)
+        getcontext().rounding = 'ROUND_DOWN'
+        if rwidth * 640 > width:
+            rwidth = rwidth - 0.1            
+        if rheight * 480 > height:
+            rheight = rheight - 0.1
         return rwidth, rheight
     # Get xtics for the graph
     def GetXtics(self, path, graph, sortedtics, tofile):
@@ -714,6 +725,7 @@ class wxFrame1(wx.Frame):
                         print >> self.plot, "%s %f" % (index, result)
                     count = count + 1
                 graph("e\n")
+                graph("e\n")
                 if tofile is True:
                     print >> self.plot, "e\n"
                 time.sleep(0.1)
@@ -721,7 +733,8 @@ class wxFrame1(wx.Frame):
                 resultcount = resultcount + 1
             resultcount = 0
             filecount = filecount + 1
-        
+        graph("exit")
+        graph("exit")
     # helper function to browse through selected tests and compare their titles,
     # if they are the same the function will return true and a longer name will be used
     def UseLong(self, path):
@@ -777,6 +790,25 @@ class wxFrame1(wx.Frame):
     # Double click event for static bitmap 1
     # Open a new window and view image at full size
     def OnBitmapDblClick(self, event):
+        g = Gnuplot.Gnuplot(debug=1)
+        g("set yrange [0:*]")
+        g("set terminal png")
+        g("set size 2,2")
+        g('set output "full.png"')
+        g(self.datacom)
+        sortedtics = []
+        self.GetXtics(self.path, g, sortedtics, False)
+        self.SetGraphLabel(self.path, g, False)
+        self.GraphData(self.path, g, sortedtics, self.text, self.parents, False)
+        time.sleep(0.5)
+        mtry = 0
+        while mtry < 8:
+            if os.stat(r"full.png")[6] > 0:
+                self.fullImg = wx.Bitmap(r"full.png", wx.BITMAP_TYPE_PNG)
+                self.fullImgPath = r"full.png"
+                break
+            time.sleep(0.1)
+            mtry = mtry + 1        
         img = self.fullImg
         height = img.GetHeight()
         width = img.GetWidth()
