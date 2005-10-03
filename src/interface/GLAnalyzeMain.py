@@ -67,13 +67,15 @@ class wxFrame1(wx.Frame):
               text='GLScry')
     def _init_glscry_panel(self, parent):
         boxsizer = wx.BoxSizer(wx.VERTICAL)
-        glsizer = wx.FlexGridSizer(16, 2, 2, 2)
+        glsizer = wx.FlexGridSizer(16, 3, 2, 0)
         boxsizer.Add(glsizer)
         self.checkBoxes = []
         checkAll = wx.Button(self.panel4, -1, "Select All")
         wx.EVT_BUTTON(checkAll, -1, self.SelectAll)
         run = wx.Button(self.panel4, -1, "Run Tests")
         wx.EVT_BUTTON(run, -1, self.RunGLScry)
+        config = wx.Button(self.panel4, -1, "Configure")
+        wx.EVT_BUTTON(config, -1, self.ConfigGLScry)
         # create each test's individual checkbox
         batchCheck = wx.CheckBox(self.panel4, -1, "Batch Sizes")
         self.checkBoxes.append(batchCheck)
@@ -101,11 +103,14 @@ class wxFrame1(wx.Frame):
         self.checkBoxes.append(vformatsCheck)
         glsizer.Add(wx.StaticText(self.panel4, -1, "Tests:"), 0, wx.ALIGN_LEFT)
         glsizer.Add(wx.StaticText(self.panel4, -1, " "), 0, wx.ALIGN_LEFT)
+        glsizer.Add(wx.StaticText(self.panel4, -1, " "), 0, wx.ALIGN_LEFT)
         for i in range(0, 12):
             glsizer.Add(self.checkBoxes[i], 0, wx.ALIGN_LEFT)
             glsizer.Add(wx.StaticText(self.panel4, -1, " "), 0, wx.ALIGN_LEFT)
-        glsizer.Add(checkAll, 0, wx.ALIGN_LEFT)
-        glsizer.Add(run, 0, wx.ALIGN_LEFT)
+            glsizer.Add(wx.StaticText(self.panel4, -1, " "), 0, wx.ALIGN_LEFT)
+        glsizer.Add(checkAll, 1, wx.ALIGN_RIGHT)
+        glsizer.Add(run, 1, wx.ALIGN_CENTER)
+        glsizer.Add(config, 1, wx.ALIGN_LEFT)
         # text control for displaying GLScry information
         global infoBox
         infoBox = wx.TextCtrl(self.panel4, -1, "", size = (235, 200), style = wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
@@ -230,6 +235,10 @@ class wxFrame1(wx.Frame):
               label='Browse', name='browse_button', parent=self.panel1,
               pos= wx.Point(168, 16), size= wx.Size(75, 23), style=0)
         self.browse_button.Bind(wx.EVT_BUTTON, self.BuildFolder, id=wxID_WXFRAME1BROWSE_BUTTON)
+        
+        wxFrame1.C_OK = False
+        wxFrame1.TestSet = False
+        wxFrame1.OutSet = False
         
         # window resize and maximize events
         wx.EVT_MAXIMIZE(self, self.OnSize)
@@ -660,7 +669,7 @@ class wxFrame1(wx.Frame):
 
     # Graph the data
     def GraphData(self, path, graph, sortedtics, text, parents, tofile):
-        longtitle = self.UseLong(path)
+        longtitle = self.UseLong(path, text, parents)
         numfiles = len(path)
         file = range(numfiles)
         shortTitles = []
@@ -725,32 +734,46 @@ class wxFrame1(wx.Frame):
                         print >> self.plot, "%s %f" % (index, result)
                     count = count + 1
                 graph("e\n")
-                graph("e\n")
                 if tofile is True:
                     print >> self.plot, "e\n"
                 time.sleep(0.1)
                 count = 0
                 resultcount = resultcount + 1
+            graph("e\n")
+            graph("e\n")
             resultcount = 0
             filecount = filecount + 1
+        graph("e\n")
         graph("exit")
         graph("exit")
     # helper function to browse through selected tests and compare their titles,
     # if they are the same the function will return true and a longer name will be used
-    def UseLong(self, path):
+    def UseLong(self, path, text, parents):
         file = []
         titles = []
         filecount = 0
         while filecount < len(path):
             file.insert(len(file), eval(open(path[filecount], "rU").read()))
             filecount = filecount + 1
+        resultcount = 0
+        numresults = 0
         filecount = 0
         while filecount < len(file):
-            title = file[filecount]['Test']['GraphLines'][0]['Title']
-            if title not in titles:
-                titles.insert(len(titles), title)
+            # first determine what tests will be being graphed
+            if self.IsTitle(file[filecount], text[filecount], parents[filecount]):
+                resultcount = self.GetResultCount(file[filecount], text[filecount], parents[filecount])
+                numresults = resultcount + 1
             else:
-                return True
+                numresults = len(file[filecount]['Test']['GraphLines'])
+                resultcount = 0
+            # then sort through the files to be graphed, determining thier titles
+            while resultcount < numresults:
+                title = file[filecount]['Test']['GraphLines'][resultcount]['Title']
+                if title not in titles:
+                    titles.insert(len(titles), title)
+                else:
+                    return True
+                resultcount = resultcount + 1
             filecount = filecount + 1
         return False
     
@@ -852,6 +875,72 @@ class wxFrame1(wx.Frame):
                 selected.append(i)
             i = i + 1
         return selected
+    def ConfigGLScry(self, event):
+        self.GLScryConfig = wx.Frame(self, -1, name='', pos= wx.Point(-1, -1), size= wx.Size(400, 155),
+                                     style=wx.DEFAULT_FRAME_STYLE, title="GLScry Configuration")
+        self.panelC = wx.Panel(self.GLScryConfig, -1, (-1,-1), (400, 155), wx.SIMPLE_BORDER)
+        configsizer = wx.FlexGridSizer(4, 3, 10, 5)
+        self.cbrowseTest_txt = wx.TextCtrl(id=-1, name='cbrowseTest_txt', parent=self.panelC, pos= wx.Point(-1, -1),
+              size= wx.Size(200, 21), style=0, value='Select a directory...')
+        self.cbrowseTest_button = wx.Button(id=-1, label='Browse', name='cbrowseTest_button', parent=self.panelC,
+              pos= wx.Point(-1, -1), size= wx.Size(75, 21), style=0)
+        self.cbrowseOut_txt = wx.TextCtrl(id=-1, name='cbrowseOut_txt', parent=self.panelC, pos= wx.Point(-1, -1),
+              size= wx.Size(200, 21), style=0, value='Select a directory...')
+        self.cbrowseOut_button = wx.Button(id=-1, label='Browse', name='cbrowseTest_button', parent=self.panelC,
+              pos= wx.Point(-1, -1), size= wx.Size(75, 21), style=0)
+        self.OK_button = wx.Button(id=-1, label='OK', name='OK_button', parent=self.panelC,
+              pos= wx.Point(-1, -1), size= wx.Size(75, 21), style=0)
+        self.Cancel_button = wx.Button(id=-1, label='Cancel', name='Cancel_button', parent=self.panelC,
+              pos= wx.Point(-1, -1), size= wx.Size(75, 21), style=0)
+        configsizer.Add(wx.StaticText(self.panelC, -1, " "), 0, wx.ALIGN_LEFT)
+        configsizer.Add(wx.StaticText(self.panelC, -1, " "), 0, wx.ALIGN_LEFT)
+        configsizer.Add(wx.StaticText(self.panelC, -1, " "), 0, wx.ALIGN_LEFT)
+        configsizer.Add(wx.StaticText(self.panelC, -1, "  Test Directory: ",  size = (-1, 15), style = wx.ST_NO_AUTORESIZE), 0, wx.ALIGN_LEFT)
+        configsizer.Add(self.cbrowseTest_txt, 0, wx.ALIGN_LEFT)
+        configsizer.Add(self.cbrowseTest_button, 0, wx.ALIGN_LEFT)
+        configsizer.Add(wx.StaticText(self.panelC, -1, "  Output Directory: ",  size = (-1, 15), style = wx.ST_NO_AUTORESIZE), 0, wx.ALIGN_LEFT)
+        configsizer.Add(self.cbrowseOut_txt, 0, wx.ALIGN_LEFT)
+        configsizer.Add(self.cbrowseOut_button, 0, wx.ALIGN_LEFT)
+        configsizer.Add(wx.StaticText(self.panelC, -1, " "), 0, wx.ALIGN_LEFT)
+        configsizer.Add(self.OK_button, 0, wx.ALIGN_RIGHT)
+        configsizer.Add(self.Cancel_button, 0, wx.ALIGN_LEFT)
+        wx.EVT_BUTTON(self.OK_button, -1, self.COK)
+        wx.EVT_BUTTON(self.Cancel_button, -1, self.CCancel)        
+        wx.EVT_BUTTON(self.cbrowseTest_button, -1, self.CBrowseTest)
+        wx.EVT_BUTTON(self.cbrowseOut_button, -1, self.CBrowseOut)
+        self.panelC.SetSizer(configsizer)
+        self.GLScryConfig.Show()
+    def CBrowseTest(self, event):
+        dlg = wx.DirDialog(self, "Select a test directory", os.getcwd())
+        try:
+            if dlg.ShowModal() == wx.ID_OK:
+                wxFrame1.TestSet = True;
+                dir = dlg.GetPath()
+                self.cbrowseTest_txt.Clear()
+                self.cbrowseTest_txt.WriteText(dir)
+                wxFrame1.TestDir = dir
+                           
+        finally:
+            dlg.Destroy()
+    def CBrowseOut(self, event):
+        dlg = wx.DirDialog(self, "Select an output directory", os.getcwd())
+        try:
+            if dlg.ShowModal() == wx.ID_OK:
+                wxFrame1.OutSet = True;
+                dir = dlg.GetPath()
+                self.cbrowseOut_txt.Clear()
+                self.cbrowseOut_txt.WriteText(dir)
+                wxFrame1.OutDir = dir
+                           
+        finally:
+            dlg.Destroy()
+    def COK(self, event):
+        wxFrame1.C_OK = True;
+        self.GLScryConfig.Destroy()
+    def CCancel(self, event):
+        wxFrame1.TestSet = False;
+        wxFrame1.OutSet = False;
+        self.GLScryConfig.Destroy()
     def CreateTestList(self, selected):
         tests = []
         for i in range(0, len(selected)):
@@ -892,7 +981,10 @@ class wxFrame1(wx.Frame):
         selected = self.GetSelected()
         tests = self.CreateTestList(selected)
         cwd = os.getcwd()
-        scriptDir = os.path.join(cwd, 'test')
+        if wxFrame1.TestSet is True and wxFrame1.C_OK is True:
+            scriptDir = wxFrame1.TestDir
+        else:
+            scriptDir = os.path.join(cwd, 'test')
         moduleDir = os.path.join(cwd, 'lib')
         sys.path.append(moduleDir)
         # Get test list.
@@ -908,11 +1000,14 @@ class wxFrame1(wx.Frame):
         # Create data directory if it does not exist and switch to it so
         # the tests output their files there.
         hostname = socket.gethostname()
-        datadir = os.path.join(cwd, 'data', hostname)
-        try:
-            os.makedirs(datadir)
-        except OSError:
-            pass
+        if wxFrame1.OutSet is True and wxFrame1.C_OK is True:
+            datadir = wxFrame1.OutDir
+        else:
+            datadir = os.path.join(cwd, 'data', hostname)
+            try:
+                os.makedirs(datadir)
+            except OSError:
+                pass
         os.chdir(datadir)
     
         infoBox.WriteText('Data directory: %s' % (datadir))
