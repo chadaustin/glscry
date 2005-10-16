@@ -57,7 +57,7 @@ class wxFrame1(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSave, id=wxID_WXFRAME1MENU1ITEMS1)
         self.Bind(wx.EVT_MENU, self.OnExit, id=wxID_WXFRAME1MENU1ITEMS2)
         self.Bind(wx.EVT_MENU, self.OnGnuSave, id=wxID_WXFRAME1MENU1ITEMS3)
-
+        
     def _init_coll_menuBar1_Menus(self, parent):
 
         parent.Append(menu=self.menu1, title='File')
