@@ -547,7 +547,6 @@ class wxFrame1(wx.Frame):
         rwidth = round(rwidth, 1)
         rheight = height / 480;
         rheight = round(rheight, 1)
-        getcontext().rounding = 'ROUND_DOWN'
         if rwidth * 640 > width:
             rwidth = rwidth - 0.1            
         if rheight * 480 > height:
@@ -585,24 +584,11 @@ class wxFrame1(wx.Frame):
             count = 0
             while count < size:
                 # add xtic to sortedtics if it is not already there
-                if self.data_style.GetSelection() != 3:
-                    try:
-                        xtic = int(combinedtics[filecount][count])
-                    except:
-                        print "\nERROR: Cannot graph data. Try a different data style.\n"
-                        d= wx.MessageDialog( self, "Cannot graph data. Try a different data style.", "Error", wx.OK | wx.ICON_ERROR)
-                        d.ShowModal()
-                        d.Destroy()
-                        break
-                else:
-                    xtic = combinedtics[filecount][count]
+                xtic = combinedtics[filecount][count]
                 if xtic not in sortedtics:
                     sortedtics.append(xtic)
                 count = count + 1
             filecount = filecount + 1
-        # now sort sortedtics and set the xtics if you are not graphing with boxes
-        if self.data_style.GetSelection() != 3:
-            sortedtics.sort()
         count = 0
         size = len(sortedtics)
         xcom = "set xtics ("
@@ -805,11 +791,7 @@ class wxFrame1(wx.Frame):
         ticsize = len(sortedtics)
         count = 0
         while count < ticsize:
-            if self.data_style.GetSelection() != 3:
-                value = int(value)
-                curval = int(sortedtics[count])
-            else:
-                curval = sortedtics[count]
+            curval = sortedtics[count]
             if curval == value:
                 index = count
                 return index
@@ -820,7 +802,14 @@ class wxFrame1(wx.Frame):
         g = Gnuplot.Gnuplot(debug=1)
         g("set yrange [0:*]")
         g("set terminal png")
-        g("set size 2,2")
+        if self.config.Exists("fullWidth") and self.config.Exists("fullHeight"):
+            w = int(self.config.Read("fullWidth"))
+            w = w/640
+            h = int(self.config.Read("fullHeight"))
+            h = h/480
+            g("set size %s, %f" %(w,h))
+        else:
+            g("set size 2,2")
         g('set output "full.png"')
         g(self.datacom)
         sortedtics = []
@@ -871,32 +860,48 @@ class wxFrame1(wx.Frame):
         self.libSet = False
         self.outSet = False
     def ShowPref(self, event):
-        self.prefFrame = wx.Frame(self, pos= wx.Point(-1, -1), size= wx.Size(425, 530),
+        self.prefFrame = wx.Frame(self, pos= wx.Point(-1, -1), size= wx.Size(415, 400),
             style=wx.DEFAULT_FRAME_STYLE, title="Preferences")
         self.prefWindow = wx.Window(self.prefFrame, -1, wx.Point(-1,-1), wx.Size(-1, -1),
             style=wx.SIMPLE_BORDER)
         # set up sizer and all emlements
         sizer = wx.FlexGridSizer(10, 3, 15, 10)
         sizer.FitInside(self.prefWindow)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, "",size = wx.Size(1, 1)), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, "",size = wx.Size(1, 1)), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, "",size = wx.Size(1, 1)), 0, wx.ALIGN_LEFT)
         sizer.Add(wx.StaticText(self.prefWindow, -1, "  Graphing:"), 0, wx.ALIGN_LEFT)
         sizer.Add(wx.StaticText(self.prefWindow, -1, "", size = wx.Size(1, -1)), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, "    Full Image Size:"), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
+        self.iWidth = wx.TextCtrl(self.prefWindow, size= wx.Size(85, 21), style=0, value='width')
+        self.iHeight = wx.TextCtrl(self.prefWindow, size= wx.Size(85, 21), style=0, value='height')
+        iSizer = wx.BoxSizer(wx.HORIZONTAL)
+        iSizer.Add(self.iWidth)
+        iSizer.Add(wx.StaticText(self.prefWindow, -1, "    X    "), 0, wx.ALIGN_LEFT)
+        iSizer.Add(self.iHeight)
+        sizer.Add(iSizer)
+        
         sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
         sizer.Add(wx.StaticText(self.prefWindow, -1, "  GLScry:"), 0, wx.ALIGN_LEFT)
         sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
         sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
-        sizer.Add(wx.StaticText(self.prefWindow, -1, "  Test Directory:"), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, "    Test Directory:"), 0, wx.ALIGN_LEFT)
         self.testBox = wx.TextCtrl(self.prefWindow, size= wx.Size(200, 21), style=0, value='Select a directory...')
         sizer.Add(self.testBox)
         self.testButton = wx.Button(label='Browse', parent=self.prefWindow, size= wx.Size(75, 23), style=0)
         self.testButton.Bind(wx.EVT_BUTTON, self.testBrowse)
         sizer.Add(self.testButton)
-        sizer.Add(wx.StaticText(self.prefWindow, -1, "  Output Directory:"), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, "    Output Directory:"), 0, wx.ALIGN_LEFT)
         self.outBox = wx.TextCtrl(self.prefWindow, size= wx.Size(200, 21), style=0, value='Select a directory...')
         sizer.Add(self.outBox)
         self.outButton = wx.Button(label='Browse', parent=self.prefWindow, size= wx.Size(75, 23), style=0)
         self.outButton.Bind(wx.EVT_BUTTON, self.outBrowse)
         sizer.Add(self.outButton)
-        sizer.Add(wx.StaticText(self.prefWindow, -1, "  Lib Directory:"), 0, wx.ALIGN_LEFT)
+        sizer.Add(wx.StaticText(self.prefWindow, -1, "    Lib Directory:"), 0, wx.ALIGN_LEFT)
         self.libBox = wx.TextCtrl(self.prefWindow, size= wx.Size(200, 21), style=0, value='Select a directory...')
         sizer.Add(self.libBox)
         self.libButton = wx.Button(label='Browse', parent=self.prefWindow, size= wx.Size(75, 23), style=0)
@@ -915,6 +920,12 @@ class wxFrame1(wx.Frame):
         sizer.Add(sizer2, 0, wx.ALIGN_LEFT)
         sizer.Add(wx.StaticText(self.prefWindow, -1, ""), 0, wx.ALIGN_LEFT)
         # write the config file info to textboxes if it exists
+        if self.config.Exists("fullWidth"):
+            self.iWidth.Clear()
+            self.iWidth.WriteText(self.config.Read("fullWidth"))
+        if self.config.Exists("fullHeight"):
+            self.iHeight.Clear()
+            self.iHeight.WriteText(self.config.Read("fullHeight"))
         if self.config.Exists("testDir"):
             self.testBox.Clear()
             self.testBox.WriteText(self.config.Read("testDir"))
@@ -979,6 +990,10 @@ class wxFrame1(wx.Frame):
             self.config.Write("outDir", self.outBox.GetValue())
         if self.libSet:
             self.config.Write("libDir", self.libBox.GetValue())
+        if self.iWidth.GetValue() != "width":
+            self.config.Write("fullWidth", self.iWidth.GetValue())
+        if self.iHeight.GetValue() != "height":
+            self.config.Write("fullHeight", self.iHeight.GetValue())
         self.config.Flush()
         self.prefFrame.Destroy()
     def PCancel(self, event):

@@ -13,6 +13,7 @@ class BoaApp(wx.App):
         self.main = GLAnalyzeMain.create(None)
         self.main.Show()
         self.SetTopWindow(self.main)
+        GLAnalyzeMain.wxFrame1.InitConfig(self.main)
         return True
 
 def main():
